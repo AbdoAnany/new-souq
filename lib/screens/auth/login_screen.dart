@@ -111,11 +111,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               // Logo and welcome message
               Center(
-                child: Image.asset(
-                  AppConstants.logoPath,
-                  height: 100,
-                  width: 100,
-                ),
+                child:  Icon(
+          Icons.adb, // Replace with your app logo
+            size: 100,
+
+          ),
               ),
               const SizedBox(height: 24.0),
               Text(

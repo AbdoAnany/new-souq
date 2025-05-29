@@ -731,7 +731,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error_outline, color: Colors.red.shade700),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               message,
               style: TextStyle(color: Colors.red.shade700),

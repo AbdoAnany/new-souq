@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'firebase_options.dart';
 import 'models/user.dart';
 import 'constants/app_constants.dart';
 import 'constants/app_theme.dart';
@@ -19,7 +20,9 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
     
     // Initialize Firebase
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options:DefaultFirebaseOptions.currentPlatform,
+    );
     
     // Set system UI overlay style
     SystemChrome.setSystemUIOverlayStyle(

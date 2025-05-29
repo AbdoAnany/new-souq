@@ -106,11 +106,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 opacity: _fadeInAnimation,
                 child: ScaleTransition(
                   scale: _scaleAnimation,
-                  child: Image.asset(
-                    AppConstants.logoPath,
-                    height: 150.0,
-                    width: 150.0,
-                  ),
+                  child: Icon(
+                  Icons.adb, // Replace with your app logo
+                  size: 80,
+
+                ),
                 ),
               ),
               

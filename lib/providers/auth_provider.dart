@@ -42,6 +42,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         email: email,
         password: password,
       );
+      print(result.user);
       
       if (result.isSuccess) {
         final user = await _authService.getUserData();
