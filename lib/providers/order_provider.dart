@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/models/cart.dart' show PaymentMethod, Cart;
-import 'package:souq/models/order.dart';
+import 'package:souq/models/cart.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/services/order_service.dart';
 import 'package:souq/services/tracking_service.dart' as tracking_service;
 
-class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
+class OrderNotifier extends StateNotifier<AsyncValue<List<UserOrder>>> {
   final OrderService _orderService;
-  StreamSubscription<List<OrderModel>>? _ordersSubscription;
+  StreamSubscription<List<UserOrder>>? _ordersSubscription;
   
   OrderNotifier(this._orderService) : super(const AsyncValue.loading()) {
     _setupOrdersSubscription();
@@ -71,8 +71,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
       rethrow;
     }
   }
-  
-  Future<OrderModel> placeOrder({
+    Future<UserOrder> placeOrder({
     required String userId,
     required Cart cart,
     required Address shippingAddress,
@@ -111,7 +110,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
     }
   }
   
-  Future<OrderModel> cancelOrder(String orderId) async {
+  Future<UserOrder> cancelOrder(String orderId) async {
     try {
       final cancelledOrder = await _orderService.cancelOrder(orderId);
       
@@ -132,8 +131,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
   // Enhanced helper methods
   bool hasOrders() => (state.value ?? []).isNotEmpty;
   
-  int get orderCount => state.value?.length ?? 0;
-    OrderModel? getOrderById(String orderId) {
+  int get orderCount => state.value?.length ?? 0;    UserOrder? getOrderById(String orderId) {
     try {
       return state.value?.firstWhere((order) => order.id == orderId);
     } catch (e) {
@@ -141,7 +139,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
     }
   }
     
-  List<OrderModel> getOrdersByStatus(OrderStatus status) =>
+  List<UserOrder> getOrdersByStatus(OrderStatus status) =>
     state.value?.where((order) => order.status == status).toList() ?? [];
     
   bool isOrderCancellable(String orderId) {
@@ -151,7 +149,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
             order.status == OrderStatus.confirmed);
   }
 
-  Future<List<OrderModel>> searchOrders(String query) async {
+  Future<List<UserOrder>> searchOrders(String query) async {
     if (!mounted) return [];
     final orders = state.value ?? [];
     
@@ -162,10 +160,10 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
   }
 }
 
-class OrderDetailNotifier extends StateNotifier<AsyncValue<OrderModel?>> {
+class OrderDetailNotifier extends StateNotifier<AsyncValue<UserOrder?>> {
   final OrderService _orderService;
   final String _orderId;
-  StreamSubscription<OrderModel>? _orderSubscription;
+  StreamSubscription<UserOrder>? _orderSubscription;
 
   OrderDetailNotifier(this._orderService, this._orderId) : super(const AsyncValue.loading()) {
     _setupOrderSubscription();
@@ -244,7 +242,7 @@ class OrderTrackingState {
 
 class OrderTrackingNotifier extends StateNotifier<OrderTrackingState> {  final tracking_service.TrackingService _trackingService;
   final OrderService _orderService;
-  StreamSubscription<OrderModel>? _orderSubscription;
+  StreamSubscription<UserOrder>? _orderSubscription;
 
   OrderTrackingNotifier(this._trackingService, this._orderService)
       : super(const OrderTrackingState());
@@ -280,7 +278,7 @@ class OrderTrackingNotifier extends StateNotifier<OrderTrackingState> {  final t
     }
   }
   
-  void _setupOrderSubscription(OrderModel? order) {
+  void _setupOrderSubscription(UserOrder? order) {
     if(order==null) return;
     _orderSubscription?.cancel();
     _orderSubscription = _orderService.getOrderStream(order.id).listen(
@@ -323,17 +321,17 @@ final orderServiceProvider = Provider<OrderService>((ref) {
   return OrderService();
 });
 
-final ordersProvider = StateNotifierProvider<OrderNotifier, AsyncValue<List<OrderModel>>>((ref) {
+final ordersProvider = StateNotifierProvider<OrderNotifier, AsyncValue<List<UserOrder>>>((ref) {
   final orderService = ref.watch(orderServiceProvider);
   return OrderNotifier(orderService);
 });
 
-final orderDetailProvider = StateNotifierProvider.family<OrderDetailNotifier, AsyncValue<OrderModel?>, String>((ref, orderId) {
+final orderDetailProvider = StateNotifierProvider.family<OrderDetailNotifier, AsyncValue<UserOrder?>, String>((ref, orderId) {
   final orderService = ref.watch(orderServiceProvider);
   return OrderDetailNotifier(orderService, orderId);
 });
 
-final orderStreamProvider = StreamProvider.family<OrderModel, String>((ref, orderId) {
+final orderStreamProvider = StreamProvider.family<UserOrder, String>((ref, orderId) {
   final orderService = ref.watch(orderServiceProvider);
   return orderService.getOrderStream(orderId);
 });
@@ -344,7 +342,7 @@ final orderTrackingProvider = StateNotifierProvider<OrderTrackingNotifier, Order
   return OrderTrackingNotifier(trackingService, orderService);
 });
 
-final ordersByStatusProvider = FutureProvider.family<List<OrderModel>, OrderStatus>((ref, status) async {
+final ordersByStatusProvider = FutureProvider.family<List<UserOrder>, OrderStatus>((ref, status) async {
   final orderService = ref.watch(orderServiceProvider);
   final authState = ref.watch(authProvider);
   

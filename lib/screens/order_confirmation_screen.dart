@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
-import 'package:souq/models/order.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
@@ -39,13 +39,19 @@ class OrderConfirmationScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Success animation
-                  Lottie.asset(
-                    'assets/animations/order_success.json',
-                    width: 200,
-                    height: 200,
-                    repeat: false,
+
+                  Icon(
+                    Icons.check_circle,
+                    color: theme.colorScheme.primary,
+                    size: 80,
                   ),
+                  // Success animation
+                  // Lottie.asset(
+                  //   'assets/animations/order_success.json',
+                  //   width: 200,
+                  //   height: 200,
+                  //   repeat: false,
+                  // ),
                   
                   const SizedBox(height: 16),
                   
@@ -136,13 +142,13 @@ class OrderConfirmationScreen extends ConsumerWidget {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   image: DecorationImage(
-                                    image: NetworkImage(item.image??''),
+                                    image: NetworkImage(item.productImage??''),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
                               title: Text(
-                                item.title,
+                                item.productName,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -152,7 +158,7 @@ class OrderConfirmationScreen extends ConsumerWidget {
                                 style: theme.textTheme.bodySmall,
                               ),
                               trailing: Text(
-                                FormatterUtil.formatCurrency(item.total),
+                                FormatterUtil.formatCurrency(item.totalPrice),
                                 style: theme.textTheme.titleSmall,
                               ),
                             );
@@ -190,6 +196,7 @@ class OrderConfirmationScreen extends ConsumerWidget {
                   // Shipping address
                   Container(
                     padding: const EdgeInsets.all(16),
+                    width: double.infinity,
                     decoration: BoxDecoration(
                       color: theme.cardColor,
                       borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),

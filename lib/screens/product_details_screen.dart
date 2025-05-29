@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:carousel_slider/carousel_slider.dart' as carousel;
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/providers/cart_provider.dart';
@@ -27,7 +27,7 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   int _quantity = 1;
   int _currentImageIndex = 0;
-  final CarouselController _carouselController = CarouselController();
+  final CarouselSliderController _carouselController = CarouselSliderController();
   bool _isInWishlist = false;
   
   @override
@@ -174,10 +174,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     children: [
                       // Product Images Carousel
                       Stack(
-                        children: [
-                          carousel.CarouselSlider(
+                        children: [                          CarouselSlider(
                             carouselController: _carouselController,
-                            options: carousel.CarouselOptions(
+                            options: CarouselOptions(
                               height: 300,
                               viewportFraction: 1.0,
                               enableInfiniteScroll: product.images.length > 1,
@@ -215,7 +214,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: product.images.asMap().entries.map((entry) {
                                   return GestureDetector(
-                                    onTap: () => _carouselController.jumpTo(entry.key.toDouble()),
+                                    onTap: () => _carouselController.animateToPage(entry.key),
                                     child: Container(
                                       width: 8.0,
                                       height: 8.0,

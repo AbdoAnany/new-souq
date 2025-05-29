@@ -14,6 +14,7 @@ import 'providers/auth_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'services/dummy_data_service.dart';
 
 Future<void> main() async {
   try {
@@ -34,12 +35,27 @@ Future<void> main() async {
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
-    
-    // Set preferred orientations
+      // Set preferred orientations
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    
+    // Initialize dummy data if needed (only in development)
+    try {
+      final dummyDataService = DummyDataService();
+      final isInitialized = await dummyDataService.isDummyDataInitialized();
+      if (!isInitialized) {
+        print('🚀 Initializing dummy data...');
+        await dummyDataService.initializeDummyData();
+        print('✅ Dummy data initialization completed!');
+      } else {
+        print('ℹ️  Dummy data already exists');
+      }
+    } catch (e) {
+      print('⚠️  Warning: Failed to initialize dummy data: $e');
+      // Continue running the app even if dummy data initialization fails
+    }
     
     runApp(const ProviderScope(child: SouqApp()));
   } catch (e) {
@@ -121,10 +137,9 @@ class SouqApp extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 16),                ElevatedButton(
-                  onPressed: () {
+                const SizedBox(height: 16),                ElevatedButton(                  onPressed: () {
                     // Refresh the auth provider to retry authentication
-                    ref.refresh(authProvider);
+                    ref.invalidate(authProvider);
                   },
                   child: const Text('Try Again'),
                 ),

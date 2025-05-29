@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/models/product.dart' hide Category;
+import 'package:souq/models/product.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/constants/app_constants.dart';

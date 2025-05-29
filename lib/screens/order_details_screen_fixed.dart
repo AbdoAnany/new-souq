@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
-import 'package:souq/models/order.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/services/tracking_service.dart';
@@ -271,13 +271,13 @@ class OrderDetailsScreen extends ConsumerWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
                                 image: DecorationImage(
-                                  image: NetworkImage(item.image??''),
+                                  image: NetworkImage(item.productImage??''),
                                   fit: BoxFit.cover,
                                 ),
                               ),
                             ),
                             title: Text(
-                              item.title,
+                              item.productName,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -289,11 +289,9 @@ class OrderDetailsScreen extends ConsumerWidget {
                                   '${item.quantity} × ${FormatterUtil.formatCurrency(item.price)}',
                                   style: theme.textTheme.bodySmall,
                                 ),
-                                if (item.customizations != null && item.customizations!.isNotEmpty)
+                                if (item.selectedVariant != null && item.selectedVariant!.isNotEmpty)
                                   Text(
-                                    item.customizations!.entries
-                                        .map((e) => "${e.key}: ${e.value}")
-                                        .join(", "),
+                                  "  item.selectedVariant!.entries .map((e) => {e.key}: {e.value}",
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: AppConstants.textSecondaryColor,
                                     ),
@@ -301,7 +299,7 @@ class OrderDetailsScreen extends ConsumerWidget {
                               ],
                             ),
                             trailing: Text(
-                              FormatterUtil.formatCurrency(item.total),
+                              FormatterUtil.formatCurrency(item.totalPrice),
                               style: theme.textTheme.titleSmall,
                             ),
                           );
@@ -629,7 +627,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return Icon(iconData, size: 20);
   }
   
-  void _showCancelDialog(BuildContext context, WidgetRef ref, OrderModel order) {
+  void _showCancelDialog(BuildContext context, WidgetRef ref, UserOrder order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

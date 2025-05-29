@@ -1,6 +1,6 @@
 import 'package:souq/models/product.dart';
 import 'package:souq/models/user.dart';
-import 'package:souq/models/order.dart';
+
 
 class CartItem {
   final String id;
@@ -138,89 +138,89 @@ class Cart {
 }
 
 
-class OrderItem {
-  final String id;
-  final String productId;
-  final String productName;
-  final String productImage;
-  final int quantity;
-  final double price;
-  final double totalPrice;
-  final Map<String, dynamic>? selectedVariants;
+// class OrderItem {
+//   final String id;
+//   final String productId;
+//   final String productName;
+//   final String productImage;
+//   final int quantity;
+//   final double price;
+//   final double totalPrice;
+//   final Map<String, dynamic>? selectedVariants;
 
-  OrderItem({
-    required this.id,
-    required this.productId,
-    required this.productName,
-    required this.productImage,
-    required this.quantity,
-    required this.price,
-    required this.totalPrice,
-    this.selectedVariants,
-  });
+//   OrderItem({
+//     required this.id,
+//     required this.productId,
+//     required this.productName,
+//     required this.productImage,
+//     required this.quantity,
+//     required this.price,
+//     required this.totalPrice,
+//     this.selectedVariants,
+//   });
 
-  factory OrderItem.fromJson(Map<String, dynamic> json) {
-    return OrderItem(
-      id: json['id'] ?? '',
-      productId: json['productId'] ?? '',
-      productName: json['productName'] ?? '',
-      productImage: json['productImage'] ?? '',
-      quantity: json['quantity'] ?? 1,
-      price: (json['price'] ?? 0).toDouble(),
-      totalPrice: (json['totalPrice'] ?? 0).toDouble(),
-      selectedVariants: json['selectedVariants'],
-    );
-  }
+//   factory OrderItem.fromJson(Map<String, dynamic> json) {
+//     return OrderItem(
+//       id: json['id'] ?? '',
+//       productId: json['productId'] ?? '',
+//       productName: json['productName'] ?? '',
+//       productImage: json['productImage'] ?? '',
+//       quantity: json['quantity'] ?? 1,
+//       price: (json['price'] ?? 0).toDouble(),
+//       totalPrice: (json['totalPrice'] ?? 0).toDouble(),
+//       selectedVariants: json['selectedVariants'],
+//     );
+//   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'productId': productId,
-      'productName': productName,
-      'productImage': productImage,
-      'quantity': quantity,
-      'price': price,
-      'totalPrice': totalPrice,
-      'selectedVariants': selectedVariants,
-    };
-  }
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'id': id,
+//       'productId': productId,
+//       'productName': productName,
+//       'productImage': productImage,
+//       'quantity': quantity,
+//       'price': price,
+//       'totalPrice': totalPrice,
+//       'selectedVariants': selectedVariants,
+//     };
+//   }
 
-  factory OrderItem.fromCartItem(CartItem cartItem) {
-    return OrderItem(
-      id: cartItem.id,
-      productId: cartItem.productId,
-      productName: cartItem.product.name,
-      productImage: cartItem.product.mainImage,
-      quantity: cartItem.quantity,
-      price: cartItem.price,
-      totalPrice: cartItem.totalPrice,
-      selectedVariants: cartItem.selectedVariants,
-    );
-  }
-}
+//   factory OrderItem.fromCartItem(CartItem cartItem) {
+//     return OrderItem(
+//       id: cartItem.id,
+//       productId: cartItem.productId,
+//       productName: cartItem.product.name,
+//       productImage: cartItem.product.mainImage,
+//       quantity: cartItem.quantity,
+//       price: cartItem.price,
+//       totalPrice: cartItem.totalPrice,
+//       selectedVariants: cartItem.selectedVariants,
+//     );
+//   }
+// }
 
-enum PaymentMethod {
-  cashOnDelivery,
-  creditCard,
-  paypal,
-  stripe,
-  unknown
-}
+// enum PaymentMethod {
+//   cashOnDelivery,
+//   creditCard,
+//   paypal,
+//   stripe,
+//   unknown
+// }
 
-extension PaymentMethodExtension on PaymentMethod {
-  String get displayName {
-    switch (this) {
-      case PaymentMethod.cashOnDelivery:
-        return 'Cash on Delivery';
-      case PaymentMethod.creditCard:
-        return 'Credit Card';
-      case PaymentMethod.paypal:
-        return 'PayPal';
-      case PaymentMethod.stripe:
-        return 'Stripe';
-      case PaymentMethod.unknown:
-        // TODO: Handle this case.
-        return 'Unknown';
-    }
-  }
-}
+// extension PaymentMethodExtension on PaymentMethod {
+//   String get displayName {
+//     switch (this) {
+//       case PaymentMethod.cashOnDelivery:
+//         return 'Cash on Delivery';
+//       case PaymentMethod.creditCard:
+//         return 'Credit Card';
+//       case PaymentMethod.paypal:
+//         return 'PayPal';
+//       case PaymentMethod.stripe:
+//         return 'Stripe';
+//       case PaymentMethod.unknown:
+//         // TODO: Handle this case.
+//         return 'Unknown';
+//     }
+//   }
+// }

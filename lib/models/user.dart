@@ -11,6 +11,7 @@ class User {
   final bool isEmailVerified;
   final bool isPhoneVerified;
   final String? fcmToken;
+  final String role; // Added role field
 
   User({
     required this.id,
@@ -25,8 +26,8 @@ class User {
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
     this.fcmToken,
+    this.role = 'user', // Default role is 'user'
   });
-
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? '',
@@ -44,9 +45,9 @@ class User {
       isEmailVerified: json['isEmailVerified'] ?? false,
       isPhoneVerified: json['isPhoneVerified'] ?? false,
       fcmToken: json['fcmToken'],
+      role: json['role'] ?? 'user',
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -61,11 +62,11 @@ class User {
       'isEmailVerified': isEmailVerified,
       'isPhoneVerified': isPhoneVerified,
       'fcmToken': fcmToken,
+      'role': role,
     };
   }
 
   String get fullName => '$firstName $lastName';
-
   User copyWith({
     String? id,
     String? email,
@@ -79,6 +80,7 @@ class User {
     bool? isEmailVerified,
     bool? isPhoneVerified,
     String? fcmToken,
+    String? role,
   }) {
     return User(
       id: id ?? this.id,
@@ -93,6 +95,7 @@ class User {
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
       fcmToken: fcmToken ?? this.fcmToken,
+      role: role ?? this.role,
     );
   }
 }

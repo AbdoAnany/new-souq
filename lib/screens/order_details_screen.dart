@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/order.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/models/cart.dart'; // Import for PaymentMethod
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
@@ -23,7 +23,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     final orderStreamAsync = ref.watch(orderStreamProvider(orderId));
     
     // Convert the stream to Order type explicitly
-    final orderStream = orderStreamAsync.whenData((data) => data as OrderModel);
+    final orderStream = orderStreamAsync.whenData((data) => data as UserOrder);
     
     return Scaffold(
       appBar: AppBar(
@@ -242,16 +242,14 @@ class OrderDetailsScreen extends ConsumerWidget {
                             leading: Container(
                               width: 60,
                               height: 60,                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                image: item.image != null ? DecorationImage(
-                                  image: NetworkImage(item.image!),
+                                borderRadius: BorderRadius.circular(8),                                image: item.productImage != null ? DecorationImage(
+                                  image: NetworkImage(item.productImage!),
                                   fit: BoxFit.cover,
-                                ) : null,
-                                color: item.image == null ? Colors.grey[200] : null,
+                                ) : null,                                color: item.productImage == null ? Colors.grey[200] : null,
                               ),
-                              child: item.image == null ? const Icon(Icons.image, color: Colors.grey) : null,
+                              child: item.productImage == null ? const Icon(Icons.image, color: Colors.grey) : null,
                             ),                            title: Text(
-                              item.title,
+                              item.productName,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -262,18 +260,13 @@ class OrderDetailsScreen extends ConsumerWidget {
                                 Text(
                                   '${item.quantity} × ${FormatterUtil.formatCurrency(item.price)}',
                                   style: theme.textTheme.bodySmall,
-                                ),                                if (item.customizations != null && item.customizations!.isNotEmpty)
-                                  Text(
-                                    item.customizations!.entries
-                                        .map((e) => "${e.key}: ${e.value}")
-                                        .join(", "),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppConstants.textSecondaryColor,
-                                    ),
-                                  ),
+                                ),                              Text(
+                                'Qty: ${item.quantity}',
+                                style: theme.textTheme.bodySmall,
+                              ),
                               ],
                             ),                            trailing: Text(
-                              FormatterUtil.formatCurrency(item.total),
+                              FormatterUtil.formatCurrency(item.price * item.quantity),
                               style: theme.textTheme.titleSmall,
                             ),
                           );
@@ -593,7 +586,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return Icon(iconData, size: 20);
   }
   
-  void _showCancelDialog(BuildContext context, WidgetRef ref, OrderModel order) {
+  void _showCancelDialog(BuildContext context, WidgetRef ref, UserOrder order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

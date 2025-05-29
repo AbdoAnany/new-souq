@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as carousel_slider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:carousel_slider/carousel_slider.dart' as carousel_slider;
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/models/product.dart';
@@ -31,7 +30,7 @@ class HomeTab extends ConsumerStatefulWidget {
 
 class _HomeTabState extends ConsumerState<HomeTab> {
   int _currentCarouselSlide = 0;
-  final CarouselController _carouselController = CarouselController();
+  final CarouselSliderController _carouselController = CarouselSliderController();
 
   @override
   void initState() {
@@ -177,10 +176,9 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   }
                   
                   return Column(
-                    children: [
-                      carousel_slider.CarouselSlider(
+                    children: [                      CarouselSlider(
                         carouselController: _carouselController,
-                        options: carousel_slider.CarouselOptions(
+                        options: CarouselOptions(
                           height: 180,
                           viewportFraction: 0.92,
                           enlargeCenterPage: true,
@@ -201,7 +199,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: offers.asMap().entries.map((entry) {
                               return GestureDetector(
-                                onTap: () => _carouselController.jumpTo(entry.key.toDouble()),
+                                onTap: () => _carouselController.animateToPage(entry.key),
                                 child: Container(
                                   width: 8.0,
                                   height: 8.0,

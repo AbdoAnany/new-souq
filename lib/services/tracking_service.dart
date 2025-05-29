@@ -1,4 +1,4 @@
-import 'package:souq/models/order.dart';
+import 'package:souq/models/user_order.dart';
 
 class TrackingEvent {
   final String status;
@@ -21,7 +21,7 @@ class TrackingService {
   factory TrackingService() => _instance;
   TrackingService._internal();
 
-  List<TrackingEvent> generateTrackingEvents(OrderModel? order) {
+  List<TrackingEvent> generateTrackingEvents(UserOrder? order) {
     if(order==null) return  <TrackingEvent>[];
 
     final events = <TrackingEvent>[];
@@ -80,7 +80,7 @@ class TrackingService {
 }
 
 class OrderTrackingInfo {
-  final OrderModel order;
+  final UserOrder order;
   final List<TrackingEvent> trackingEvents;
 
   OrderTrackingInfo({

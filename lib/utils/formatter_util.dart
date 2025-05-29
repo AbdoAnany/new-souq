@@ -27,6 +27,11 @@ class FormatterUtil {
     return format.format(date);
   }
   
+  static String formatDate(DateTime date, {String? locale}) {
+    final format = DateFormat.yMd(locale);
+    return format.format(date);
+  }
+  
   // For Arabic/RTL text handling
   static String getLocalizedText(BuildContext context, String englishText, String arabicText) {
     return AppLocalizations.of(context).locale.languageCode == 'ar' ? arabicText : englishText;

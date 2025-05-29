@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
@@ -835,7 +836,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   
                   const SizedBox(height: 24),
                   
-                  // OrderModel summary
+                  // Order summary
                   _buildOrderSummary(),
                   
                   const SizedBox(height: 24),

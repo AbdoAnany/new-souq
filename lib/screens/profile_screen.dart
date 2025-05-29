@@ -5,6 +5,7 @@ import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/wishlist_screen.dart';
 import 'package:souq/screens/order_history_screen.dart';
+import 'package:souq/screens/admin/admin_dashboard_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -163,8 +164,7 @@ class ProfileScreen extends ConsumerWidget {
                 // Show privacy policy
               },
             ),
-            
-            _buildListItem(
+              _buildListItem(
               context: context,
               leading: const Icon(Icons.description_outlined),
               title: 'Terms & Conditions',
@@ -172,6 +172,24 @@ class ProfileScreen extends ConsumerWidget {
                 // Show terms and conditions
               },
             ),
+            
+            // Admin Section (only visible for admin users)
+            if (authState.value?.role == 'admin') ...[
+              _buildSectionHeader(context, 'Admin'),
+              _buildListItem(
+                context: context,
+                leading: const Icon(Icons.admin_panel_settings),
+                title: 'Admin Dashboard',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminDashboardScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
             
             // Sign Out Button
             Padding(

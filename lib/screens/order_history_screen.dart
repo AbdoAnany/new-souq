@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/order.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_details_screen.dart';
@@ -171,7 +171,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
     );
   }
   
-  Widget _buildOrderList(BuildContext context, List<OrderModel> orders) {
+  Widget _buildOrderList(BuildContext context, List<UserOrder> orders) {
     if (orders.isEmpty) {
       return _buildEmptyTabState(context);
     }
@@ -208,7 +208,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
     );
   }
   
-  Widget _buildOrderCard(BuildContext context, OrderModel order) {
+  Widget _buildOrderCard(BuildContext context, UserOrder order) {
     final theme = Theme.of(context);
     
     return Card(
@@ -264,12 +264,11 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                         height: 60,
                         margin: EdgeInsets.only(left: index > 0 ? -15 : 0),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white, width: 2),
-                          borderRadius: BorderRadius.circular(8),                          image: item.image != null ? DecorationImage(
-                            image: NetworkImage(item.image!),
+                          border: Border.all(color: Colors.white, width: 2),                          borderRadius: BorderRadius.circular(8),                          image: item.productImage != null ? DecorationImage(
+                            image: NetworkImage(item.productImage!),
                             fit: BoxFit.cover,
                           ) : null,
-                          color: item.image == null ? Colors.grey[200] : null,
+                          color: item.productImage == null ? Colors.grey[200] : null,
                         ),
                       );
                     }).toList(),
@@ -405,7 +404,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
     );
   }
   
-  void _showCancelDialog(BuildContext context, OrderModel order) {
+  void _showCancelDialog(BuildContext context, UserOrder order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
