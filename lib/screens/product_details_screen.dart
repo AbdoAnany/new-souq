@@ -27,7 +27,7 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   int _quantity = 1;
   int _currentImageIndex = 0;
-  final carousel.CarouselSliderController _carouselController = carousel.CarouselSliderController();
+  final CarouselController _carouselController = CarouselController();
   bool _isInWishlist = false;
   
   @override
@@ -215,7 +215,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: product.images.asMap().entries.map((entry) {
                                   return GestureDetector(
-                                    onTap: () => _carouselController.animateToPage(entry.key),
+                                    onTap: () => _carouselController.jumpTo(entry.key.toDouble()),
                                     child: Container(
                                       width: 8.0,
                                       height: 8.0,

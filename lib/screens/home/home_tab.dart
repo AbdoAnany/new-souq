@@ -31,7 +31,7 @@ class HomeTab extends ConsumerStatefulWidget {
 
 class _HomeTabState extends ConsumerState<HomeTab> {
   int _currentCarouselSlide = 0;
-  final carousel_slider.CarouselSliderController _carouselController = carousel_slider.CarouselSliderController();
+  final CarouselController _carouselController = CarouselController();
 
   @override
   void initState() {
@@ -201,7 +201,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: offers.asMap().entries.map((entry) {
                               return GestureDetector(
-                                onTap: () => _carouselController.animateToPage(entry.key),
+                                onTap: () => _carouselController.jumpTo(entry.key.toDouble()),
                                 child: Container(
                                   width: 8.0,
                                   height: 8.0,
