@@ -27,7 +27,7 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   int _quantity = 1;
   int _currentImageIndex = 0;
-  final carousel.CarouselController _carouselController = carousel.CarouselController();
+  final carousel.CarouselSliderController _carouselController = carousel.CarouselSliderController();
   bool _isInWishlist = false;
   
   @override

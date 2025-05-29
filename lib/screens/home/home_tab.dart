@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as carousel_slider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:carousel_slider/carousel_slider.dart' as carousel_slider;
 import 'package:souq/constants/app_constants.dart';
@@ -30,7 +31,7 @@ class HomeTab extends ConsumerStatefulWidget {
 
 class _HomeTabState extends ConsumerState<HomeTab> {
   int _currentCarouselSlide = 0;
-  final carousel_slider.CarouselController _carouselController = carousel_slider.CarouselController();
+  final carousel_slider.CarouselSliderController _carouselController = carousel_slider.CarouselSliderController();
 
   @override
   void initState() {
