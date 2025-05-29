@@ -41,8 +41,7 @@ class AppConstants {
   // API
   static const String baseUrl = 'https://api.souq.com/v1/';
   static const Duration timeoutDuration = Duration(seconds: 30);
-  
-  // Firebase Collections
+    // Firebase Collections
   static const String usersCollection = 'users';
   static const String productsCollection = 'products';
   static const String categoriesCollection = 'categories';
@@ -51,6 +50,7 @@ class AppConstants {
   static const String wishlistsCollection = 'wishlists';
   static const String reviewsCollection = 'reviews';
   static const String offersCollection = 'offers';
+  static const String notificationsCollection = 'notifications';
   
   // SharedPreferences Keys
   static const String userIdKey = 'user_id';
