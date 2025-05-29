@@ -12,7 +12,7 @@ enum OrderStatus {
   returned
 }
 
-class Order {
+class OrderModel {
   final String id;
   final String userId;
   final String orderNumber;
@@ -39,7 +39,7 @@ class Order {
   final String? trackingNumber;
   final String? trackingUrl;
 
-  Order({
+  OrderModel({
     required this.id,
     required this.userId,
     required this.orderNumber,
@@ -125,8 +125,8 @@ static PaymentMethod stringToPaymentMethod(String method) {
       return PaymentMethod.unknown;
   }
 }
-  factory Order.fromJson(Map<String, dynamic> json) {
-    return Order(
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    return OrderModel(
       id: json['id'],
       userId: json['userId'],
       orderNumber: json['orderNumber'],
@@ -143,7 +143,7 @@ static PaymentMethod stringToPaymentMethod(String method) {
       billingAddress: json['billingAddress'] != null
           ? Address.fromJson(json['billingAddress'])
           : null,
-      paymentMethod: Order.stringToPaymentMethod(json['paymentMethod']),
+      paymentMethod: OrderModel.stringToPaymentMethod(json['paymentMethod']),
       paymentId: json['paymentId'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: (json['updatedAt'] as Timestamp).toDate(),
@@ -176,7 +176,7 @@ static PaymentMethod stringToPaymentMethod(String method) {
     );
   }
 
-  Order copyWith({
+  OrderModel copyWith({
     String? id,
     String? userId,
     String? orderNumber,
@@ -203,7 +203,7 @@ static PaymentMethod stringToPaymentMethod(String method) {
     String? trackingNumber,
     String? trackingUrl,
   }) {
-    return Order(
+    return OrderModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       orderNumber: orderNumber ?? this.orderNumber,

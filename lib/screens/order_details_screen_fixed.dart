@@ -629,7 +629,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return Icon(iconData, size: 20);
   }
   
-  void _showCancelDialog(BuildContext context, WidgetRef ref, Order order) {
+  void _showCancelDialog(BuildContext context, WidgetRef ref, OrderModel order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

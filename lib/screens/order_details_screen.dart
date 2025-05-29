@@ -23,7 +23,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     final orderStreamAsync = ref.watch(orderStreamProvider(orderId));
     
     // Convert the stream to Order type explicitly
-    final orderStream = orderStreamAsync.whenData((data) => data as Order);
+    final orderStream = orderStreamAsync.whenData((data) => data as OrderModel);
     
     return Scaffold(
       appBar: AppBar(
@@ -593,7 +593,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return Icon(iconData, size: 20);
   }
   
-  void _showCancelDialog(BuildContext context, WidgetRef ref, Order order) {
+  void _showCancelDialog(BuildContext context, WidgetRef ref, OrderModel order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

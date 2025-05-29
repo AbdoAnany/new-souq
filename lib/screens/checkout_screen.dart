@@ -835,7 +835,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   
                   const SizedBox(height: 24),
                   
-                  // Order summary
+                  // OrderModel summary
                   _buildOrderSummary(),
                   
                   const SizedBox(height: 24),

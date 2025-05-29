@@ -1,0 +1,159 @@
+{
+  "project_info": {
+    "project_number": "202323131888",
+    "firebase_url": "https://souq1-841fb-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "souq1-841fb",
+    "storage_bucket": "souq1-841fb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202323131888:android:9bee05ebac17efb94cb135",
+        "android_client_info": {
+          "package_name": "com.abdoanany.souq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "202323131888-u4nfifbai8tbgv7kle3pntfb25m2r50g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7BIXSgLoGxXa3TF4tPWvYFv8BFf-VIF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "202323131888-u4nfifbai8tbgv7kle3pntfb25m2r50g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "202323131888-5rt3lrar4jcqd7eaj1uj9ot0m0s19pld.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.anany.souq1"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202323131888:android:71d28a7e321aa3914cb135",
+        "android_client_info": {
+          "package_name": "com.anany.souq1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "202323131888-6ipckr607p2f73fdq6p1jdqevtmvv9bt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anany.souq1",
+            "certificate_hash": "2fa534058caa4beac0b39e4a4da3f75ec12d3749"
+          }
+        },
+        {
+          "client_id": "202323131888-b9of7l5crvpcr5v5rg11r3v5514qvhh9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anany.souq1",
+            "certificate_hash": "275db47f8be735581ac1dbee02c3ee960d323017"
+          }
+        },
+        {
+          "client_id": "202323131888-d2rbdppi25od54ll9cgjeth0ce1uf4j0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anany.souq1",
+            "certificate_hash": "29a1cb7f2a81afcb7b3511bf3c6cd46d55da3114"
+          }
+        },
+        {
+          "client_id": "202323131888-e293h7svmf1tkpkhghkakh68de0vhvg1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anany.souq1",
+            "certificate_hash": "86f6c41a4fb4c8414a1708ab58ea7043cd350a73"
+          }
+        },
+        {
+          "client_id": "202323131888-f8btenkiqf7hdrdemo795oo6i5kb4373.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anany.souq1",
+            "certificate_hash": "cd7732c67881abe5dc2906336a82a3739bc304b3"
+          }
+        },
+        {
+          "client_id": "202323131888-u4nfifbai8tbgv7kle3pntfb25m2r50g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7BIXSgLoGxXa3TF4tPWvYFv8BFf-VIF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "202323131888-u4nfifbai8tbgv7kle3pntfb25m2r50g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "202323131888-5rt3lrar4jcqd7eaj1uj9ot0m0s19pld.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.anany.souq1"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202323131888:android:534213ea76cf81ba4cb135",
+        "android_client_info": {
+          "package_name": "com.grocery.holmon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "202323131888-u4nfifbai8tbgv7kle3pntfb25m2r50g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7BIXSgLoGxXa3TF4tPWvYFv8BFf-VIF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "202323131888-u4nfifbai8tbgv7kle3pntfb25m2r50g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "202323131888-5rt3lrar4jcqd7eaj1uj9ot0m0s19pld.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.anany.souq1"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

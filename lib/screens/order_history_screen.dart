@@ -171,7 +171,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
     );
   }
   
-  Widget _buildOrderList(BuildContext context, List<Order> orders) {
+  Widget _buildOrderList(BuildContext context, List<OrderModel> orders) {
     if (orders.isEmpty) {
       return _buildEmptyTabState(context);
     }
@@ -208,7 +208,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
     );
   }
   
-  Widget _buildOrderCard(BuildContext context, Order order) {
+  Widget _buildOrderCard(BuildContext context, OrderModel order) {
     final theme = Theme.of(context);
     
     return Card(
@@ -405,7 +405,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
     );
   }
   
-  void _showCancelDialog(BuildContext context, Order order) {
+  void _showCancelDialog(BuildContext context, OrderModel order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

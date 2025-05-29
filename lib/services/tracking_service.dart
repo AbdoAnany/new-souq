@@ -21,7 +21,7 @@ class TrackingService {
   factory TrackingService() => _instance;
   TrackingService._internal();
 
-  List<TrackingEvent> generateTrackingEvents(Order? order) {
+  List<TrackingEvent> generateTrackingEvents(OrderModel? order) {
     if(order==null) return  <TrackingEvent>[];
 
     final events = <TrackingEvent>[];
@@ -80,7 +80,7 @@ class TrackingService {
 }
 
 class OrderTrackingInfo {
-  final Order order;
+  final OrderModel order;
   final List<TrackingEvent> trackingEvents;
 
   OrderTrackingInfo({
