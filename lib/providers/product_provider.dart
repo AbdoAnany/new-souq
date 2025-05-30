@@ -152,10 +152,12 @@ class CategoryNotifier extends StateNotifier<AsyncValue<List<Category>>> {
 
   Future<void> fetchCategories() async {
     state = const AsyncValue.loading();
+    print('Fetching categories...');
     try {
       final categories = await _productService.getCategories();
       state = AsyncValue.data(categories);
     } catch (e, stack) {
+      print('Error fetching categories: $e');
       state = AsyncValue.error(e, stack);
     }
   }

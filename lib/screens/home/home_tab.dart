@@ -294,7 +294,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   }
                   
                   return SizedBox(
-                    height: 250,
+                    height: 255,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -362,7 +362,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   final newProducts = products.take(5).toList();
                   
                   return SizedBox(
-                    height: 250,
+                    height: 255,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -623,7 +623,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildProductsShimmer() {
     return SizedBox(
-      height: 250,
+      height: 255,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),

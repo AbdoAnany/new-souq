@@ -453,11 +453,11 @@ class _OfferFormDialogState extends ConsumerState<OfferFormDialog> {
 
       if (widget.offer == null) {
         await ref
-            .read(adminOffersNotifierProvider.notifier)
+            .read(adminOffersProvider.notifier)
             .addOffer(offerData);
       } else {
         await ref
-            .read(adminOffersNotifierProvider.notifier)
+            .read(adminOffersProvider.notifier)
             .updateOffer(widget.offer!.id, offerData);
       }
 

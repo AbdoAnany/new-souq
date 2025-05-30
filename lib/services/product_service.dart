@@ -194,6 +194,7 @@ class ProductService {
           .where('isActive', isEqualTo: true)
           .orderBy('name')
           .get();
+      print("Categories: " + querySnapshot.docs.toString());
 
       return querySnapshot.docs
           .map((doc) => Category.fromJson({...doc.data(), 'id': doc.id}))

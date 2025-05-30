@@ -4,7 +4,7 @@ import '../../models/category.dart';
 import '../../providers/admin_provider.dart';
 import '../../constants/app_constants.dart';
 import 'widgets/category_form_dialog.dart';
-thia s new project wit without any data can add some dommy data and can add add screen to add data for admin user do the best way
+// thia s new project wit without any data can add some dommy data and can add add screen to add data for admin user do the best way
 class AdminCategoriesScreen extends ConsumerStatefulWidget {
   const AdminCategoriesScreen({super.key});
 
@@ -21,13 +21,13 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
     super.initState();
     // Load categories when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(adminCategoriesNotifierProvider.notifier).loadCategories();
+      ref.read(adminCategoriesProvider.notifier).fetchCategories();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final categoriesState = ref.watch(adminCategoriesNotifierProvider);
+    final categoriesState = ref.watch(adminCategoriesProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -40,8 +40,8 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               ref
-                  .read(adminCategoriesNotifierProvider.notifier)
-                  .loadCategories();
+                  .read(adminCategoriesProvider.notifier)
+                  .fetchCategories();
             },
           ),
         ],
@@ -146,8 +146,8 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                     ElevatedButton(
                       onPressed: () {
                         ref
-                            .read(adminCategoriesNotifierProvider.notifier)
-                            .loadCategories();
+                            .read(adminCategoriesProvider.notifier)
+                            .fetchCategories();
                       },
                       child: const Text('Try Again'),
                     ),
@@ -244,11 +244,11 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: AppConstants.paddingSmall),
-                  if (category.tags.isNotEmpty)
+                  if (category.name.isNotEmpty)
                     Wrap(
                       spacing: 4,
                       runSpacing: 4,
-                      children: category.tags.take(3).map((tag) {
+                      children: category.subcategories.take(3).map((tag) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -263,7 +263,7 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                             ),
                           ),
                           child: Text(
-                            tag,
+                            tag.name,
                             style: TextStyle(
                               color: AppConstants.primaryColor,
                               fontSize: 10,
@@ -341,7 +341,7 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
   }
 
   void _toggleActive(Category category) {
-    ref.read(adminCategoriesNotifierProvider.notifier).toggleActive(
+    ref.read(adminCategoriesProvider.notifier).toggleStatus(
           category.id,
           !category.isActive,
         );
@@ -393,7 +393,7 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
             ),
             onPressed: () {
               ref
-                  .read(adminCategoriesNotifierProvider.notifier)
+                  .read(adminCategoriesProvider.notifier)
                   .deleteCategory(category.id);
               Navigator.pop(context);
             },

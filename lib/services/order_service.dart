@@ -322,6 +322,207 @@ class OrderService {
     }
   }
 
+  // Admin-specific methods
+  
+  // Get all orders for admin (without user filtering)
+  Future<List<OrderModel>> getAllOrders({
+    int limit = 50,
+    DocumentSnapshot? lastDocument,
+    OrderStatus? status,
+    String? searchQuery,
+  }) async {
+    try {
+      Query query = _firestore
+          .collection(AppConstants.ordersCollection)
+          .orderBy('createdAt', descending: true);
+
+      // Filter by status if provided
+      if (status != null) {
+        query = query.where('status', isEqualTo: status.name);
+      }
+
+      // Apply limit
+      query = query.limit(limit);
+
+      // Apply pagination
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      final querySnapshot = await query.get();
+      var orders = querySnapshot.docs
+          .map((doc) => OrderModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .toList();
+
+      // Apply search filtering if provided
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        orders = orders.where((order) {
+          final query = searchQuery.toLowerCase();
+          return order.orderNumber.toLowerCase().contains(query) ||
+                 order.id.toLowerCase().contains(query) ||
+                 '${order.shippingAddress.firstName} ${order.shippingAddress.lastName}'.toLowerCase().contains(query);
+        }).toList();
+      }
+
+      return orders;
+    } catch (e) {
+      throw Exception('Failed to fetch all orders: ${e.toString()}');
+    }
+  }
+
+  // Get orders count by status for admin dashboard
+  Future<Map<OrderStatus, int>> getOrdersCountByStatus() async {
+    try {
+      final Map<OrderStatus, int> counts = {};
+      
+      for (final status in OrderStatus.values) {
+        final querySnapshot = await _firestore
+            .collection(AppConstants.ordersCollection)
+            .where('status', isEqualTo: status.name)
+            .count()
+            .get();
+        counts[status] = querySnapshot.count ?? 0;
+      }
+      
+      return counts;
+    } catch (e) {
+      throw Exception('Failed to get orders count by status: ${e.toString()}');
+    }
+  }
+
+  // Admin update order status with more options
+  Future<OrderModel> adminUpdateOrderStatus({
+    required String orderId,
+    required OrderStatus status,
+    String? trackingNumber,
+    String? notes,
+  }) async {
+    try {
+      final orderDoc = await _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(orderId)
+          .get();
+
+      if (!orderDoc.exists) {
+        throw Exception('Order not found');
+      }
+
+      final order = OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
+      final now = DateTime.now();
+
+      Map<String, dynamic> updateData = {
+        'status': status.name,
+        'updatedAt': now.toIso8601String(),
+      };
+
+      // Add admin notes if provided
+      if (notes != null && notes.isNotEmpty) {
+        updateData['notes'] = notes;
+      }
+
+      // Add status-specific timestamps and data
+      switch (status) {
+        case OrderStatus.confirmed:
+          updateData['confirmedAt'] = now.toIso8601String();
+          break;
+        case OrderStatus.processing:
+          updateData['processedAt'] = now.toIso8601String();
+          break;
+        case OrderStatus.shipped:
+          updateData['shippedAt'] = now.toIso8601String();
+          if (trackingNumber != null && trackingNumber.isNotEmpty) {
+            updateData['trackingNumber'] = trackingNumber;
+          }
+          break;
+        case OrderStatus.delivered:
+          updateData['deliveredAt'] = now.toIso8601String();
+          break;
+        case OrderStatus.cancelled:
+          updateData['cancelledAt'] = now.toIso8601String();
+          if (notes != null) {
+            updateData['cancellationReason'] = notes;
+          }
+          // Restore product quantities for cancelled orders
+          await _restoreProductQuantities(order.items);
+          break;
+        default:
+          break;
+      }
+
+      await _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(orderId)
+          .update(updateData);
+
+      return order.copyWith(
+        status: status,
+        trackingNumber: trackingNumber ?? order.trackingNumber,
+        notes: notes ?? order.notes,
+        confirmedAt: status == OrderStatus.confirmed ? now : order.confirmedAt,
+        processedAt: status == OrderStatus.processing ? now : order.processedAt,
+        shippedAt: status == OrderStatus.shipped ? now : order.shippedAt,
+        deliveredAt: status == OrderStatus.delivered ? now : order.deliveredAt,
+        cancelledAt: status == OrderStatus.cancelled ? now : order.cancelledAt,
+        cancellationReason: status == OrderStatus.cancelled ? notes : order.cancellationReason,
+        updatedAt: now,
+      );
+    } catch (e) {
+      throw Exception('Failed to update order status: ${e.toString()}');
+    }
+  }
+
+  // Get orders analytics for admin
+  Future<Map<String, dynamic>> getOrdersAnalytics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      Query query = _firestore.collection(AppConstants.ordersCollection);
+
+      if (startDate != null) {
+        query = query.where('createdAt', isGreaterThanOrEqualTo: startDate);
+      }
+      if (endDate != null) {
+        query = query.where('createdAt', isLessThanOrEqualTo: endDate);
+      }
+
+      final querySnapshot = await query.get();
+      final orders = querySnapshot.docs
+          .map((doc) => OrderModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .toList();
+
+      double totalRevenue = 0;
+      double totalShipping = 0;
+      double totalTax = 0;
+      Map<OrderStatus, int> statusCounts = {};
+      Map<String, int> topProducts = {};
+
+      for (final order in orders) {
+        totalRevenue += order.total;
+        totalShipping += order.shipping;
+        totalTax += order.tax;
+        
+        statusCounts[order.status] = (statusCounts[order.status] ?? 0) + 1;
+        
+        for (final item in order.items) {
+          topProducts[item.title] = (topProducts[item.title] ?? 0) + item.quantity;
+        }
+      }
+
+      return {
+        'totalOrders': orders.length,
+        'totalRevenue': totalRevenue,
+        'totalShipping': totalShipping,
+        'totalTax': totalTax,
+        'averageOrderValue': orders.isNotEmpty ? totalRevenue / orders.length : 0,
+        'statusCounts': statusCounts,
+        'topProducts': topProducts,
+      };
+    } catch (e) {
+      throw Exception('Failed to get orders analytics: ${e.toString()}');
+    }
+  }
+
   // Private helper methods
   String _generateOrderNumber() {
     final now = DateTime.now();

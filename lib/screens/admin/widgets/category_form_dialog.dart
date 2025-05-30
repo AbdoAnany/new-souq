@@ -38,8 +38,8 @@ class _CategoryFormDialogState extends ConsumerState<CategoryFormDialog> {
     final category = widget.category!;
     _nameController.text = category.name;
     _descriptionController.text = category.description;
-    _tagsController.text = category.tags.join(', ');
-    _sortOrderController.text = category.sortOrder.toString();
+    _tagsController.text = category.subcategories.join(', ');
+    // _sortOrderController.text = category.sortOrder.toString();
     _isActive = category.isActive;
   }
 
@@ -273,20 +273,20 @@ class _CategoryFormDialogState extends ConsumerState<CategoryFormDialog> {
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         isActive: _isActive,
-        sortOrder: int.parse(_sortOrderController.text),
-        tags: tags,
+        // sortOrder: int.parse(_sortOrderController.text),
+        // subcategories: tags,
         createdAt: widget.category?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
       if (widget.category == null) {
         await ref
-            .read(adminCategoriesNotifierProvider.notifier)
-            .addCategory(category);
+            .read(adminCategoriesProvider.notifier)
+            .addCategory(category.toJson());
       } else {
         await ref
-            .read(adminCategoriesNotifierProvider.notifier)
-            .updateCategory(category);
+            .read(adminCategoriesProvider.notifier)
+            .updateCategory(category.id,category.toJson());
       }
 
       if (mounted) {

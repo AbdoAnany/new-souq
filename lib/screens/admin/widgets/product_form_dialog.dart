@@ -50,13 +50,13 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     _nameController.text = product.name;
     _descriptionController.text = product.description;
     _priceController.text = product.price.toString();
-    _stockController.text = product.stock.toString();
-    _imageUrlController.text = product.imageUrl;
+    _stockController.text = product.quantity.toString();
+    _imageUrlController.text = product.mainImage;
     _brandController.text = product.brand ?? '';
     _skuController.text = product.sku ?? '';
     _weightController.text = product.weight?.toString() ?? '';
     _dimensionsController.text = product.dimensions ?? '';
-    _materialsController.text = product.materials?.join(', ') ?? '';
+    // _materialsController.text = product.specifications?.join(', ') ?? '';
     _ratingController.text = product.rating.toString();
     _reviewCountController.text = product.reviewCount.toString();
     _selectedCategory = product.categoryId;
@@ -398,9 +398,9 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         price: double.parse(_priceController.text),
-        stock: int.parse(_stockController.text),
+        quantity: int.parse(_stockController.text),
         categoryId: _selectedCategory,
-        imageUrl: _imageUrlController.text.trim(),
+        images: [_imageUrlController.text.trim()],
         isFeatured: _isFeatured,
         brand: _brandController.text.trim().isEmpty
             ? null
@@ -414,27 +414,27 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
         dimensions: _dimensionsController.text.trim().isEmpty
             ? null
             : _dimensionsController.text.trim(),
-        materials: _materialsController.text.trim().isEmpty
-            ? null
-            : _materialsController.text
-                .trim()
-                .split(',')
-                .map((e) => e.trim())
-                .toList(),
+        // materials: _materialsController.text.trim().isEmpty
+        //     ? null
+        //     : _materialsController.text
+        //         .trim()
+        //         .split(',')
+        //         .map((e) => e.trim())
+        //         .toList(),
         rating: double.parse(_ratingController.text),
         reviewCount: int.parse(_reviewCountController.text),
         createdAt: widget.product?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
+        updatedAt: DateTime.now(), category: '',
       );
 
       if (widget.product == null) {
         await ref
-            .read(adminProductsNotifierProvider.notifier)
-            .addProduct(product);
+            .read(adminProductsProvider.notifier)
+            .addProduct(product.toJson());
       } else {
         await ref
-            .read(adminProductsNotifierProvider.notifier)
-            .updateProduct(product);
+            .read(adminProductsProvider.notifier)
+            .updateProduct(widget.product!.id, product.toJson());
       }
 
       if (mounted) {

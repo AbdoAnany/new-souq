@@ -205,23 +205,30 @@ class ProductCard extends ConsumerWidget {
                     Row(
                       children: [
                         // Current price
-                        Text(
-                          FormatterUtil.formatCurrency(product.price),
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: hasDiscount ? theme.colorScheme.primary : null,
-                          ),
-                        ),
-                        const SizedBox(width: 4.0),
-                        // Original price if discounted
-                        if (hasDiscount)
-                          Text(
-                            FormatterUtil.formatCurrency(product.originalPrice!),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              decoration: TextDecoration.lineThrough,
-                              color: Colors.grey,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              FormatterUtil.formatCurrency(product.price),
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: hasDiscount ? theme.colorScheme.primary : null,
+                              ),
                             ),
-                          ),
+                            // Original price if discounted
+                            if (hasDiscount)
+                              Text(
+                                FormatterUtil.formatCurrency(product.originalPrice!),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        const SizedBox(width: 4.0),
+
                         const Spacer(),
                         
                         // Add to Cart Button

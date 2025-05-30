@@ -27,7 +27,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final offersAsync = ref.watch(adminOffersNotifierProvider);
+    final offersAsync = ref.watch(adminOffersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +38,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(adminOffersNotifierProvider.notifier).fetchOffers();
+              ref.read(adminOffersProvider.notifier).fetchOffers();
             },
           ),
         ],
@@ -213,7 +213,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
                     ElevatedButton(
                       onPressed: () {
                         ref
-                            .read(adminOffersNotifierProvider.notifier)
+                            .read(adminOffersProvider.notifier)
                             .fetchOffers();
                       },
                       child: const Text('Retry'),
@@ -516,7 +516,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
 
   void _toggleOfferStatus(Offer offer) {
     ref
-        .read(adminOffersNotifierProvider.notifier)
+        .read(adminOffersProvider.notifier)
         .toggleStatus(offer.id, !offer.isActive);
   }
 
@@ -535,7 +535,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
             onPressed: () {
               Navigator.of(context).pop();
               ref
-                  .read(adminOffersNotifierProvider.notifier)
+                  .read(adminOffersProvider.notifier)
                   .deleteOffer(offer.id);
             },
             style: TextButton.styleFrom(

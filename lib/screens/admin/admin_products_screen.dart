@@ -22,13 +22,13 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
     super.initState();
     // Load products when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(adminProductsNotifierProvider.notifier).loadProducts();
+      ref.read(adminProductsProvider.notifier).fetchProducts();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final productsState = ref.watch(adminProductsNotifierProvider);
+    final productsState = ref.watch(adminProductsProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -40,7 +40,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(adminProductsNotifierProvider.notifier).loadProducts();
+              ref.read(adminProductsProvider.notifier).fetchProducts();
             },
           ),
         ],
@@ -180,8 +180,8 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                     ElevatedButton(
                       onPressed: () {
                         ref
-                            .read(adminProductsNotifierProvider.notifier)
-                            .loadProducts();
+                            .read(adminProductsProvider.notifier)
+                            .fetchProducts();
                       },
                       child: const Text('Try Again'),
                     ),
@@ -220,7 +220,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadiusMedium),
                   child: Image.network(
-                    product.imageUrl,
+                    product.images.first,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
@@ -295,9 +295,9 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                           ),
                           const SizedBox(width: AppConstants.paddingMedium),
                           Text(
-                            'Stock: ${product.stock}',
+                            'Stock: ${product.quantity}',
                             style: TextStyle(
-                              color: product.stock > 0
+                              color: product.quantity > 0
                                   ? AppConstants.accentColor
                                   : AppConstants.errorColor,
                               fontWeight: FontWeight.w500,
@@ -393,14 +393,14 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
   }
 
   void _toggleFeatured(Product product) {
-    ref.read(adminProductsNotifierProvider.notifier).toggleFeatured(
+    ref.read(adminProductsProvider.notifier).toggleFeatured(
           product.id,
           !product.isFeatured,
         );
   }
 
   void _showStockDialog(Product product) {
-    final controller = TextEditingController(text: product.stock.toString());
+    final controller = TextEditingController(text: product.quantity.toString());
 
     showDialog(
       context: context,
@@ -422,7 +422,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
           ElevatedButton(
             onPressed: () {
               final newStock = int.tryParse(controller.text) ?? 0;
-              ref.read(adminProductsNotifierProvider.notifier).updateStock(
+              ref.read(adminProductsProvider.notifier).updateStock(
                     product.id,
                     newStock,
                   );
@@ -453,7 +453,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
             ),
             onPressed: () {
               ref
-                  .read(adminProductsNotifierProvider.notifier)
+                  .read(adminProductsProvider.notifier)
                   .deleteProduct(product.id);
               Navigator.pop(context);
             },
