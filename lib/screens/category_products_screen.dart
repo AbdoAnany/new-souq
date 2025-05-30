@@ -113,8 +113,8 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
       final lastProduct = _products.isNotEmpty ? _products.last : null;
       
       final moreProducts = await ref.read(productServiceProvider).getProductsByCategory(
-        categoryId: widget.category.id,
-        lastProductId: lastProduct?.id,
+        categoryId: widget.category.id, 
+        // lastProductId: lastProduct?.id,
         minPrice: _priceRange.start,
         maxPrice: _priceRange.end,
         minRating: _minRating,

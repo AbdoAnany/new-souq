@@ -101,7 +101,6 @@ class SearchProductsParams {
     this.sortBy,
     this.descending,
   });
-    @override
   SearchProductsParams copyWith({
     String? query,
     Map<String, dynamic>? filters,
@@ -143,7 +142,6 @@ class GetProductsByCategoryParams {
     this.descending,
   });
   
-  @override
   GetProductsByCategoryParams copyWith({
     String? categoryId,
     int? page,
