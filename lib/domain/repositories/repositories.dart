@@ -44,6 +44,7 @@ abstract class AuthRepository {
 /// Repository interface for Product domain
 abstract class ProductRepository {
   Future<Result<Product, Failure>> getProductById(String productId);
+  Future<Result<List<Product>, Failure>> getProductsByCategory(String categoryId, {int? limit});
   Future<Result<List<Product>, Failure>> getProducts({
     int? limit,
     String? startAfter,

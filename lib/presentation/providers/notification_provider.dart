@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/notification.dart';
 import '../../domain/usecases/notification_usecases.dart';
 import '../../data/providers/repository_providers.dart';
-import '../../core/result.dart';
 
 // Notification state
 class NotificationState {
@@ -133,9 +132,7 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
 
   // Get unread count
   Future<void> getUnreadCount(String userId) async {
-    final result = await _getUnreadCountUseCase(GetUnreadCountParams(
-      userId: userId,
-    ));
+    final result = await _getUnreadCountUseCase(userId);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),

@@ -149,4 +149,40 @@ class NotificationRepositoryImpl implements NotificationRepository {
       'actionUrl': notification.actionUrl,
     };
   }
+  
+  @override
+  Future<Result<void, Failure>> deleteNotification(String notificationId) async {
+    try {
+      await _firestore
+          .collection(AppConstants.notificationsCollection)
+          .doc(notificationId)
+          .delete();
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(NetworkFailure('Failed to delete notification: ${e.toString()}'));
+    }
+  }
+  
+  @override
+  Future<Result<void, Failure>> markAllAsRead(String userId) async {
+    try {
+      final batch = _firestore.batch();
+      final querySnapshot = await _firestore
+          .collection(AppConstants.notificationsCollection)
+          .where('userId', isEqualTo: userId)
+          .where('isRead', isEqualTo: false)
+          .get();
+
+      for (final doc in querySnapshot.docs) {
+        batch.update(doc.reference, {
+          'isRead': true,
+          'readAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      return batch.commit().then((_) => Result.success(null));
+    } catch (e) {
+      return Result.failure(NetworkFailure('Failed to mark all notifications as read: ${e.toString()}'));
+    }
+  }
 }

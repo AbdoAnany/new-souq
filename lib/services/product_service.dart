@@ -1,18 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/models/product.dart';
-import 'package:souq/models/offer.dart';
-import 'package:souq/models/category.dart';
-import 'package:souq/constants/app_constants.dart';
+import '../core/result.dart';
+import '../core/failure.dart';
+import '../constants/app_constants.dart';
+import '../models/product.dart';
+import '../models/category.dart';
+import '../models/offer.dart';
 
 class ProductService {
   static final ProductService _instance = ProductService._internal();
   factory ProductService() => _instance;
-  ProductService._internal();
+  
+  final FirebaseFirestore _firestore;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  ProductService._internal() : _firestore = FirebaseFirestore.instance;
 
-  // Get featured products
-  Future<List<Product>> getFeaturedProducts({int limit = 10}) async {
+  Future<Result<List<Product>, Failure>> getFeaturedProducts({int limit = 10}) async {
     try {
       final querySnapshot = await _firestore
           .collection(AppConstants.productsCollection)
@@ -21,81 +23,60 @@ class ProductService {
           .limit(limit)
           .get();
 
-      return querySnapshot.docs
+      final products = querySnapshot.docs
           .map((doc) => Product.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
+
+      return Result.success(products);
     } catch (e) {
-      throw Exception('Failed to fetch featured products: ${e.toString()}');
+      return Result.failure(NetworkFailure('Failed to fetch featured products: ${e.toString()}'));
     }
   }
 
-  // Get products by category
-  Future<List<Product>> getProductsByCategory({
+  Future<Result<List<Product>, Failure>> getProductsByCategory({
     required String categoryId,
-    String? lastProductId,
+    int? limit,
     double? minPrice,
     double? maxPrice,
     double? minRating,
     String? sortBy,
-    int limit = AppConstants.pageSize,
+    bool descending = false,
   }) async {
     try {
-      Query query = _firestore
+      var query = _firestore
           .collection(AppConstants.productsCollection)
           .where('categoryId', isEqualTo: categoryId)
           .where('inStock', isEqualTo: true);
 
-      // Apply price filter
       if (minPrice != null) {
         query = query.where('price', isGreaterThanOrEqualTo: minPrice);
       }
       if (maxPrice != null) {
         query = query.where('price', isLessThanOrEqualTo: maxPrice);
       }
-
-      // Apply rating filter
-      if (minRating != null && minRating > 0) {
+      if (minRating != null) {
         query = query.where('rating', isGreaterThanOrEqualTo: minRating);
       }
 
-      // Apply sorting
-      switch (sortBy) {
-        case 'price_asc':
-          query = query.orderBy('price', descending: false);
-          break;
-        case 'price_desc':
-          query = query.orderBy('price', descending: true);
-          break;
-        case 'rating':
-          query = query.orderBy('rating', descending: true);
-          break;
-        case 'popularity':
-          query = query.orderBy('purchaseCount', descending: true);
-          break;
-        default:
-          query = query.orderBy('createdAt', descending: true);
+      if (sortBy != null) {
+        query = query.orderBy(sortBy, descending: descending);
+      } else {
+        query = query.orderBy('createdAt', descending: true);
       }
 
-      // Apply pagination
-      if (lastProductId != null) {
-        final lastDoc = await _firestore
-            .collection(AppConstants.productsCollection)
-            .doc(lastProductId)
-            .get();
-        if (lastDoc.exists) {
-          query = query.startAfterDocument(lastDoc);
-        }
+      if (limit != null) {
+        query = query.limit(limit);
       }
-
-      query = query.limit(limit);
 
       final querySnapshot = await query.get();
 
-      return querySnapshot.docs
-          .map((doc) => Product.fromJson({...(doc.data() as Map<String, dynamic>), 'id': doc.id}))
+      final products = querySnapshot.docs
+          .map((doc) => Product.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
+
+      return Result.success(products);
     } catch (e) {
-      throw Exception('Failed to fetch products: ${e.toString()}');
+      return Result.failure(NetworkFailure('Failed to fetch products by category: ${e.toString()}'));
     }
   }
 

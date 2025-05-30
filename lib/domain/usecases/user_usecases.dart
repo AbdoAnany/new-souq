@@ -41,8 +41,8 @@ class UpdateUserUseCase implements UseCase<User, User> {
       return Result.failure(const ValidationFailure('Email is required'));
     }
 
-    if (user.firstName.isEmpty) {
-      return Result.failure(const ValidationFailure('First name is required'));
+    if (user.name.isEmpty) {
+      return Result.failure(const ValidationFailure('Name is required'));
     }
 
     if (!_isValidEmail(user.email)) {
@@ -91,9 +91,9 @@ class GetUsersUseCase implements UseCase<List<User>, GetUsersParams> {
   @override
   Future<Result<List<User>, Failure>> call(GetUsersParams params) async {
     return await _repository.getUsers(
-      page: params.page,
+      startAfter: params.page.toString(),
       limit: params.limit,
-      search: params.search,
+      searchQuery: params.search,
     );
   }
 }
@@ -140,7 +140,7 @@ class UpdateUserProfileUseCase implements UseCase<User, UpdateUserProfileParams>
     }
 
     final currentUser = currentUserResult.value;
-    
+
     // Update user with new profile data
     final updatedUser = currentUser.copyWith(
       firstName: params.firstName,

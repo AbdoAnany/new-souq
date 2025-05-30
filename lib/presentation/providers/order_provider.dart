@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:souq/core/failure.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/usecases/order_usecases.dart';
 import '../../data/providers/repository_providers.dart';

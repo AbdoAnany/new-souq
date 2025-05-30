@@ -329,4 +329,25 @@ class ProductRepositoryImpl implements ProductRepository {
         .where((term) => !['the', 'and', 'for', 'with', 'are', 'was'].contains(term))
         .toList();
   }
+  
+  @override
+  Future<Result<List<Product>, Failure>> getProductsByCategory(String categoryId, {int? limit}) async {
+    try {
+      Query query = _firestore.collection(AppConstants.productsCollection)
+          .where('categoryId', isEqualTo: categoryId)
+          .where('inStock', isEqualTo: true)
+          .orderBy('createdAt', descending: true);
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      final snapshot = await query.get();
+      final products = snapshot.docs.map((doc) => _mapDocumentToProduct(doc.data() as Map<String, dynamic>, doc.id)).toList();
+
+      return Result.success(products);
+    } catch (e) {
+      return Result.failure(NetworkFailure('Failed to fetch products by category: ${e.toString()}'));
+    }
+  }
 }

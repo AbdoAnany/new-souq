@@ -363,4 +363,80 @@ class OrderRepositoryImpl implements OrderRepository {
     final timestamp = now.millisecondsSinceEpoch;
     return 'ORD-${timestamp.toString().substring(timestamp.toString().length - 8)}';
   }
-}
+  
+  @override
+  Future<Result<List<Order>, Failure>> getAllOrders({int? page, int? limit, OrderStatus? status, String? search}) async {
+    try {
+      Query query = _firestore.collection(AppConstants.ordersCollection)
+          .orderBy('createdAt', descending: true);
+
+      if (status != null) {
+        query = query.where('status', isEqualTo: status.name);
+      }
+
+      if (search != null && search.isNotEmpty) {
+        query = query.where('orderNumber', isGreaterThanOrEqualTo: search)
+                     .where('orderNumber', isLessThanOrEqualTo: search + '\uf8ff');
+      }
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      final querySnapshot = await query.get();
+      final orders = querySnapshot.docs
+          .map((doc) => _mapDocumentToOrder(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+
+      return Result.success(orders);
+    } catch (e) {
+      return Result.failure(NetworkFailure('Failed to get all orders: ${e.toString()}'));
+    }
+  }
+  
+  @override
+  Future<Result<Order, Failure>> updateOrder(Order order) async {
+    try {
+      final orderRef = _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(order.id);
+
+      final updateData = _mapOrderToDocument(order);
+      updateData.remove('id'); // Remove ID from update data
+
+      await orderRef.update(updateData);
+
+      // Get updated order
+      final orderDoc = await orderRef.get();
+      if (orderDoc.exists) {
+        final orderData = orderDoc.data()!;
+        final updatedOrder = _mapDocumentToOrder(orderData, orderDoc.id);
+        return Result.success(updatedOrder);
+      } else {
+        return Result.failure(const NotFoundFailure('Order not found'));
+      }
+    } catch (e) {
+      return Result.failure(NetworkFailure('Failed to update order: ${e.toString()}'));
+    }
+  }
+  
+  @override
+  Stream<Order> watchOrder(String orderId) {
+    try {
+      final orderRef = _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(orderId);
+
+      return orderRef.snapshots().map((snapshot) {
+        if (snapshot.exists) {
+          final orderData = snapshot.data()!;
+          return _mapDocumentToOrder(orderData, snapshot.id);
+        } else {
+          throw NotFoundFailure('Order not found');
+        }
+      });
+    } catch (e) {
+      return Stream.error(NetworkFailure('Failed to watch order: ${e.toString()}'));
+    }
+  }
+  }

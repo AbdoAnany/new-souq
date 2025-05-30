@@ -154,10 +154,10 @@ class CategoryProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> 
     try {
       final result = await _getProductsByCategory(params);
       if (!_mounted) return;
-      
       result.fold(
-        onSuccess: (products) => state = AsyncValue.data(products),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+     
+        (error) => state = AsyncValue.error(error, StackTrace.current),
+        (products) => state = AsyncValue.data(products),
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -180,12 +180,13 @@ class CategoryProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> 
       if (!_mounted) return;
       
       result.fold(
-        onSuccess: (newProducts) {
+       (error) => state = AsyncValue.error(error, StackTrace.current),
+   (newProducts) {
           final updatedProducts = [...currentData, ...newProducts];
           state = AsyncValue.data(updatedProducts);
           _currentParams = nextPageParams;
         },
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+  
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -203,7 +204,7 @@ class CategoryProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> 
   bool get hasMore {
     final currentData = state.asData?.value;
     if (currentData == null || _currentParams == null) return false;
-    return currentData.length >= _currentParams!.page * _currentParams!.limit;
+    return currentData.length >= _currentParams!.page! * _currentParams!.limit!;
   }
 }
 
@@ -237,8 +238,9 @@ class SearchProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
       if (!_mounted) return;
       
       result.fold(
-        onSuccess: (products) => state = AsyncValue.data(products),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+        (error) => state = AsyncValue.error(error, StackTrace.current),
+        (products) => state = AsyncValue.data(products),
+ 
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -261,12 +263,12 @@ class SearchProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
       if (!_mounted) return;
       
       result.fold(
-        onSuccess: (newProducts) {
+      (error) => state = AsyncValue.error(error, StackTrace.current),
+      (newProducts) {
           final updatedProducts = [...currentData, ...newProducts];
           state = AsyncValue.data(updatedProducts);
           _currentParams = nextPageParams;
         },
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -282,7 +284,7 @@ class SearchProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
   bool get hasMore {
     final currentData = state.asData?.value;
     if (currentData == null || _currentParams == null) return false;
-    return currentData.length >= _currentParams!.page * _currentParams!.limit;
+    return currentData.length >= _currentParams!.page! * _currentParams!.limit!;
   }
 }
 
@@ -310,9 +312,9 @@ class CategoriesNotifier extends StateNotifier<AsyncValue<List<Category>>> {
       final result = await _getCategories();
       if (!_mounted) return;
       
-      result.fold(
-        onSuccess: (categories) => state = AsyncValue.data(categories),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+      result.fold(      (error) => state = AsyncValue.error(error, StackTrace.current),
+
+        (categories) => state = AsyncValue.data(categories),
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -329,9 +331,9 @@ class CategoriesNotifier extends StateNotifier<AsyncValue<List<Category>>> {
       final result = await _getSubcategories(parentId);
       if (!_mounted) return;
       
-      result.fold(
-        onSuccess: (categories) => state = AsyncValue.data(categories),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+      result.fold((error) => state = AsyncValue.error(error, StackTrace.current),
+        (categories) => state = AsyncValue.data(categories),
+     
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -368,8 +370,8 @@ class OffersNotifier extends StateNotifier<AsyncValue<List<Offer>>> {
       if (!_mounted) return;
       
       result.fold(
-        onSuccess: (offers) => state = AsyncValue.data(offers),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+        (error) => state = AsyncValue.error(error, StackTrace.current),
+     (offers) => state = AsyncValue.data(offers),
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -425,9 +427,9 @@ final relatedProductsAsyncProvider = FutureProvider.family<List<Product>, String
   final getRelatedProducts = ref.watch(getRelatedProductsProvider);
   final result = await getRelatedProducts(productId);
   
-  return result.fold(
-    onSuccess: (products) => products,
-    onFailure: (error) => throw Exception(error),
+  return result.fold( (error) => throw Exception(error),
+ (products) => products,
+
   );
 });
 
@@ -437,19 +439,18 @@ final newArrivalsProvider = FutureProvider<List<Product>>((ref) async {
   final result = await getNewArrivals();
   
   return result.fold(
-    onSuccess: (products) => products,
-    onFailure: (error) => throw Exception(error),
+ (error) => throw Exception(error), (products) => products,
   );
 });
 
 // Price range provider
 final priceRangeProvider = FutureProvider.family<Map<String, double>, String?>((ref, categoryId) async {
   final repository = ref.watch(productRepositoryProvider);
-  final result = await repository.getPriceRange(categoryId);
+  final result = await repository.getProductsByCategory(categoryId);
   
   return result.fold(
-    onSuccess: (priceRange) => priceRange,
-    onFailure: (error) => throw Exception(error),
+    (error) => throw Exception(error),
+    (priceRange) => priceRange,
   );
 });
 
