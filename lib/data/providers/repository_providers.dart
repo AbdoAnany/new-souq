@@ -27,7 +27,9 @@ final offerRepositoryProvider = Provider<OfferRepository>((ref) {
 });
 
 final cartRepositoryProvider = Provider<CartRepository>((ref) {
-  return CartRepositoryImpl();
+  return CartRepositoryImpl(
+    productRepository: ref.read(productRepositoryProvider),
+  );
 });
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
@@ -39,7 +41,9 @@ final orderRepositoryProvider = Provider<OrderRepository>((ref) {
 });
 
 final wishlistRepositoryProvider = Provider<WishlistRepository>((ref) {
-  return WishlistRepositoryImpl();
+  return WishlistRepositoryImpl(
+    productRepository: ref.read(productRepositoryProvider),
+  );
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

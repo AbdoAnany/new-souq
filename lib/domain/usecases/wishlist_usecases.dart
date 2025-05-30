@@ -112,27 +112,26 @@ class ToggleWishlistUseCase {
 
   ToggleWishlistUseCase(this._repository);
 
-  Future<Result<bool>> call(String userId, String productId) async {
+  Future<Result<bool, Failure>> call(String userId, String productId) async {
     final isInWishlistResult = await _repository.isInWishlist(userId, productId);
     
-    if (isInWishlistResult.isFailure) {
-      return Result.failure(isInWishlistResult.error!);
-    }
-
-    final isInWishlist = isInWishlistResult.data!;
-
-    if (isInWishlist) {
-      final removeResult = await _repository.removeFromWishlist(userId, productId);
-      if (removeResult.isFailure) {
-        return Result.failure(removeResult.error!);
-      }
-      return Result.success(false);
-    } else {
-      final addResult = await _repository.addToWishlist(userId, productId);
-      if (addResult.isFailure) {
-        return Result.failure(addResult.error!);
-      }
-      return Result.success(true);
-    }
+    return isInWishlistResult.fold(
+      (failure) => Result.failure(failure),
+      (isInWishlist) async {
+        if (isInWishlist) {
+          final removeResult = await _repository.removeFromWishlist(userId, productId);
+          return removeResult.fold(
+            (failure) => Result.failure(failure),
+            (_) => Result.success(false)
+          );
+        } else {
+          final addResult = await _repository.addToWishlist(userId, productId);
+          return addResult.fold(
+            (failure) => Result.failure(failure),
+            (_) => Result.success(true)
+          );
+        }
+      },
+    );
   }
 }

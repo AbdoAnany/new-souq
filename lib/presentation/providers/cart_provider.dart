@@ -1,11 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/utils/result.dart';
-import '../../core/config/app_config.dart';
 import '../../data/providers/repository_providers.dart';
+import '../../domain/entities/cart.dart';
 import '../../domain/usecases/cart_usecases.dart';
-import '../../models/cart.dart';
-import '../../models/product.dart';
 
 /// Cart state for managing cart data and operations
 class CartState {
@@ -72,40 +69,43 @@ class CartNotifier extends StateNotifier<CartState> {
 
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getCartUseCase.call(userId);
+    final result = await _getCartUseCase.call(GetCartParams(userId: userId));
 
     result.fold(
-      onSuccess: (cart) {
+      (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.toString(),
+        );
+        if (kDebugMode) {
+          print('Error loading cart: $failure');
+        }
+      },
+      (cart) {
         state = state.copyWith(
           cart: cart,
           isLoading: false,
         );
-      },
-      onFailure: (error) {
-        state = state.copyWith(
-          isLoading: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error loading cart: $error');
-        }
       },
     );
   }
 
   /// Watch cart changes in real-time
   void watchCart(String userId) {
-    _watchCartUseCase.call(userId).listen(
-      (cart) {
+    _watchCartUseCase.call(WatchCartParams(userId: userId)).listen(
+      (result) {
         if (!mounted) return;
-        state = state.copyWith(cart: cart);
-      },
-      onError: (error) {
-        if (!mounted) return;
-        state = state.copyWith(error: error.toString());
-        if (kDebugMode) {
-          print('Error watching cart: $error');
-        }
+        result.fold(
+          (failure) {
+            state = state.copyWith(error: failure.toString());
+            if (kDebugMode) {
+              print('Error watching cart: $failure');
+            }
+          },
+          (cart) {
+            state = state.copyWith(cart: cart);
+          },
+        );
       },
     );
   }
@@ -115,6 +115,7 @@ class CartNotifier extends StateNotifier<CartState> {
     required String userId,
     required String productId,
     int quantity = 1,
+    Map<String, dynamic>? selectedVariants,
   }) async {
     if (state.isUpdating) return false;
 
@@ -125,26 +126,27 @@ class CartNotifier extends StateNotifier<CartState> {
         userId: userId,
         productId: productId,
         quantity: quantity,
+        selectedVariants: selectedVariants,
       ),
     );
 
     return result.fold(
-      onSuccess: (cart) {
+      (failure) {
+        state = state.copyWith(
+          isUpdating: false,
+          error: failure.toString(),
+        );
+        if (kDebugMode) {
+          print('Error adding to cart: $failure');
+        }
+        return false;
+      },
+      (cart) {
         state = state.copyWith(
           cart: cart,
           isUpdating: false,
         );
         return true;
-      },
-      onFailure: (error) {
-        state = state.copyWith(
-          isUpdating: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error adding to cart: $error');
-        }
-        return false;
       },
     );
   }
@@ -168,22 +170,22 @@ class CartNotifier extends StateNotifier<CartState> {
     );
 
     return result.fold(
-      onSuccess: (cart) {
+      (failure) {
+        state = state.copyWith(
+          isUpdating: false,
+          error: failure.toString(),
+        );
+        if (kDebugMode) {
+          print('Error updating cart item: $failure');
+        }
+        return false;
+      },
+      (cart) {
         state = state.copyWith(
           cart: cart,
           isUpdating: false,
         );
         return true;
-      },
-      onFailure: (error) {
-        state = state.copyWith(
-          isUpdating: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error updating cart item: $error');
-        }
-        return false;
       },
     );
   }
@@ -205,22 +207,22 @@ class CartNotifier extends StateNotifier<CartState> {
     );
 
     return result.fold(
-      onSuccess: (cart) {
+      (failure) {
+        state = state.copyWith(
+          isUpdating: false,
+          error: failure.toString(),
+        );
+        if (kDebugMode) {
+          print('Error removing from cart: $failure');
+        }
+        return false;
+      },
+      (cart) {
         state = state.copyWith(
           cart: cart,
           isUpdating: false,
         );
         return true;
-      },
-      onFailure: (error) {
-        state = state.copyWith(
-          isUpdating: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error removing from cart: $error');
-        }
-        return false;
       },
     );
   }
@@ -231,30 +233,31 @@ class CartNotifier extends StateNotifier<CartState> {
 
     state = state.copyWith(isUpdating: true, error: null);
 
-    final result = await _clearCartUseCase.call(userId);
+    final result = await _clearCartUseCase.call(ClearCartParams(userId: userId));
 
     return result.fold(
-      onSuccess: (_) {
+      (failure) {
+        state = state.copyWith(
+          isUpdating: false,
+          error: failure.toString(),
+        );
+        if (kDebugMode) {
+          print('Error clearing cart: $failure');
+        }
+        return false;
+      },
+      (_) {
         state = state.copyWith(
           cart: Cart(
             id: userId,
             userId: userId,
+            items: [],
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),
           isUpdating: false,
         );
         return true;
-      },
-      onFailure: (error) {
-        state = state.copyWith(
-          isUpdating: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error clearing cart: $error');
-        }
-        return false;
       },
     );
   }
@@ -263,19 +266,11 @@ class CartNotifier extends StateNotifier<CartState> {
   int getItemQuantity(String productId) {
     if (state.cart == null) return 0;
     
-    final item = state.cart!.items.firstWhere(
+    final item = state.cart!.items.where(
       (item) => item.productId == productId,
-      orElse: () => CartItem(
-        id: '',
-        productId: '',
-        product: Product.empty(),
-        quantity: 0,
-        price: 0,
-        addedAt: DateTime.now(),
-      ),
-    );
+    ).firstOrNull;
     
-    return item.quantity;
+    return item?.quantity ?? 0;
   }
 
   /// Check if product is in cart

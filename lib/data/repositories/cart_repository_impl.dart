@@ -327,17 +327,13 @@ class CartRepositoryImpl implements CartRepository {
     return {
       'id': item.id,
       'productId': item.productId,
-      'productName': item.product.name,
-      'productDescription': item.product.description,
+      'productName': item.product.name,      'productDescription': item.product.description,
       'productImages': item.product.images,
       'categoryId': item.product.categoryId,
       'category': item.product.category,
       'quantity': item.quantity,
       'price': item.price,
       'selectedVariants': item.selectedVariants,
-      'addedAt': Timestamp.fromDate(item.addedAt),
-    };
-  }
       'addedAt': Timestamp.fromDate(item.addedAt),
     };
   }

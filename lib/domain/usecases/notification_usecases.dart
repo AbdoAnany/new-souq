@@ -51,9 +51,8 @@ class MarkAllNotificationsAsReadUseCase implements UseCase<void, String> {
   final NotificationRepository _repository;
 
   MarkAllNotificationsAsReadUseCase(this._repository);
-
   @override
-  Future<Result<void>> call(String userId) async {
+  Future<Result<void, Failure>> call(String userId) async {
     return await _repository.markAllAsRead(userId);
   }
 }
@@ -63,9 +62,8 @@ class DeleteNotificationUseCase implements UseCase<void, String> {
   final NotificationRepository _repository;
 
   DeleteNotificationUseCase(this._repository);
-
   @override
-  Future<Result<void>> call(String notificationId) async {
+  Future<Result<void, Failure>> call(String notificationId) async {
     return await _repository.deleteNotification(notificationId);
   }
 }
@@ -106,14 +104,13 @@ class HasUnreadNotificationsUseCase implements UseCase<bool, String> {
   final NotificationRepository _repository;
 
   HasUnreadNotificationsUseCase(this._repository);
-
   @override
-  Future<Result<bool>> call(String userId) async {
+  Future<Result<bool, Failure>> call(String userId) async {
     final countResult = await _repository.getUnreadCount(userId);
-    if (countResult.isFailure) {
-      return Result.failure(countResult.error!);
-    }
     
-    return Result.success(countResult.data! > 0);
+    return countResult.fold(
+      (failure) => Result.failure(failure),
+      (count) => Result.success(count > 0),
+    );
   }
 }

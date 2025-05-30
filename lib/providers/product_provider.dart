@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/models/category.dart';
-import 'package:souq/models/product.dart';
-import 'package:souq/models/offer.dart';
-import 'package:souq/services/product_service.dart';
+import 'package:souq/core/result.dart';
+import 'package:souq/core/failure.dart';
+import 'package:souq/data/providers/repository_providers.dart';
+import 'package:souq/domain/usecases/product_usecases.dart';
+import 'package:souq/domain/entities/product.dart';
+import 'package:souq/domain/entities/category.dart' as domain;
 
 class ProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
   final ProductService _productService;
@@ -21,10 +24,20 @@ class ProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
   Future<void> fetchFeaturedProducts() async {
     if (!_mounted) return;
     state = const AsyncValue.loading();
+    
     try {
-      final products = await _productService.getFeaturedProducts();
+      final result = await _productService.getFeaturedProducts();
       if (!_mounted) return;
-      state = AsyncValue.data(products);
+      
+      if (result is Success<List<Product>, Failure>) {
+        state = AsyncValue.data(result.value);
+      } else {
+        final failure = (result as ResultFailure<List<Product>, Failure>).failure;
+        state = AsyncValue.error(failure, StackTrace.current);
+        if (kDebugMode) {
+          print('Error loading featured products: $failure');
+        }
+      }
     } catch (e, stackTrace) {
       if (!_mounted) return;
       state = AsyncValue.error(e, stackTrace);
@@ -34,39 +47,28 @@ class ProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
   Future<void> fetchProductsByCategory(String categoryId) async {
     if (!_mounted) return;
     state = const AsyncValue.loading();
+    
     try {
-      final products = await _productService.getProductsByCategory(
-        categoryId: categoryId,
-      );
+      final result = await _productService.getProductsByCategory(categoryId: categoryId);
       if (!_mounted) return;
-      state = AsyncValue.data(products);
+      
+      if (result is Success<List<Product>, Failure>) {
+        state = AsyncValue.data(result.value);
+      } else {
+        final failure = (result as ResultFailure<List<Product>, Failure>).failure;
+        state = AsyncValue.error(failure, StackTrace.current);
+        if (kDebugMode) {
+          print('Error loading products by category: $failure');
+        }
+      }
     } catch (e, stackTrace) {
       if (!_mounted) return;
       state = AsyncValue.error(e, stackTrace);
     }
   }
-  Future<void> searchProducts(String searchQuery, {
-    double? minPrice,
-    double? maxPrice,
-    double? minRating,
-    String? sortBy,
-  }) async {
-    if (!_mounted) return;
-    state = const AsyncValue.loading();
-    try {
-      final products = await _productService.searchProducts(
-        query: searchQuery,
-        minPrice: minPrice,
-        maxPrice: maxPrice,
-        minRating: minRating,
-        sortBy: sortBy,
-      );
-      if (!_mounted) return;
-      state = AsyncValue.data(products);
-    } catch (e, stackTrace) {
-      if (!_mounted) return;
-      state = AsyncValue.error(e, stackTrace);
-    }
+
+  Future<void> refresh() async {
+    await fetchFeaturedProducts();
   }
 }
 

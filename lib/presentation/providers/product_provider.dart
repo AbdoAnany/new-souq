@@ -1,14 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config/app_config.dart';
-import '../../core/utils/result.dart';
 import '../../core/utils/responsive_helper.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../domain/usecases/product_usecases.dart';
 import '../../domain/usecases/category_usecases.dart';
 import '../../domain/usecases/offer_usecases.dart';
-import '../../models/product.dart';
-import '../../models/category.dart';
-import '../../models/offer.dart';
+import '../../domain/entities/product.dart';
+import '../../domain/entities/category.dart';
+import '../../domain/entities/offer.dart';
 
 // Repository Provider (imported from data layer)
 // Use the repository providers from data layer
@@ -46,12 +45,12 @@ final getRelatedProductsProvider = Provider<GetRelatedProducts>((ref) {
 
 // Category Use Case Providers
 final getCategoriesProvider = Provider<GetCategories>((ref) {
-  final repository = ref.watch(productRepositoryProvider);
+  final repository = ref.watch(categoryRepositoryProvider);
   return GetCategories(repository);
 });
 
 final getSubcategoriesProvider = Provider<GetSubcategories>((ref) {
-  final repository = ref.watch(productRepositoryProvider);
+  final repository = ref.watch(categoryRepositoryProvider);
   return GetSubcategories(repository);
 });
 
@@ -80,14 +79,13 @@ class FeaturedProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> 
     if (!_mounted) return;
     
     state = const AsyncValue.loading();
-    
-    try {
+      try {
       final result = await _getFeaturedProducts();
       if (!_mounted) return;
       
       result.fold(
-        onSuccess: (products) => state = AsyncValue.data(products),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+        (error) => state = AsyncValue.error(error, StackTrace.current),
+        (products) => state = AsyncValue.data(products),
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;
@@ -120,10 +118,9 @@ class ProductDetailNotifier extends StateNotifier<AsyncValue<Product?>> {
     try {
       final result = await _getProductById(productId);
       if (!_mounted) return;
-      
-      result.fold(
-        onSuccess: (product) => state = AsyncValue.data(product),
-        onFailure: (error) => state = AsyncValue.error(error, StackTrace.current),
+        result.fold(
+        (error) => state = AsyncValue.error(error, StackTrace.current),
+        (product) => state = AsyncValue.data(product),
       );
     } catch (e, stackTrace) {
       if (!_mounted) return;

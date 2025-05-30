@@ -1,41 +1,38 @@
 import '../../core/usecase/usecase.dart';
-import '../../core/utils/result.dart';
+import '../../core/result.dart';
+import '../../core/failure.dart';
 import '../repositories/repositories.dart';
-import '../../models/product.dart';
+import '../entities/product.dart';
 
-class GetFeaturedProducts implements NoParamsUseCase<Result<List<Product>>> {
+class GetFeaturedProducts implements NoParamsUseCase<List<Product>> {
   final ProductRepository repository;
   
   GetFeaturedProducts(this.repository);
-  
-  @override
-  Future<Result<List<Product>>> call() async {
+    @override
+  Future<Result<List<Product>, Failure>> call() async {
     return await repository.getFeaturedProducts();
   }
 }
 
-class GetProductById implements UseCase<Result<Product>, String> {
+class GetProductById implements UseCase<Product, String> {
   final ProductRepository repository;
   
   GetProductById(this.repository);
-  
-  @override
-  Future<Result<Product>> call(String productId) async {
+    @override
+  Future<Result<Product, Failure>> call(String productId) async {
     return await repository.getProductById(productId);
   }
 }
 
-class SearchProducts implements UseCase<Result<List<Product>>, SearchProductsParams> {
+class SearchProducts implements UseCase<List<Product>, SearchProductsParams> {
   final ProductRepository repository;
   
   SearchProducts(this.repository);
-  
-  @override
-  Future<Result<List<Product>>> call(SearchProductsParams params) async {
+    @override
+  Future<Result<List<Product>, Failure>> call(SearchProductsParams params) async {
     return await repository.getProducts(
-      page: params.page,
       limit: params.limit,
-      search: params.query,
+      searchQuery: params.query,
       categoryId: params.categoryId,
       minPrice: params.minPrice,
       maxPrice: params.maxPrice,
@@ -46,16 +43,14 @@ class SearchProducts implements UseCase<Result<List<Product>>, SearchProductsPar
   }
 }
 
-class GetProductsByCategory implements UseCase<Result<List<Product>>, GetProductsByCategoryParams> {
+class GetProductsByCategory implements UseCase<List<Product>, GetProductsByCategoryParams> {
   final ProductRepository repository;
   
   GetProductsByCategory(this.repository);
-  
-  @override
-  Future<Result<List<Product>>> call(GetProductsByCategoryParams params) async {
+    @override
+  Future<Result<List<Product>, Failure>> call(GetProductsByCategoryParams params) async {
     return await repository.getProducts(
       categoryId: params.categoryId,
-      page: params.page,
       limit: params.limit,
       sortBy: params.sortBy,
       descending: params.descending,
@@ -63,50 +58,53 @@ class GetProductsByCategory implements UseCase<Result<List<Product>>, GetProduct
   }
 }
 
-class GetNewArrivals implements NoParamsUseCase<Result<List<Product>>> {
+class GetNewArrivals implements NoParamsUseCase<List<Product>> {
   final ProductRepository repository;
   
   GetNewArrivals(this.repository);
-  
-  @override
-  Future<Result<List<Product>>> call() async {
+    @override
+  Future<Result<List<Product>, Failure>> call() async {
     return await repository.getNewArrivals();
   }
 }
 
-class GetRelatedProducts implements UseCase<Result<List<Product>>, String> {
+class GetRelatedProducts implements UseCase<List<Product>, String> {
   final ProductRepository repository;
   
   GetRelatedProducts(this.repository);
-  
-  @override
-  Future<Result<List<Product>>> call(String productId) async {
+    @override
+  Future<Result<List<Product>, Failure>> call(String productId) async {
     return await repository.getRelatedProducts(productId);
   }
 }
 
 // Parameter classes
-class SearchProductsParams extends SearchParams {
+class SearchProductsParams {
+  final String query;
   final String? categoryId;
   final double? minPrice;
   final double? maxPrice;
   final double? minRating;
+  final int? page;
+  final int? limit;
+  final String? sortBy;
+  final bool? descending;
   
   const SearchProductsParams({
-    required super.query,
+    required this.query,
     this.categoryId,
     this.minPrice,
     this.maxPrice,
     this.minRating,
-    super.page,
-    super.limit,
-    super.sortBy,
-    super.descending,
+    this.page,
+    this.limit,
+    this.sortBy,
+    this.descending,
   });
-  
-  @override
+    @override
   SearchProductsParams copyWith({
     String? query,
+    Map<String, dynamic>? filters,
     String? categoryId,
     double? minPrice,
     double? maxPrice,
@@ -130,15 +128,19 @@ class SearchProductsParams extends SearchParams {
   }
 }
 
-class GetProductsByCategoryParams extends PaginationParams {
+class GetProductsByCategoryParams {
   final String categoryId;
+  final int? page;
+  final int? limit;
+  final String? sortBy;
+  final bool? descending;
   
   const GetProductsByCategoryParams({
     required this.categoryId,
-    super.page,
-    super.limit,
-    super.sortBy,
-    super.descending,
+    this.page,
+    this.limit,
+    this.sortBy,
+    this.descending,
   });
   
   @override

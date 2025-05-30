@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/utils/result.dart';
+import '../../core/result.dart';
+import '../../core/failure.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../domain/usecases/wishlist_usecases.dart';
 
@@ -43,10 +44,8 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
   final GetWishlistUseCase _getWishlistUseCase;
   final AddToWishlistUseCase _addToWishlistUseCase;
   final RemoveFromWishlistUseCase _removeFromWishlistUseCase;
-  final ClearWishlistUseCase _clearWishlistUseCase;
-  final IsInWishlistUseCase _isInWishlistUseCase;
+  final ClearWishlistUseCase _clearWishlistUseCase;  final IsInWishlistUseCase _isInWishlistUseCase;
   final ToggleWishlistUseCase _toggleWishlistUseCase;
-
   WishlistNotifier({
     required GetWishlistUseCase getWishlistUseCase,
     required AddToWishlistUseCase addToWishlistUseCase,
@@ -61,7 +60,6 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
         _isInWishlistUseCase = isInWishlistUseCase,
         _toggleWishlistUseCase = toggleWishlistUseCase,
         super(const WishlistState());
-
   /// Load wishlist for user
   Future<void> loadWishlist(String userId) async {
     if (state.isLoading) return;
@@ -69,15 +67,9 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _getWishlistUseCase.call(userId);
-
+    
     result.fold(
-      onSuccess: (productIds) {
-        state = state.copyWith(
-          productIds: productIds,
-          isLoading: false,
-        );
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -85,6 +77,14 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
         if (kDebugMode) {
           print('Error loading wishlist: $error');
         }
+      },
+      (wishlist) {
+        // Extract productIds from Wishlist entity
+        final productIds = wishlist.items.map((item) => item.productId).toList();
+        state = state.copyWith(
+          productIds: productIds,
+          isLoading: false,
+        );
       },
     );
   }
@@ -103,10 +103,18 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
         userId: userId,
         productId: productId,
       ),
-    );
-
-    return result.fold(
-      onSuccess: (_) {
+    );    return result.fold(
+      (error) {
+        state = state.copyWith(
+          isUpdating: false,
+          error: error.toString(),
+        );
+        if (kDebugMode) {
+          print('Error adding to wishlist: $error');
+        }
+        return false;
+      },
+      (_) {
         final updatedProductIds = List<String>.from(state.productIds);
         if (!updatedProductIds.contains(productId)) {
           updatedProductIds.add(productId);
@@ -117,16 +125,6 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
           isUpdating: false,
         );
         return true;
-      },
-      onFailure: (error) {
-        state = state.copyWith(
-          isUpdating: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error adding to wishlist: $error');
-        }
-        return false;
       },
     );
   }
@@ -145,20 +143,8 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
         userId: userId,
         productId: productId,
       ),
-    );
-
-    return result.fold(
-      onSuccess: (_) {
-        final updatedProductIds = List<String>.from(state.productIds);
-        updatedProductIds.remove(productId);
-        
-        state = state.copyWith(
-          productIds: updatedProductIds,
-          isUpdating: false,
-        );
-        return true;
-      },
-      onFailure: (error) {
+    );    return result.fold(
+      (error) {
         state = state.copyWith(
           isUpdating: false,
           error: error.toString(),
@@ -167,6 +153,16 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
           print('Error removing from wishlist: $error');
         }
         return false;
+      },
+      (_) {
+        final updatedProductIds = List<String>.from(state.productIds);
+        updatedProductIds.remove(productId);
+        
+        state = state.copyWith(
+          productIds: updatedProductIds,
+          isUpdating: false,
+        );
+        return true;
       },
     );
   }
@@ -180,10 +176,18 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
 
     state = state.copyWith(isUpdating: true, error: null);
 
-    final result = await _toggleWishlistUseCase.call(userId, productId);
-
-    return result.fold(
-      onSuccess: (isInWishlist) {
+    final result = await _toggleWishlistUseCase.call(userId, productId);    return result.fold(
+      (error) {
+        state = state.copyWith(
+          isUpdating: false,
+          error: error.toString(),
+        );
+        if (kDebugMode) {
+          print('Error toggling wishlist: $error');
+        }
+        return false;
+      },
+      (isInWishlist) {
         final updatedProductIds = List<String>.from(state.productIds);
         
         if (isInWishlist) {
@@ -200,16 +204,6 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
         );
         return isInWishlist;
       },
-      onFailure: (error) {
-        state = state.copyWith(
-          isUpdating: false,
-          error: error.toString(),
-        );
-        if (kDebugMode) {
-          print('Error toggling wishlist: $error');
-        }
-        return false;
-      },
     );
   }
 
@@ -219,17 +213,8 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
 
     state = state.copyWith(isUpdating: true, error: null);
 
-    final result = await _clearWishlistUseCase.call(userId);
-
-    return result.fold(
-      onSuccess: (_) {
-        state = state.copyWith(
-          productIds: [],
-          isUpdating: false,
-        );
-        return true;
-      },
-      onFailure: (error) {
+    final result = await _clearWishlistUseCase.call(userId);    return result.fold(
+      (error) {
         state = state.copyWith(
           isUpdating: false,
           error: error.toString(),
@@ -239,12 +224,31 @@ class WishlistNotifier extends StateNotifier<WishlistState> {
         }
         return false;
       },
+      (_) {
+        state = state.copyWith(
+          productIds: [],
+          isUpdating: false,
+        );
+        return true;
+      },
     );
   }
-
-  /// Check if product is in wishlist
+  /// Check if product is in wishlist synchronously (from local state)
   bool isInWishlist(String productId) {
     return state.productIds.contains(productId);
+  }
+
+  /// Check if product is in wishlist asynchronously (from remote)
+  Future<Result<bool, Failure>> checkIsInWishlist({
+    required String userId,
+    required String productId,
+  }) async {
+    return await _isInWishlistUseCase.call(
+      IsInWishlistParams(
+        userId: userId,
+        productId: productId,
+      ),
+    );
   }
 
   /// Clear error state
@@ -279,8 +283,7 @@ final toggleWishlistUseCaseProvider = Provider<ToggleWishlistUseCase>((ref) {
 });
 
 /// Main wishlist provider
-final wishlistProvider = StateNotifierProvider<WishlistNotifier, WishlistState>((ref) {
-  return WishlistNotifier(
+final wishlistProvider = StateNotifierProvider<WishlistNotifier, WishlistState>((ref) {  return WishlistNotifier(
     getWishlistUseCase: ref.read(getWishlistUseCaseProvider),
     addToWishlistUseCase: ref.read(addToWishlistUseCaseProvider),
     removeFromWishlistUseCase: ref.read(removeFromWishlistUseCaseProvider),

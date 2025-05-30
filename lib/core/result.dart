@@ -3,12 +3,10 @@ import 'failure.dart';
 /// A Result type that represents either a successful value or a failure
 abstract class Result<T, F> {
   const Result();
-
   /// Returns true if this is a Success
   bool get isSuccess => this is Success<T, F>;
-
   /// Returns true if this is a Failure
-  bool get isFailure => this is Failure<T, F>;
+  bool get isFailure => this is ResultFailure<T, F>;
 
   /// Fold the result into a single value
   R fold<R>(R Function(F failure) onFailure, R Function(T success) onSuccess) {
@@ -81,7 +79,6 @@ class ResultFailure<T, F> extends Result<T, F> {
 
   @override
   int get hashCode => failure.hashCode;
-
   @override
   String toString() => 'Failure($failure)';
 }

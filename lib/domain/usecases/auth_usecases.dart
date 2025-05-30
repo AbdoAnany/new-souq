@@ -8,7 +8,6 @@ class SignInWithEmailAndPassword implements UseCase<User, SignInParams> {
   final AuthRepository repository;
   
   SignInWithEmailAndPassword(this.repository);
-  
   @override
   Future<Result<User, Failure>> call(SignInParams params) async {
     return await repository.signInWithEmailAndPassword(
@@ -22,9 +21,8 @@ class SignUpWithEmailAndPassword implements UseCase<User, SignUpParams> {
   final AuthRepository repository;
   
   SignUpWithEmailAndPassword(this.repository);
-  
-  @override
-  Future<Result<User>> call(SignUpParams params) async {
+    @override
+  Future<Result<User, Failure>> call(SignUpParams params) async {
     return await repository.signUpWithEmailAndPassword(
       params.email,
       params.password,
@@ -34,46 +32,45 @@ class SignUpWithEmailAndPassword implements UseCase<User, SignUpParams> {
   }
 }
 
-class SignInWithGoogle implements NoParamsUseCase<Result<User>> {
+class SignInWithGoogle implements NoParamsUseCase<User> {
   final AuthRepository repository;
   
   SignInWithGoogle(this.repository);
-  
-  @override
-  Future<Result<User>> call() async {
+    @override
+  Future<Result<User, Failure>> call() async {
     return await repository.signInWithGoogle();
   }
 }
 
-class SignOut implements NoParamsUseCase<Result<void>> {
+class SignOut implements NoParamsUseCase<void> {
   final AuthRepository repository;
   
   SignOut(this.repository);
   
   @override
-  Future<Result<void>> call() async {
+  Future<Result<void, Failure>> call() async {
     return await repository.signOut();
   }
 }
 
-class ResetPassword implements UseCase<Result<void>, String> {
+class ResetPassword implements UseCase<void, String> {
   final AuthRepository repository;
   
   ResetPassword(this.repository);
   
   @override
-  Future<Result<void>> call(String email) async {
+  Future<Result<void, Failure>> call(String email) async {
     return await repository.resetPassword(email);
   }
 }
 
-class GetCurrentUser implements NoParamsUseCase<Result<User?>> {
+class GetCurrentUser implements NoParamsUseCase<User?> {
   final AuthRepository repository;
   
   GetCurrentUser(this.repository);
   
   @override
-  Future<Result<User?>> call() async {
+  Future<Result<User?, Failure>> call() async {
     return await repository.getCurrentUser();
   }
 }

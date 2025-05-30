@@ -79,6 +79,12 @@ abstract class CategoryRepository {
 abstract class OrderRepository {
   Future<Result<Order, Failure>> getOrderById(String orderId);
   Future<Result<List<Order>, Failure>> getUserOrders(String userId, {int? limit});
+  Future<Result<List<Order>, Failure>> getAllOrders({
+    int? page,
+    int? limit,
+    OrderStatus? status,
+    String? search,
+  });
   Future<Result<Order, Failure>> createOrder({
     required String userId,
     required List<OrderItem> items,
@@ -86,9 +92,11 @@ abstract class OrderRepository {
     required String deliveryAddress,
     String? notes,
   });
+  Future<Result<Order, Failure>> updateOrder(Order order);
   Future<Result<Order, Failure>> updateOrderStatus(String orderId, OrderStatus status);
   Future<Result<Order, Failure>> cancelOrder(String orderId);
   Stream<Result<List<Order>, Failure>> watchUserOrders(String userId);
+  Stream<Order> watchOrder(String orderId);
 }
 
 /// Repository interface for Cart domain
@@ -98,6 +106,7 @@ abstract class CartRepository {
     required String userId,
     required String productId,
     required int quantity,
+    Map<String, dynamic>? selectedVariants,
   });
   Future<Result<Cart, Failure>> updateCartItem({
     required String userId,
@@ -127,6 +136,8 @@ abstract class WishlistRepository {
 abstract class NotificationRepository {
   Future<Result<List<AppNotification>, Failure>> getNotifications(String userId, {int? limit});
   Future<Result<void, Failure>> markAsRead(String notificationId);
+  Future<Result<void, Failure>> markAllAsRead(String userId);
+  Future<Result<void, Failure>> deleteNotification(String notificationId);
   Future<Result<int, Failure>> getUnreadCount(String userId);
   Future<Result<AppNotification, Failure>> createNotification(AppNotification notification);
   Stream<Result<List<AppNotification>, Failure>> watchNotifications(String userId);

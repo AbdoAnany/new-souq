@@ -1,48 +1,48 @@
 import '../../core/usecase/usecase.dart';
-import '../../core/utils/result.dart';
+import '../../core/result.dart';
+import '../../core/failure.dart';
 import '../repositories/repositories.dart';
-import '../../models/offer.dart';
+import '../entities/offer.dart';
 
-class GetActiveOffers implements NoParamsUseCase<Result<List<Offer>>> {
+class GetActiveOffers implements NoParamsUseCase<List<Offer>> {
   final OfferRepository repository;
   
   GetActiveOffers(this.repository);
   
   @override
-  Future<Result<List<Offer>>> call() async {
+  Future<Result<List<Offer>, Failure>> call() async {
     return await repository.getActiveOffers();
   }
 }
 
-class GetOfferById implements UseCase<Result<Offer>, String> {
+class GetOfferById implements UseCase<Offer, String> {
   final OfferRepository repository;
   
   GetOfferById(this.repository);
   
   @override
-  Future<Result<Offer>> call(String offerId) async {
+  Future<Result<Offer, Failure>> call(String offerId) async {
     return await repository.getOfferById(offerId);
   }
 }
 
-class GetOffersByCategory implements UseCase<Result<List<Offer>>, String> {
+class GetOffersByCategory implements UseCase<List<Offer>, String> {
   final OfferRepository repository;
   
   GetOffersByCategory(this.repository);
-  
-  @override
-  Future<Result<List<Offer>>> call(String categoryId) async {
+    @override
+  Future<Result<List<Offer>, Failure>> call(String categoryId) async {
     return await repository.getOffersByCategory(categoryId);
   }
 }
 
-class ValidateOffer implements UseCase<Result<bool>, ValidateOfferParams> {
+class ValidateOffer implements UseCase<bool, ValidateOfferParams> {
   final OfferRepository repository;
   
   ValidateOffer(this.repository);
   
   @override
-  Future<Result<bool>> call(ValidateOfferParams params) async {
+  Future<Result<bool, Failure>> call(ValidateOfferParams params) async {
     return await repository.validateOffer(params.offerId, params.productId);
   }
 }

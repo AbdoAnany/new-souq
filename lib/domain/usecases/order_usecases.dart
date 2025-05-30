@@ -155,30 +155,6 @@ class WatchUserOrdersUseCase implements StreamUseCase<List<Order>, WatchUserOrde
   }
 }
 
-/// Use case for getting order by ID
-class GetOrderByIdUseCase implements UseCase<UserOrder, String> {
-  final OrderRepository _repository;
-
-  GetOrderByIdUseCase(this._repository);
-
-  @override
-  Future<Result<UserOrder>> call(String orderId) async {
-    return await _repository.getOrderById(orderId);
-  }
-}
-
-/// Use case for getting user orders
-class GetUserOrdersUseCase implements UseCase<List<UserOrder>, String> {
-  final OrderRepository _repository;
-
-  GetUserOrdersUseCase(this._repository);
-
-  @override
-  Future<Result<List<UserOrder>>> call(String userId) async {
-    return await _repository.getUserOrders(userId);
-  }
-}
-
 /// Parameters for getting all orders with filters
 class GetAllOrdersParams {
   final int? page;
@@ -195,13 +171,13 @@ class GetAllOrdersParams {
 }
 
 /// Use case for getting all orders (admin)
-class GetAllOrdersUseCase implements UseCase<List<UserOrder>, GetAllOrdersParams> {
+class GetAllOrdersUseCase implements UseCase<List<Order>, GetAllOrdersParams> {
   final OrderRepository _repository;
 
   GetAllOrdersUseCase(this._repository);
 
   @override
-  Future<Result<List<UserOrder>>> call(GetAllOrdersParams params) async {
+  Future<Result<List<Order>, Failure>> call(GetAllOrdersParams params) async {
     return await _repository.getAllOrders(
       page: params.page,
       limit: params.limit,
@@ -211,74 +187,15 @@ class GetAllOrdersUseCase implements UseCase<List<UserOrder>, GetAllOrdersParams
   }
 }
 
-/// Use case for creating an order
-class CreateOrderUseCase implements UseCase<UserOrder, UserOrder> {
-  final OrderRepository _repository;
-
-  CreateOrderUseCase(this._repository);
-
-  @override
-  Future<Result<UserOrder>> call(UserOrder order) async {
-    // Validate order before creating
-    if (order.items.isEmpty) {
-      return Result.failure('Order must contain at least one item');
-    }
-
-    if (order.total <= 0) {
-      return Result.failure('Order total must be greater than 0');
-    }
-
-    return await _repository.createOrder(order);
-  }
-}
-
 /// Use case for updating an order
-class UpdateOrderUseCase implements UseCase<UserOrder, UserOrder> {
+class UpdateOrderUseCase implements UseCase<Order, Order> {
   final OrderRepository _repository;
 
   UpdateOrderUseCase(this._repository);
 
   @override
-  Future<Result<UserOrder>> call(UserOrder order) async {
+  Future<Result<Order, Failure>> call(Order order) async {
     return await _repository.updateOrder(order);
-  }
-}
-
-/// Parameters for updating order status
-class UpdateOrderStatusParams {
-  final String orderId;
-  final OrderStatus status;
-
-  const UpdateOrderStatusParams({
-    required this.orderId,
-    required this.status,
-  });
-}
-
-/// Use case for updating order status
-class UpdateOrderStatusUseCase implements UseCase<UserOrder, UpdateOrderStatusParams> {
-  final OrderRepository _repository;
-
-  UpdateOrderStatusUseCase(this._repository);
-
-  @override
-  Future<Result<UserOrder>> call(UpdateOrderStatusParams params) async {
-    return await _repository.updateOrderStatus(
-      params.orderId,
-      params.status,
-    );
-  }
-}
-
-/// Use case for cancelling an order
-class CancelOrderUseCase implements UseCase<void, String> {
-  final OrderRepository _repository;
-
-  CancelOrderUseCase(this._repository);
-
-  @override
-  Future<Result<void>> call(String orderId) async {
-    return await _repository.cancelOrder(orderId);
   }
 }
 
@@ -288,7 +205,7 @@ class WatchOrderUseCase {
 
   WatchOrderUseCase(this._repository);
 
-  Stream<UserOrder> call(String orderId) {
+  Stream<Order> call(String orderId) {
     return _repository.watchOrder(orderId);
   }
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/utils/result.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../domain/repositories/repositories.dart';
-import '../../models/user.dart';
+import '../../domain/entities/user.dart';
 
 /// Authentication state for managing user authentication
 class AuthState {
@@ -40,7 +39,6 @@ class AuthState {
 /// Authentication provider for managing auth state and operations
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
-
   AuthNotifier({required AuthRepository authRepository})
       : _authRepository = authRepository,
         super(const AuthState()) {
@@ -51,12 +49,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _initAuth() {
     // Listen to auth state changes
     _authRepository.authStateChanges.listen(
-      (user) {
+      (result) {
         if (!mounted) return;
-        state = state.copyWith(
-          user: user,
-          isAuthenticated: user != null,
-          isLoading: false,
+        
+        result.fold(
+          (error) {
+            state = state.copyWith(
+              error: error.toString(),
+              isLoading: false,
+            );
+            if (kDebugMode) {
+              print('Auth state change error: $error');
+            }
+          },
+          (user) {
+            state = state.copyWith(
+              user: user,
+              isAuthenticated: user != null,
+              isLoading: false,
+            );
+          },
         );
       },
       onError: (error) {
@@ -82,14 +94,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _authRepository.getCurrentUser();
 
     result.fold(
-      onSuccess: (user) {
-        state = state.copyWith(
-          user: user,
-          isAuthenticated: user != null,
-          isLoading: false,
-        );
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -97,6 +102,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         if (kDebugMode) {
           print('Error getting current user: $error');
         }
+      },      (user) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
       },
     );
   }
@@ -113,15 +124,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _authRepository.signInWithEmailAndPassword(email, password);
 
     return result.fold(
-      onSuccess: (user) {
-        state = state.copyWith(
-          user: user,
-          isAuthenticated: true,
-          isLoading: false,
-        );
-        return true;
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -130,6 +133,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
           print('Sign in error: $error');
         }
         return false;
+      },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
+        return true;
       },
     );
   }
@@ -153,15 +164,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
 
     return result.fold(
-      onSuccess: (user) {
-        state = state.copyWith(
-          user: user,
-          isAuthenticated: true,
-          isLoading: false,
-        );
-        return true;
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -170,6 +173,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
           print('Sign up error: $error');
         }
         return false;
+      },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
+        return true;
       },
     );
   }
@@ -183,15 +194,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _authRepository.signInWithGoogle();
 
     return result.fold(
-      onSuccess: (user) {
-        state = state.copyWith(
-          user: user,
-          isAuthenticated: true,
-          isLoading: false,
-        );
-        return true;
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -200,6 +203,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
           print('Google sign in error: $error');
         }
         return false;
+      },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
+        return true;
       },
     );
   }
@@ -213,15 +224,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _authRepository.signOut();
 
     return result.fold(
-      onSuccess: (_) {
-        state = state.copyWith(
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        );
-        return true;
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -230,6 +233,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
           print('Sign out error: $error');
         }
         return false;
+      },
+      (_) {
+        state = state.copyWith(
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        );
+        return true;
       },
     );
   }
@@ -243,11 +254,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _authRepository.resetPassword(email);
 
     return result.fold(
-      onSuccess: (_) {
-        state = state.copyWith(isLoading: false);
-        return true;
-      },
-      onFailure: (error) {
+      (error) {
         state = state.copyWith(
           isLoading: false,
           error: error.toString(),
@@ -256,6 +263,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
           print('Reset password error: $error');
         }
         return false;
+      },
+      (_) {
+        state = state.copyWith(isLoading: false);
+        return true;
       },
     );
   }

@@ -12,26 +12,6 @@ class ProductRepositoryImpl implements ProductRepository {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
-  Future<Result<List<Product>, Failure>> getFeaturedProducts({int limit = 10}) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection(AppConstants.productsCollection)
-          .where('isFeatured', isEqualTo: true)
-          .where('isActive', isEqualTo: true)
-          .limit(limit)
-          .get();
-
-      final products = querySnapshot.docs
-          .map((doc) => _mapDocumentToProduct(doc.data(), doc.id))
-          .toList();
-
-      return Result.success(products);
-    } catch (e) {
-      return Result.failure(NetworkFailure('Failed to get featured products: ${e.toString()}'));
-    }
-  }
-
-  @override
   Future<Result<Product, Failure>> getProductById(String productId) async {
     try {
       final productDoc = await _firestore
@@ -53,14 +33,15 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<Result<List<Product>, Failure>> getProducts({
-    String? categoryId,
-    int? page,
     int? limit,
+    String? startAfter,
+    String? categoryId,
+    String? searchQuery,
     double? minPrice,
     double? maxPrice,
     double? minRating,
     String? sortBy,
-    bool descending = false,
+    bool? descending,
   }) async {
     try {
       Query query = _firestore.collection(AppConstants.productsCollection);
@@ -70,8 +51,13 @@ class ProductRepositoryImpl implements ProductRepository {
         query = query.where('categoryId', isEqualTo: categoryId);
       }
 
-      // Apply active filter
-      query = query.where('isActive', isEqualTo: true);
+      // Apply search filter
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        final searchTerms = searchQuery.toLowerCase().split(' ');
+        for (final term in searchTerms) {
+          query = query.where('searchTerms', arrayContains: term);
+        }
+      }
 
       // Apply price filters
       if (minPrice != null) {
@@ -83,24 +69,27 @@ class ProductRepositoryImpl implements ProductRepository {
 
       // Apply rating filter
       if (minRating != null) {
-        query = query.where('averageRating', isGreaterThanOrEqualTo: minRating);
+        query = query.where('rating', isGreaterThanOrEqualTo: minRating);
       }
 
       // Apply sorting
       if (sortBy != null) {
-        query = query.orderBy(sortBy, descending: descending);
+        query = query.orderBy(sortBy, descending: descending ?? false);
       } else {
         query = query.orderBy('createdAt', descending: true);
       }
 
       // Apply pagination
-      if (limit != null) {
+      if (startAfter != null) {
+        final startAfterDoc = await _firestore
+            .collection(AppConstants.productsCollection)
+            .doc(startAfter)
+            .get();
+        if (startAfterDoc.exists) {
+          query = query.startAfterDocument(startAfterDoc);
+        }
+      }      if (limit != null) {
         query = query.limit(limit);
-      }
-
-      if (page != null && page > 1 && limit != null) {
-        final offset = (page - 1) * limit;
-        query = query.offset(offset);
       }
 
       final querySnapshot = await query.get();
@@ -116,60 +105,17 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Result<List<Product>, Failure>> searchProducts({
-    required String query,
-    int? page,
-    int? limit,
-    String? categoryId,
-    double? minPrice,
-    double? maxPrice,
-    double? minRating,
-    String? sortBy,
-    bool descending = false,
-  }) async {
+  Future<Result<List<Product>, Failure>> getFeaturedProducts({int? limit}) async {
     try {
-      Query firestoreQuery = _firestore.collection(AppConstants.productsCollection);
+      Query query = _firestore
+          .collection(AppConstants.productsCollection)
+          .where('isFeatured', isEqualTo: true)
+          .where('inStock', isEqualTo: true)
+          .orderBy('createdAt', descending: true);
 
-      // Apply active filter
-      firestoreQuery = firestoreQuery.where('isActive', isEqualTo: true);
-
-      // Apply category filter
-      if (categoryId != null && categoryId.isNotEmpty) {
-        firestoreQuery = firestoreQuery.where('categoryId', isEqualTo: categoryId);
-      }
-
-      // Apply text search (using array-contains for search terms)
-      if (query.isNotEmpty) {
-        final searchTerms = query.toLowerCase().split(' ');
-        for (final term in searchTerms) {
-          firestoreQuery = firestoreQuery.where('searchTerms', arrayContains: term);
-        }
-      }
-
-      // Apply price filters
-      if (minPrice != null) {
-        firestoreQuery = firestoreQuery.where('price', isGreaterThanOrEqualTo: minPrice);
-      }
-      if (maxPrice != null) {
-        firestoreQuery = firestoreQuery.where('price', isLessThanOrEqualTo: maxPrice);
-      }
-
-      // Apply rating filter
-      if (minRating != null) {
-        firestoreQuery = firestoreQuery.where('averageRating', isGreaterThanOrEqualTo: minRating);
-      }
-
-      // Apply sorting
-      if (sortBy != null) {
-        firestoreQuery = firestoreQuery.orderBy(sortBy, descending: descending);
-      }
-
-      // Apply pagination
       if (limit != null) {
-        firestoreQuery = firestoreQuery.limit(limit);
-      }
-
-      final querySnapshot = await firestoreQuery.get();
+        query = query.limit(limit);
+      }      final querySnapshot = await query.get();
 
       final products = querySnapshot.docs
           .map((doc) => _mapDocumentToProduct(doc.data() as Map<String, dynamic>, doc.id))
@@ -177,22 +123,24 @@ class ProductRepositoryImpl implements ProductRepository {
 
       return Result.success(products);
     } catch (e) {
-      return Result.failure(NetworkFailure('Failed to search products: ${e.toString()}'));
+      return Result.failure(NetworkFailure('Failed to get featured products: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Result<List<Product>, Failure>> getNewArrivals({int limit = 10}) async {
+  Future<Result<List<Product>, Failure>> getNewArrivals({int? limit}) async {
     try {
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
 
-      final querySnapshot = await _firestore
+      Query query = _firestore
           .collection(AppConstants.productsCollection)
-          .where('isActive', isEqualTo: true)
+          .where('inStock', isEqualTo: true)
           .where('createdAt', isGreaterThan: Timestamp.fromDate(thirtyDaysAgo))
-          .orderBy('createdAt', descending: true)
-          .limit(limit)
-          .get();
+          .orderBy('createdAt', descending: true);
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }      final querySnapshot = await query.get();
 
       final products = querySnapshot.docs
           .map((doc) => _mapDocumentToProduct(doc.data() as Map<String, dynamic>, doc.id))
@@ -205,28 +153,31 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Result<List<Product>, Failure>> getRelatedProducts(String productId, {int limit = 5}) async {
+  Future<Result<List<Product>, Failure>> getRelatedProducts(String productId, {int? limit}) async {
     try {
       // First get the product to find its category
       final productResult = await getProductById(productId);
       if (productResult.isFailure) {
-        return Result.failure(productResult.failure);
+        return Result.failure((productResult as ResultFailure).failure);
       }
 
-      final product = productResult.value;
+      final product = (productResult as Success).value;
 
       // Get related products from the same category
-      final querySnapshot = await _firestore
+      Query query = _firestore
           .collection(AppConstants.productsCollection)
           .where('categoryId', isEqualTo: product.categoryId)
-          .where('isActive', isEqualTo: true)
-          .limit(limit + 1) // Get one extra to exclude the current product
-          .get();
+          .where('inStock', isEqualTo: true)
+          .orderBy('rating', descending: true);
 
-      final products = querySnapshot.docs
+      if (limit != null) {
+        query = query.limit(limit + 1); // Get one extra to exclude the current product
+      }
+
+      final querySnapshot = await query.get();      final products = querySnapshot.docs
           .map((doc) => _mapDocumentToProduct(doc.data() as Map<String, dynamic>, doc.id))
           .where((p) => p.id != productId) // Exclude the current product
-          .take(limit)
+          .take(limit ?? 5)
           .toList();
 
       return Result.success(products);
@@ -279,25 +230,21 @@ class ProductRepositoryImpl implements ProductRepository {
       await _firestore
           .collection(AppConstants.productsCollection)
           .doc(productId)
-          .update({'isActive': false});
+          .update({'inStock': false});
 
       return Result.success(null);
     } catch (e) {
       return Result.failure(NetworkFailure('Failed to delete product: ${e.toString()}'));
     }
   }
-
   // Helper methods
   Product _mapDocumentToProduct(Map<String, dynamic> data, String id) {
     final imagesData = data['images'] as List<dynamic>? ?? [];
     final images = imagesData.map((img) => img as String).toList();
 
-    final variantsData = data['variants'] as List<dynamic>? ?? [];
-    final variants = variantsData
-        .map((variantData) => ProductVariant.fromMap(Map<String, dynamic>.from(variantData)))
-        .toList();
-
     final specificationsData = data['specifications'] as Map<String, dynamic>? ?? {};
+    final tagsData = data['tags'] as List<dynamic>? ?? [];
+    final tags = tagsData.map((tag) => tag as String).toList();
 
     return Product(
       id: id,
@@ -306,25 +253,26 @@ class ProductRepositoryImpl implements ProductRepository {
       price: (data['price'] as num).toDouble(),
       originalPrice: data['originalPrice'] != null ? (data['originalPrice'] as num).toDouble() : null,
       categoryId: data['categoryId'] as String,
-      categoryName: data['categoryName'] as String,
+      category: data['category'] as String,
       images: images,
-      thumbnailUrl: data['thumbnailUrl'] as String?,
-      stockQuantity: data['stockQuantity'] as int,
-      variants: variants,
-      specifications: specificationsData,
-      averageRating: (data['averageRating'] as num?)?.toDouble() ?? 0.0,
+      inStock: data['inStock'] as bool? ?? true,
+      quantity: data['quantity'] as int? ?? 0,
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
       reviewCount: data['reviewCount'] as int? ?? 0,
-      tags: List<String>.from(data['tags'] ?? []),
+      specifications: specificationsData,
+      tags: tags,
+      createdAt: data['createdAt'] is Timestamp 
+          ? (data['createdAt'] as Timestamp).toDate() 
+          : DateTime.parse(data['createdAt'] as String),
+      updatedAt: data['updatedAt'] is Timestamp 
+          ? (data['updatedAt'] as Timestamp).toDate() 
+          : DateTime.parse(data['updatedAt'] as String),
       isFeatured: data['isFeatured'] as bool? ?? false,
-      isActive: data['isActive'] as bool? ?? true,
-      weight: data['weight'] != null ? (data['weight'] as num).toDouble() : null,
-      dimensions: data['dimensions'] != null 
-          ? ProductDimensions.fromMap(Map<String, dynamic>.from(data['dimensions']))
-          : null,
+      discountPercentage: data['discountPercentage'] != null ? (data['discountPercentage'] as num).toDouble() : null,
       brand: data['brand'] as String?,
       sku: data['sku'] as String?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      weight: data['weight'] != null ? (data['weight'] as num).toDouble() : null,
+      dimensions: data['dimensions'] as String?,
     );
   }
 
@@ -335,22 +283,21 @@ class ProductRepositoryImpl implements ProductRepository {
       'price': product.price,
       'originalPrice': product.originalPrice,
       'categoryId': product.categoryId,
-      'categoryName': product.categoryName,
+      'category': product.category,
       'images': product.images,
-      'thumbnailUrl': product.thumbnailUrl,
-      'stockQuantity': product.stockQuantity,
-      'variants': product.variants.map((variant) => variant.toMap()).toList(),
-      'specifications': product.specifications,
-      'averageRating': product.averageRating,
+      'inStock': product.inStock,
+      'quantity': product.quantity,
+      'rating': product.rating,
       'reviewCount': product.reviewCount,
+      'specifications': product.specifications,
       'tags': product.tags,
       'searchTerms': _generateSearchTerms(product),
       'isFeatured': product.isFeatured,
-      'isActive': product.isActive,
-      'weight': product.weight,
-      'dimensions': product.dimensions?.toMap(),
+      'discountPercentage': product.discountPercentage,
       'brand': product.brand,
       'sku': product.sku,
+      'weight': product.weight,
+      'dimensions': product.dimensions,
       'createdAt': Timestamp.fromDate(product.createdAt),
       'updatedAt': Timestamp.fromDate(product.updatedAt),
     };
@@ -365,8 +312,8 @@ class ProductRepositoryImpl implements ProductRepository {
     // Add description terms
     terms.addAll(product.description.toLowerCase().split(' '));
     
-    // Add category name terms
-    terms.addAll(product.categoryName.toLowerCase().split(' '));
+    // Add category terms
+    terms.addAll(product.category.toLowerCase().split(' '));
     
     // Add brand terms
     if (product.brand != null) {
