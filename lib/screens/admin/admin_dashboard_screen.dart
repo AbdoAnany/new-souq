@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/admin_products_screen.dart';
 import 'package:souq/screens/admin/admin_categories_screen.dart';
 import 'package:souq/screens/admin/admin_offers_screen.dart';
+import 'package:souq/screens/admin/admin_orders_screen.dart';
 import 'package:souq/services/dummy_data_service.dart';
+import 'package:souq/utils/responsive_util.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -41,14 +44,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Section
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(ResponsiveUtil.spacing(
+                    mobile: 16, tablet: 18, desktop: 20)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -57,35 +62,41 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                         Icon(
                           Icons.admin_panel_settings,
                           color: AppConstants.primaryColor,
-                          size: 32,
+                          size: ResponsiveUtil.iconSize(
+                              mobile: 32, tablet: 36, desktop: 40),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Text(
                           'Welcome, Admin!',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppConstants.primaryColor,
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 20, tablet: 22, desktop: 24),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     Text(
                       'Manage your store inventory, categories, and offers.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: AppConstants.textSecondaryColor,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Dummy Data Section
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(ResponsiveUtil.spacing(
+                    mobile: 16, tablet: 18, desktop: 20)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -93,9 +104,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                       'Quick Actions',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 18, tablet: 20, desktop: 22),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     Row(
                       children: [
                         Expanded(
@@ -104,10 +117,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                                 ? null
                                 : _initializeDummyData,
                             icon: _isLoadingDummyData
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
+                                ? SizedBox(
+                                    width: 16.w,
+                                    height: 16.h,
+                                    child: const CircularProgressIndicator(
                                         strokeWidth: 2),
                                   )
                                 : const Icon(Icons.add_box),
@@ -117,11 +130,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppConstants.accentColor,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed:
@@ -129,7 +142,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                             icon: const Icon(Icons.clear_all),
                             label: const Text('Clear Data'),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                             ),
                           ),
                         ),
@@ -139,31 +152,35 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Statistics Section
             Text(
               'Statistics',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 18, tablet: 20, desktop: 22),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             statisticsState.when(
               data: (stats) => _buildStatisticsGrid(stats),
               loading: () => _buildStatisticsLoading(),
               error: (error, _) => _buildErrorWidget(error.toString()),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Management Sections
             Text(
               'Management',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 18, tablet: 20, desktop: 22),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildManagementGrid(),
           ],
         ),
@@ -173,10 +190,20 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildStatisticsGrid(Map<String, int> stats) {
     return GridView.count(
-      crossAxisCount: 2,
-      childAspectRatio: 1.5,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+      crossAxisCount: ResponsiveUtil.isDesktop(context)
+          ? 4
+          : ResponsiveUtil.isTablet(context)
+              ? 3
+              : 2,
+      childAspectRatio: ResponsiveUtil.isDesktop(context)
+          ? 1.3
+          : ResponsiveUtil.isTablet(context)
+              ? 1.4
+              : 1.5,
+      crossAxisSpacing:
+          ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
+      mainAxisSpacing:
+          ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
@@ -212,23 +239,33 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       String title, String value, IconData icon, Color color) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
+            Icon(
+              icon,
+              color: color,
+              size:
+                  ResponsiveUtil.iconSize(mobile: 32, tablet: 36, desktop: 40),
+            ),
+            SizedBox(height: 8.h),
             Text(
               value,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color,
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 24, tablet: 28, desktop: 32),
                   ),
             ),
             Text(
               title,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppConstants.textSecondaryColor,
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 12, tablet: 13, desktop: 14),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -240,17 +277,28 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildStatisticsLoading() {
     return GridView.count(
-      crossAxisCount: 2,
-      childAspectRatio: 1.5,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+      crossAxisCount: ResponsiveUtil.isDesktop(context)
+          ? 4
+          : ResponsiveUtil.isTablet(context)
+              ? 3
+              : 2,
+      childAspectRatio: ResponsiveUtil.isDesktop(context)
+          ? 1.3
+          : ResponsiveUtil.isTablet(context)
+              ? 1.4
+              : 1.5,
+      crossAxisSpacing:
+          ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
+      mainAxisSpacing:
+          ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: List.generate(
         4,
         (index) => Card(
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(
+                ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
             child: const Center(
               child: CircularProgressIndicator(),
             ),
@@ -262,10 +310,20 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildManagementGrid() {
     return GridView.count(
-      crossAxisCount: 2,
-      childAspectRatio: 1.2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+      crossAxisCount: ResponsiveUtil.isDesktop(context)
+          ? 4
+          : ResponsiveUtil.isTablet(context)
+              ? 3
+              : 2,
+      childAspectRatio: ResponsiveUtil.isDesktop(context)
+          ? 1.2
+          : ResponsiveUtil.isTablet(context)
+              ? 1.15
+              : 1.2,
+      crossAxisSpacing:
+          ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
+      mainAxisSpacing:
+          ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
@@ -306,7 +364,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           'View and manage orders',
           Icons.shopping_bag,
           Colors.purple,
-          () => _showComingSoon('Orders'),
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminOrdersScreen()),
+          ),
         ),
       ],
     );
@@ -322,26 +383,36 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(
+              ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 32),
-              const SizedBox(height: 8),
+              Icon(
+                icon,
+                color: color,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 32, tablet: 36, desktop: 40),
+              ),
+              SizedBox(height: 8.h),
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 16, tablet: 18, desktop: 20),
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 description,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppConstants.textSecondaryColor,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 12, tablet: 13, desktop: 14),
                     ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -357,24 +428,35 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   Widget _buildErrorWidget(String message) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
         child: Column(
           children: [
-            Icon(Icons.error_outline, color: AppConstants.errorColor, size: 48),
-            const SizedBox(height: 8),
+            Icon(
+              Icons.error_outline,
+              color: AppConstants.errorColor,
+              size:
+                  ResponsiveUtil.iconSize(mobile: 48, tablet: 56, desktop: 64),
+            ),
+            SizedBox(height: 8.h),
             Text(
               'Error loading statistics',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 16, tablet: 18, desktop: 20),
+                  ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               message,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppConstants.textSecondaryColor,
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 12, tablet: 13, desktop: 14),
                   ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             ElevatedButton(
               onPressed: () =>
                   ref.read(statisticsProvider.notifier).fetchStatistics(),
@@ -495,17 +577,5 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           ),
         ) ??
         false;
-  }
-
-  void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature management coming soon!'),
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: () {},
-        ),
-      ),
-    );
   }
 }

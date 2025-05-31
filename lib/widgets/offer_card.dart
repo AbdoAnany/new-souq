@@ -29,98 +29,29 @@ class OfferCard extends StatelessWidget {
           width: 200,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.black.withOpacity(0.05),
+            //     blurRadius: 10,
+            //     offset: const Offset(0, 2),
+            //   ),
+            // ],
           ),
-          child: Stack(
-            children: [
-              // Background image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                child: CachedNetworkImage(
-                  imageUrl: offer.imageUrl,
-                  fit: BoxFit.cover,
-                  width: 200,
-                  height: 100,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey[300],
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: theme.primaryColor.withOpacity(0.2),
-                    child: const Icon(Icons.error),
-                  ),
-                ),
+          child:   ClipRRect(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            child: CachedNetworkImage(
+              imageUrl: offer.imageUrl,
+              fit: BoxFit.cover,
+              width: 200,
+              height: 100,
+              placeholder: (context, url) => Container(
+                color: Colors.grey[300],
               ),
-              
-              // Gradient overlay
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
+              errorWidget: (context, url, error) => Container(
+                color: theme.primaryColor.withOpacity(0.2),
+                child: const Icon(Icons.error),
               ),
-              
-              // Content
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Discount badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6.0,
-                        vertical: 2.0,
-                      ),
-                      decoration: BoxDecoration(                      color: AppConstants.secondaryColor,
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
-                      ),
-                      child: Text(
-                        offer.type == OfferType.percentage && offer.discountPercentage != null
-                            ? '${offer.discountPercentage!.toInt()}% OFF'
-                            : offer.discountAmount != null 
-                                ? '\$${offer.discountAmount!.toInt()} OFF'
-                                : 'SPECIAL OFFER',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    
-                    // Title
-                    SizedBox(
-                      width: 120,
-                      child: Text(
-                        offer.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       );
@@ -152,7 +83,7 @@ class OfferCard extends StatelessWidget {
                 imageUrl: offer.imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
-                height: 180,
+                // height: 180,
                 placeholder: (context, url) => Container(
                   color: Colors.grey[300],
                 ),
@@ -163,22 +94,22 @@ class OfferCard extends StatelessWidget {
               ),
             ),
             
-            // Gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.black.withOpacity(0.7),
-                    Colors.transparent,
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-            
+            // // Gradient overlay
+            // Container(
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            //     gradient: LinearGradient(
+            //       begin: Alignment.centerLeft,
+            //       end: Alignment.centerRight,
+            //       colors: [
+            //         Colors.black.withOpacity(0.7),
+            //         Colors.transparent,
+            //         Colors.transparent,
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            //
             // Content
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -198,7 +129,7 @@ class OfferCard extends StatelessWidget {
                     child: Text(
                       offer.type == OfferType.percentage && offer.discountPercentage != null
                           ? '${offer.discountPercentage!.toInt()}% OFF'
-                          : offer.discountAmount != null 
+                          : offer.discountAmount != null
                               ? '\$${offer.discountAmount!.toInt()} OFF'
                               : 'SPECIAL OFFER',
                       style: const TextStyle(
@@ -209,10 +140,10 @@ class OfferCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Title
                   SizedBox(
-                    width: 200,
+                    // width: 200,
                     child: Text(
                       offer.title,
                       style: const TextStyle(
@@ -225,7 +156,7 @@ class OfferCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Description
                   SizedBox(
                     width: 200,
@@ -240,27 +171,27 @@ class OfferCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
-                  // CTA Button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Apply offer or navigate
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: theme.primaryColor,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                    ),
-                    child: const Text(
-                      'Shop Now',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+
+                  // // CTA Button
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     // Apply offer or navigate
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.white,
+                  //     foregroundColor: theme.primaryColor,
+                  //     padding: const EdgeInsets.symmetric(
+                  //       horizontal: 16.0,
+                  //       vertical: 8.0,
+                  //     ),
+                  //   ),
+                  //   child: const Text(
+                  //     'Shop Now',
+                  //     style: TextStyle(
+                  //       fontWeight: FontWeight.bold,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),            ),
             

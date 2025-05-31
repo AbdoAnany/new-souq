@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as carousel_slider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:carousel_slider/carousel_slider.dart' as carousel_slider;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/offer.dart';
-import 'package:souq/models/product.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
@@ -19,6 +17,7 @@ import 'package:souq/widgets/product_card.dart';
 import 'package:souq/widgets/section_header.dart';
 import 'package:souq/widgets/offer_card.dart';
 import 'package:souq/utils/size_config.dart';
+import 'package:souq/utils/responsive_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -31,13 +30,16 @@ class HomeTab extends ConsumerStatefulWidget {
 
 class _HomeTabState extends ConsumerState<HomeTab> {
   int _currentCarouselSlide = 0;
-  final carousel_slider.CarouselSliderController _carouselController = carousel_slider.CarouselSliderController();
+  final carousel_slider.CarouselSliderController _carouselController =
+      carousel_slider.CarouselSliderController();
 
   @override
   void initState() {
     super.initState();
     // Ensure we fetch featured products
     ref.read(productsProvider.notifier).fetchFeaturedProducts();
+    // Ensure we fetch categories
+    ref.read(categoryProvider.notifier).fetchCategories();
     // Fetch offers
     ref.read(offerProvider.notifier).fetchOffers();
   }
@@ -49,23 +51,26 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     final productsState = ref.watch(productsProvider);
     final offersState = ref.watch(offerProvider);
     final authState = ref.watch(authProvider);
-    
+
     final user = authState.value;
     final userName = user != null ? "${user.firstName}" : "Guest";
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           AppConstants.appName,
           style: TextStyle(
-            fontSize: 22,
+            fontSize: ResponsiveUtil.fontSize(mobile: 20, tablet: 22, desktop: 24),
             fontWeight: FontWeight.bold,
             color: theme.primaryColor,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: Icon(
+              Icons.notifications_outlined, 
+              size: ResponsiveUtil.iconSize(mobile: 22, tablet: 24, desktop: 26),
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -74,8 +79,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 ),
               );
             },
-          ),          IconButton(
-            icon: const Icon(Icons.favorite_border),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.favorite_border, 
+              size: ResponsiveUtil.iconSize(mobile: 22, tablet: 24, desktop: 26),
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -85,7 +94,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               );
             },
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: ResponsiveUtil.spacing(mobile: 6, tablet: 8, desktop: 10)),
         ],
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
@@ -102,24 +111,47 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             children: [
               // Welcome User Section
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,
-                  vertical: AppConstants.paddingSmall,
+                padding: ResponsiveUtil.padding(
+                  mobile: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  tablet: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  desktop: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 child: Text(
                   "Hello, $userName! 👋",
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 24, tablet: 28, desktop: 32),
                   ),
                 ),
               ),
 
               // Search Bar
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,
-                  vertical: AppConstants.paddingSmall,
-                ),                child: InkWell(
+                padding: ResponsiveUtil.padding(
+                  mobile: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  tablet: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  desktop: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+                child: InkWell(
                   onTap: () {
                     Navigator.push(
                       context,
@@ -129,19 +161,19 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.paddingMedium,
-                      vertical: 12,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
                     ),
                     decoration: BoxDecoration(
                       color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                      borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(color: theme.dividerColor),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                          blurRadius: 10.r,
+                          offset: Offset(0, 2.h),
                         )
                       ],
                     ),
@@ -150,13 +182,15 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         Icon(
                           Icons.search,
                           color: theme.iconTheme.color,
-                          size: 20,
+                          size: 20.sp,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8.w),
                         Text(
                           AppStrings.search,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: Colors.grey,
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16, tablet: 18, desktop: 18),
                           ),
                         ),
                       ],
@@ -165,24 +199,30 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
 
               // Banner Carousel
               offersState.when(
                 loading: () => _buildBannerCarouselShimmer(),
-                error: (error, stackTrace) => _buildErrorWidget("Failed to load offers"),
+                error: (error, stackTrace) =>
+                    _buildErrorWidget("Failed to load offers"),
                 data: (offers) {
                   if (offers.isEmpty) {
                     return _buildPlaceholderBanner();
                   }
-                  
+
                   return Column(
                     children: [
                       carousel_slider.CarouselSlider(
                         carouselController: _carouselController,
                         options: carousel_slider.CarouselOptions(
-                          height: 180,
-                          viewportFraction: 0.92,
+                          height: ResponsiveUtil.spacing(
+                              mobile: 180, tablet: 220, desktop: 250),
+                          viewportFraction: ResponsiveUtil.isDesktop(context)
+                              ? 0.8
+                              : ResponsiveUtil.isTablet(context)
+                                  ? 0.85
+                                  : 0.85,
                           enlargeCenterPage: true,
                           enableInfiniteScroll: offers.length > 1,
                           autoPlay: offers.length > 1,
@@ -192,20 +232,23 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                             });
                           },
                         ),
-                        items: offers.map((offer) => OfferCard(offer: offer)).toList(),
+                        items: offers
+                            .map((offer) => OfferCard(offer: offer))
+                            .toList(),
                       ),
                       if (offers.length > 1)
                         Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
+                          padding: EdgeInsets.only(top: 8.h),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: offers.asMap().entries.map((entry) {
                               return GestureDetector(
-                                onTap: () => _carouselController.animateToPage(entry.key),
+                                onTap: () => _carouselController
+                                    .animateToPage(entry.key),
                                 child: Container(
-                                  width: 8.0,
-                                  height: 8.0,
-                                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                                  width: 8.w,
+                                  height: 8.h,
+                                  margin: EdgeInsets.symmetric(horizontal: 4.w),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: _currentCarouselSlide == entry.key
@@ -222,7 +265,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Special Offers Section
               SectionHeader(
@@ -239,26 +282,34 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
               offersState.when(
                 loading: () => _buildOfferCardsShimmer(),
-                error: (error, stackTrace) => _buildErrorWidget("Failed to load offers"),
+                error: (error, stackTrace) =>
+                    _buildErrorWidget("Failed to load offers"),
                 data: (offers) {
                   if (offers.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text("No special offers available right now"),
+                        padding: EdgeInsets.all(16.w),
+                        child: Text(
+                          "No special offers available right now",
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14, tablet: 16, desktop: 16),
+                          ),
+                        ),
                       ),
                     );
                   }
-                  
+
                   return SizedBox(
-                    height: 110,
+                    height: ResponsiveUtil.spacing(
+                        mobile: 120, tablet: 130, desktop: 150),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
                       itemCount: offers.length,
                       itemBuilder: (context, index) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
                           child: OfferCard(
                             offer: offers[index],
                             isSmall: true,
@@ -270,7 +321,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Featured Products
               SectionHeader(
@@ -282,42 +333,54 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
               productsState.when(
                 loading: () => _buildProductsShimmer(),
-                error: (error, stackTrace) => _buildErrorWidget("Failed to load products"),
+                error: (error, stackTrace) =>
+                    _buildErrorWidget("Failed to load products"),
                 data: (products) {
                   if (products.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text("No featured products available"),
+                        padding: EdgeInsets.all(16.w),
+                        child: Text(
+                          "No featured products available",
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14, tablet: 16, desktop: 16),
+                          ),
+                        ),
                       ),
                     );
                   }
-                  
+
                   return SizedBox(
-                    height: 255,
+                    height: ResponsiveUtil.spacing(
+                        mobile: 255, tablet: 280, desktop: 320),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         final product = products[index];
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
                           child: ProductCard(
                             product: product,
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ProductDetailsScreen(productId: product.id),
+                                  builder: (context) => ProductDetailsScreen(
+                                      productId: product.id),
                                 ),
                               );
                             },
                             onAddToCart: () {
-                              ref.read(cartProvider.notifier).addToCart(product, 1);
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .addToCart(product, 1);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text("${product.name} added to cart"),
+                                  content:
+                                      Text("${product.name} added to cart"),
                                   action: SnackBarAction(
                                     label: "VIEW CART",
                                     onPressed: () {
@@ -335,7 +398,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // New Arrivals
               SectionHeader(
@@ -347,45 +410,57 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
               productsState.when(
                 loading: () => _buildProductsShimmer(),
-                error: (error, stackTrace) => _buildErrorWidget("Failed to load products"),
+                error: (error, stackTrace) =>
+                    _buildErrorWidget("Failed to load products"),
                 data: (products) {
                   if (products.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text("No new arrivals available"),
+                        padding: EdgeInsets.all(16.w),
+                        child: Text(
+                          "No new arrivals available",
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14, tablet: 16, desktop: 16),
+                          ),
+                        ),
                       ),
                     );
                   }
-                  
+
                   // Just use the first few products for demo purposes
                   final newProducts = products.take(5).toList();
-                  
+
                   return SizedBox(
-                    height: 255,
+                    height: ResponsiveUtil.spacing(
+                        mobile: 255, tablet: 280, desktop: 320),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
                       itemCount: newProducts.length,
                       itemBuilder: (context, index) {
                         final product = newProducts[index];
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
                           child: ProductCard(
                             product: product,
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ProductDetailsScreen(productId: product.id),
+                                  builder: (context) => ProductDetailsScreen(
+                                      productId: product.id),
                                 ),
                               );
                             },
                             onAddToCart: () {
-                              ref.read(cartProvider.notifier).addToCart(product, 1);
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .addToCart(product, 1);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text("${product.name} added to cart"),
+                                  content:
+                                      Text("${product.name} added to cart"),
                                   action: SnackBarAction(
                                     label: "VIEW CART",
                                     onPressed: () {
@@ -401,7 +476,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     ),
                   );
                 },
-              ),              const SizedBox(height: 24),
+              ),
+              SizedBox(height: 24.h),
 
               // Shop By Category Section
               SectionHeader(
@@ -409,48 +485,58 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 onSeeAllPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CategoriesScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const CategoriesScreen()),
                   );
                 },
               ),
 
               SizedBox(
-                height: 100,
+                height: ResponsiveUtil.spacing(
+                    mobile: 100, tablet: 120, desktop: 140),
                 child: Consumer(
                   builder: (context, ref, _) {
                     final categoryState = ref.watch(categoryProvider);
-                    
+
                     return categoryState.when(
                       loading: () => _buildCategoryShimmer(),
-                      error: (error, _) => _buildErrorWidget("Failed to load categories"),
+                      error: (error, _) =>
+                          _buildErrorWidget("Failed to load categories"),
                       data: (categories) {
                         if (categories.isEmpty) {
-                          return const Center(
+                          return Center(
                             child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text("No categories available"),
+                              padding: EdgeInsets.all(16.w),
+                              child: Text(
+                                "No categories available",
+                                style: TextStyle(
+                                  fontSize: ResponsiveUtil.fontSize(
+                                      mobile: 14, tablet: 16, desktop: 16),
+                                ),
+                              ),
                             ),
                           );
                         }
-                        
+
                         final parentCategories = categories
                             .where((cat) => cat.isParentCategory)
                             .toList();
-                        
+
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
                           itemCount: parentCategories.length,
                           itemBuilder: (context, index) {
                             final category = parentCategories[index];
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: EdgeInsets.symmetric(horizontal: 8.w),
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => CategoryProductsScreen(
+                                      builder: (context) =>
+                                          CategoryProductsScreen(
                                         category: category,
                                       ),
                                     ),
@@ -459,22 +545,35 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                                 child: Column(
                                   children: [
                                     CircleAvatar(
-                                      radius: 30,
-                                      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                                      radius: ResponsiveUtil.spacing(
+                                          mobile: 30, tablet: 35, desktop: 40),
+                                      backgroundColor: theme.colorScheme.primary
+                                          .withOpacity(0.1),
                                       backgroundImage: category.imageUrl != null
-                                          ? CachedNetworkImageProvider(category.imageUrl!)
+                                          ? CachedNetworkImageProvider(
+                                              category.imageUrl!)
                                           : null,
                                       child: category.imageUrl == null
                                           ? Icon(
                                               Icons.category,
                                               color: theme.colorScheme.primary,
+                                              size: ResponsiveUtil.fontSize(
+                                                  mobile: 24,
+                                                  tablet: 28,
+                                                  desktop: 32),
                                             )
                                           : null,
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8.h),
                                     Text(
                                       category.name,
-                                      style: theme.textTheme.bodySmall,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontSize: ResponsiveUtil.fontSize(
+                                            mobile: 12,
+                                            tablet: 13,
+                                            desktop: 14),
+                                      ),
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -491,13 +590,13 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
               // App Info Banner
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Container(
-                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                  padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -507,7 +606,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,47 +616,76 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          fontSize: ResponsiveUtil.fontSize(
+                              mobile: 20, tablet: 24, desktop: 28),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       Text(
                         "Shop conveniently, track orders, and get exclusive app-only offers.",
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
+                          fontSize: ResponsiveUtil.fontSize(
+                              mobile: 14, tablet: 16, desktop: 18),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: theme.primaryColor,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.apple),
-                                SizedBox(width: 8),
-                                Text("App Store"),
-                              ],
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: theme.primaryColor,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w, vertical: 8.h),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.apple,
+                                      size: ResponsiveUtil.fontSize(
+                                          mobile: 18, tablet: 20, desktop: 22)),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    "App Store",
+                                    style: TextStyle(
+                                      fontSize: ResponsiveUtil.fontSize(
+                                          mobile: 12, tablet: 14, desktop: 16),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: theme.primaryColor,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.android),
-                                SizedBox(width: 8),
-                                Text("Google Play"),
-                              ],
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: theme.primaryColor,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w, vertical: 8.h),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.android,
+                                      size: ResponsiveUtil.fontSize(
+                                          mobile: 18, tablet: 20, desktop: 22)),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    "Google Play",
+                                    style: TextStyle(
+                                      fontSize: ResponsiveUtil.fontSize(
+                                          mobile: 12, tablet: 14, desktop: 16),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -567,7 +695,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
             ],
           ),
         ),
@@ -577,16 +705,16 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildBannerCarouselShimmer() {
     return SizedBox(
-      height: 180,
+      height: ResponsiveUtil.spacing(mobile: 180, tablet: 220, desktop: 250),
       child: Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
         child: Container(
           width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.symmetric(horizontal: 16.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(12.r),
           ),
         ),
       ),
@@ -595,23 +723,24 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildOfferCardsShimmer() {
     return SizedBox(
-      height: 110,
+      height: ResponsiveUtil.spacing(mobile: 110, tablet: 130, desktop: 150),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.symmetric(horizontal: 8.w),
         itemCount: 3,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: Shimmer.fromColors(
               baseColor: Colors.grey[300]!,
               highlightColor: Colors.grey[100]!,
               child: Container(
-                width: 200,
+                width: ResponsiveUtil.spacing(
+                    mobile: 200, tablet: 220, desktop: 250),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
             ),
@@ -623,23 +752,24 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildProductsShimmer() {
     return SizedBox(
-      height: 255,
+      height: ResponsiveUtil.spacing(mobile: 255, tablet: 280, desktop: 320),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.symmetric(horizontal: 8.w),
         itemCount: 3,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: Shimmer.fromColors(
               baseColor: Colors.grey[300]!,
               highlightColor: Colors.grey[100]!,
               child: Container(
-                width: 180,
+                width: ResponsiveUtil.spacing(
+                    mobile: 180, tablet: 200, desktop: 220),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
             ),
@@ -651,12 +781,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildPlaceholderBanner() {
     return Container(
-      height: 180,
+      height: ResponsiveUtil.spacing(mobile: 180, tablet: 220, desktop: 250),
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Center(
         child: Column(
@@ -664,13 +794,17 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           children: [
             Icon(
               Icons.local_offer_outlined,
-              size: 48,
+              size:
+                  ResponsiveUtil.fontSize(mobile: 48, tablet: 56, desktop: 64),
               color: Theme.of(context).primaryColor,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               "No offers available",
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 16, tablet: 18, desktop: 20),
+                  ),
             ),
           ],
         ),
@@ -680,31 +814,32 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildCategoryShimmer() {
     return SizedBox(
-      height: 100,
+      height: ResponsiveUtil.spacing(mobile: 100, tablet: 120, desktop: 140),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.symmetric(horizontal: 8.w),
         itemCount: 5,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: Shimmer.fromColors(
               baseColor: Colors.grey[300]!,
               highlightColor: Colors.grey[100]!,
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 30,
+                    radius: ResponsiveUtil.spacing(
+                        mobile: 30, tablet: 35, desktop: 40),
                     backgroundColor: Colors.white,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Container(
-                    width: 60,
-                    height: 12,
+                    width: 60.w,
+                    height: 12.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                   ),
                 ],
@@ -718,30 +853,46 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildErrorWidget(String message) {
     return Container(
-      height: 120,
+      height: ResponsiveUtil.spacing(mobile: 120, tablet: 140, desktop: 160),
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.red.shade200),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: Colors.red.shade700),
-            const SizedBox(height: 6),
+            Icon(
+              Icons.error_outline,
+              color: Colors.red.shade700,
+              size:
+                  ResponsiveUtil.fontSize(mobile: 24, tablet: 28, desktop: 32),
+            ),
+            SizedBox(height: 6.h),
             Text(
               message,
-              style: TextStyle(color: Colors.red.shade700),
+              style: TextStyle(
+                color: Colors.red.shade700,
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14, tablet: 16, desktop: 18),
+              ),
+              textAlign: TextAlign.center,
             ),
             TextButton(
               onPressed: () {
                 ref.read(productsProvider.notifier).fetchFeaturedProducts();
                 ref.read(offerProvider.notifier).fetchOffers();
               },
-              child: const Text("Retry"),
+              child: Text(
+                "Retry",
+                style: TextStyle(
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 14, tablet: 16, desktop: 18),
+                ),
+              ),
             ),
           ],
         ),

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/checkout_screen.dart';
 import 'package:souq/widgets/custom_button.dart';
 import 'package:souq/utils/formatter_util.dart';
+import 'package:souq/utils/responsive_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:souq/screens/product_details_screen.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -21,7 +22,9 @@ class CartScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(AppStrings.cart),
         actions: [
-          if (cartAsyncValue.hasValue && cartAsyncValue.value != null && cartAsyncValue.value!.items.isNotEmpty)
+          if (cartAsyncValue.hasValue &&
+              cartAsyncValue.value != null &&
+              cartAsyncValue.value!.items.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_outline),
               onPressed: () {
@@ -35,7 +38,7 @@ class CartScreen extends ConsumerWidget {
           if (cart == null || cart.items.isEmpty) {
             return _buildEmptyCart(context);
           }
-          
+
           return _buildCartContent(context, ref, cart);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -43,17 +46,21 @@ class CartScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
-                size: 48,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 48, tablet: 56, desktop: 64),
                 color: Colors.red,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 "Error loading cart",
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 16, tablet: 18, desktop: 20),
+                ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               TextButton(
                 onPressed: () {
                   ref.read(cartProvider.notifier).fetchCart();
@@ -69,28 +76,35 @@ class CartScreen extends ConsumerWidget {
 
   Widget _buildEmptyCart(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.shopping_cart_outlined,
-            size: 80,
+            size: ResponsiveUtil.iconSize(mobile: 80, tablet: 96, desktop: 112),
             color: theme.dividerColor,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Text(
             'Your cart is empty',
-            style: theme.textTheme.titleMedium,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
+            ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             'Add items to start shopping',
-            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.grey,
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 14, tablet: 15, desktop: 16),
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           CustomButton(
             onPressed: () {
               Navigator.of(context).pop();
@@ -104,16 +118,17 @@ class CartScreen extends ConsumerWidget {
 
   Widget _buildCartContent(BuildContext context, WidgetRef ref, Cart cart) {
     final theme = Theme.of(context);
-    
+
     if (cart.items.isEmpty) {
       return _buildEmptyCart(context);
     }
-    
+
     return Column(
       children: [
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(
+                ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
             itemCount: cart.items.length,
             itemBuilder: (context, index) {
               final item = cart.items[index];
@@ -122,40 +137,49 @@ class CartScreen extends ConsumerWidget {
                 direction: DismissDirection.endToStart,
                 background: Container(
                   alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
+                  padding: EdgeInsets.only(right: 20.w),
                   color: Colors.red,
-                  child: const Icon(
+                  child: Icon(
                     Icons.delete,
                     color: Colors.white,
+                    size: ResponsiveUtil.iconSize(
+                        mobile: 24, tablet: 28, desktop: 32),
                   ),
                 ),
                 onDismissed: (direction) {
-                  ref.read(cartProvider.notifier).removeFromCart(item.product.id);
+                  ref
+                      .read(cartProvider.notifier)
+                      .removeFromCart(item.product.id);
                 },
                 child: Card(
-                  margin: const EdgeInsets.only(bottom: 16),
+                  margin: EdgeInsets.only(bottom: 16.h),
                   child: Padding(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(ResponsiveUtil.spacing(
+                        mobile: 8, tablet: 12, desktop: 16)),
                     child: Row(
                       children: [
                         // Product image
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                           child: CachedNetworkImage(
                             imageUrl: item.product.images.first,
-                            width: 80,
-                            height: 80,
+                            width: ResponsiveUtil.spacing(
+                                mobile: 80, tablet: 96, desktop: 112),
+                            height: ResponsiveUtil.spacing(
+                                mobile: 80, tablet: 96, desktop: 112),
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Center(
                               child: CircularProgressIndicator(),
                             ),
-                            errorWidget: (context, url, error) => const Icon(
+                            errorWidget: (context, url, error) => Icon(
                               Icons.error,
                               color: Colors.red,
+                              size: ResponsiveUtil.iconSize(
+                                  mobile: 24, tablet: 28, desktop: 32),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16.w),
                         // Product details
                         Expanded(
                           child: Column(
@@ -163,15 +187,21 @@ class CartScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 item.product.name,
-                                style: theme.textTheme.titleSmall,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontSize: ResponsiveUtil.fontSize(
+                                      mobile: 14, tablet: 16, desktop: 18),
+                                ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4.h),
                               Text(
-                                FormatterUtil.formatCurrency(item.product.price),
+                                FormatterUtil.formatCurrency(
+                                    item.product.price),
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: theme.primaryColor,
+                                  fontSize: ResponsiveUtil.fontSize(
+                                      mobile: 16, tablet: 18, desktop: 20),
                                 ),
                               ),
                             ],
@@ -182,20 +212,35 @@ class CartScreen extends ConsumerWidget {
                           children: [
                             IconButton(
                               onPressed: item.quantity > 1
-                                  ? () => ref.read(cartProvider.notifier).updateQuantity(
-                                      item.product.id, item.quantity - 1)
+                                  ? () => ref
+                                      .read(cartProvider.notifier)
+                                      .updateQuantity(
+                                          item.product.id, item.quantity - 1)
                                   : null,
-                              icon: const Icon(Icons.remove),
+                              icon: Icon(
+                                Icons.remove,
+                                size: ResponsiveUtil.iconSize(
+                                    mobile: 20, tablet: 24, desktop: 28),
+                              ),
                               color: theme.primaryColor,
                             ),
                             Text(
                               item.quantity.toString(),
-                              style: theme.textTheme.titleMedium,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 16, tablet: 18, desktop: 20),
+                              ),
                             ),
                             IconButton(
-                              onPressed: () => ref.read(cartProvider.notifier).updateQuantity(
-                                  item.product.id, item.quantity + 1),
-                              icon: const Icon(Icons.add),
+                              onPressed: () => ref
+                                  .read(cartProvider.notifier)
+                                  .updateQuantity(
+                                      item.product.id, item.quantity + 1),
+                              icon: Icon(
+                                Icons.add,
+                                size: ResponsiveUtil.iconSize(
+                                    mobile: 20, tablet: 24, desktop: 28),
+                              ),
                               color: theme.primaryColor,
                             ),
                           ],
@@ -210,15 +255,16 @@ class CartScreen extends ConsumerWidget {
         ),
         // Cart summary and checkout button
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(
+              ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
           decoration: BoxDecoration(
             color: theme.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
+                blurRadius: 10.r,
+                offset: Offset(0, -5.h),
               ),
             ],
           ),
@@ -231,43 +277,62 @@ class CartScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Subtotal',
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 16, tablet: 18, desktop: 20),
+                      ),
                     ),
                     Text(
                       FormatterUtil.formatCurrency(cart.subtotal),
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 16, tablet: 18, desktop: 20),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [                    Text(
+                  children: [
+                    Text(
                       'Shipping',
-                      style: theme.textTheme.titleMedium,
-                    ),                    Text(
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 16, tablet: 18, desktop: 20),
+                      ),
+                    ),
+                    Text(
                       FormatterUtil.formatCurrency(cart.shipping),
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 16, tablet: 18, desktop: 20),
+                      ),
                     ),
                   ],
                 ),
-                const Divider(height: 24),
+                Divider(height: 24.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Total',
-                      style: theme.textTheme.titleLarge,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 20, tablet: 22, desktop: 24),
+                      ),
                     ),
                     Text(
                       FormatterUtil.formatCurrency(cart.total),
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: theme.primaryColor,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 20, tablet: 22, desktop: 24),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 CustomButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -285,6 +350,7 @@ class CartScreen extends ConsumerWidget {
       ],
     );
   }
+
   void _showClearCartDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,

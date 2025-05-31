@@ -28,7 +28,7 @@ class OrderService {
     try {
       // Generate order number
       final orderNumber = _generateOrderNumber();
-      
+
       // Convert cart items to order items
       final orderItems = cart.items
           .map((cartItem) => OrderItem.fromCartItem(cartItem))
@@ -92,7 +92,8 @@ class OrderService {
       final querySnapshot = await query.get();
 
       return querySnapshot.docs
-          .map((doc) => OrderModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => OrderModel.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch user orders: ${e.toString()}');
@@ -108,7 +109,8 @@ class OrderService {
           .get();
 
       if (docSnapshot.exists) {
-        return OrderModel.fromJson({...docSnapshot.data()!, 'id': docSnapshot.id});
+        return OrderModel.fromJson(
+            {...docSnapshot.data()!, 'id': docSnapshot.id});
       }
       return null;
     } catch (e) {
@@ -132,7 +134,8 @@ class OrderService {
         throw Exception('OrderModel not found');
       }
 
-      final order = OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
+      final order =
+          OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
       final now = DateTime.now();
 
       Map<String, dynamic> updateData = {
@@ -213,7 +216,8 @@ class OrderService {
       }
     });
   }
-    Stream<OrderModel> ordersStream(String orderId) {
+
+  Stream<OrderModel> ordersStream(String orderId) {
     return _firestore
         .collection(AppConstants.ordersCollection)
         .doc(orderId)
@@ -226,7 +230,6 @@ class OrderService {
       }
     });
   }
-  
 
   // Get all orders stream for real-time updates
   Stream<List<OrderModel>> getOrderStreamAll() {
@@ -275,7 +278,8 @@ class OrderService {
   }) async {
     try {
       double subtotal = cart.subtotal;
-      double shipping = cart.subtotal >= 100 ? 0.0 : 10.0; // Free shipping over $100
+      double shipping =
+          cart.subtotal >= 100 ? 0.0 : 10.0; // Free shipping over $100
       double tax = subtotal * 0.1; // 10% tax
       double discount = 0.0;
 
@@ -323,7 +327,7 @@ class OrderService {
   }
 
   // Admin-specific methods
-  
+
   // Get all orders for admin (without user filtering)
   Future<List<OrderModel>> getAllOrders({
     int limit = 50,
@@ -351,7 +355,8 @@ class OrderService {
 
       final querySnapshot = await query.get();
       var orders = querySnapshot.docs
-          .map((doc) => OrderModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => OrderModel.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
 
       // Apply search filtering if provided
@@ -359,8 +364,10 @@ class OrderService {
         orders = orders.where((order) {
           final query = searchQuery.toLowerCase();
           return order.orderNumber.toLowerCase().contains(query) ||
-                 order.id.toLowerCase().contains(query) ||
-                 '${order.shippingAddress.firstName} ${order.shippingAddress.lastName}'.toLowerCase().contains(query);
+              order.id.toLowerCase().contains(query) ||
+              '${order.shippingAddress.firstName} ${order.shippingAddress.lastName}'
+                  .toLowerCase()
+                  .contains(query);
         }).toList();
       }
 
@@ -374,7 +381,7 @@ class OrderService {
   Future<Map<OrderStatus, int>> getOrdersCountByStatus() async {
     try {
       final Map<OrderStatus, int> counts = {};
-      
+
       for (final status in OrderStatus.values) {
         final querySnapshot = await _firestore
             .collection(AppConstants.ordersCollection)
@@ -383,7 +390,7 @@ class OrderService {
             .get();
         counts[status] = querySnapshot.count ?? 0;
       }
-      
+
       return counts;
     } catch (e) {
       throw Exception('Failed to get orders count by status: ${e.toString()}');
@@ -407,7 +414,8 @@ class OrderService {
         throw Exception('Order not found');
       }
 
-      final order = OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
+      final order =
+          OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
       final now = DateTime.now();
 
       Map<String, dynamic> updateData = {
@@ -463,7 +471,8 @@ class OrderService {
         shippedAt: status == OrderStatus.shipped ? now : order.shippedAt,
         deliveredAt: status == OrderStatus.delivered ? now : order.deliveredAt,
         cancelledAt: status == OrderStatus.cancelled ? now : order.cancelledAt,
-        cancellationReason: status == OrderStatus.cancelled ? notes : order.cancellationReason,
+        cancellationReason:
+            status == OrderStatus.cancelled ? notes : order.cancellationReason,
         updatedAt: now,
       );
     } catch (e) {
@@ -488,7 +497,8 @@ class OrderService {
 
       final querySnapshot = await query.get();
       final orders = querySnapshot.docs
-          .map((doc) => OrderModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => OrderModel.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
 
       double totalRevenue = 0;
@@ -501,11 +511,12 @@ class OrderService {
         totalRevenue += order.total;
         totalShipping += order.shipping;
         totalTax += order.tax;
-        
+
         statusCounts[order.status] = (statusCounts[order.status] ?? 0) + 1;
-        
+
         for (final item in order.items) {
-          topProducts[item.title] = (topProducts[item.title] ?? 0) + item.quantity;
+          topProducts[item.title] =
+              (topProducts[item.title] ?? 0) + item.quantity;
         }
       }
 
@@ -514,7 +525,8 @@ class OrderService {
         'totalRevenue': totalRevenue,
         'totalShipping': totalShipping,
         'totalTax': totalTax,
-        'averageOrderValue': orders.isNotEmpty ? totalRevenue / orders.length : 0,
+        'averageOrderValue':
+            orders.isNotEmpty ? totalRevenue / orders.length : 0,
         'statusCounts': statusCounts,
         'topProducts': topProducts,
       };
@@ -604,6 +616,7 @@ class OrderService {
       print('Failed to clear user cart: $e');
     }
   }
+
   // Generate tracking events for an order
   List<TrackingEvent> generateTrackingEvents(OrderModel order) {
     final events = <TrackingEvent>[];
@@ -627,7 +640,8 @@ class OrderService {
     }
 
     // OrderModel shipped
-    if (order.status.index >= OrderStatus.shipped.index && order.shippedAt != null) {
+    if (order.status.index >= OrderStatus.shipped.index &&
+        order.shippedAt != null) {
       events.add(TrackingEvent(
         status: 'OrderModel Shipped',
         description: 'Your order has been shipped',
@@ -638,7 +652,8 @@ class OrderService {
     }
 
     // OrderModel delivered
-    if (order.status.index >= OrderStatus.delivered.index && order.deliveredAt != null) {
+    if (order.status.index >= OrderStatus.delivered.index &&
+        order.deliveredAt != null) {
       events.add(TrackingEvent(
         status: 'OrderModel Delivered',
         description: 'Your order has been delivered successfully',

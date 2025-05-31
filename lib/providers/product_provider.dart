@@ -89,9 +89,11 @@ class OfferNotifier extends StateNotifier<AsyncValue<List<Offer>>> {
     state = const AsyncValue.loading();
     try {
       final offers = await _productService.getActiveOffers();
+      print('Offers: $offers');
       if (!_mounted) return;
       state = AsyncValue.data(offers);
     } catch (e, stackTrace) {
+      print('Error fetching offers: $e');
       if (!_mounted) return;
       state = AsyncValue.error(e, stackTrace);
     }
