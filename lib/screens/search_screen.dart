@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
+import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
-  
+
   const SearchScreen({Key? key, this.initialQuery}) : super(key: key);
 
   @override
@@ -24,7 +26,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _isLoading = false;
   Map<String, dynamic> _filters = {};
   List<String> _recentSearches = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -37,7 +39,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _loadRecentSearches();
     }
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -60,7 +62,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _saveSearchQuery(String query) {
     if (query.isEmpty) return;
-    
+
     setState(() {
       _recentSearches.removeWhere((element) => element == query);
       _recentSearches.insert(0, query);
@@ -68,7 +70,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         _recentSearches = _recentSearches.sublist(0, 10);
       }
     });
-    
+
     // In a real app, save to shared preferences or database
   }
 
@@ -79,18 +81,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       });
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Store the search query for history
       _saveSearchQuery(query);
-        // Perform the search
-      final results = await ref
-          .read(productServiceProvider)
-          .searchProducts(
+      // Perform the search
+      final results = await ref.read(productServiceProvider).searchProducts(
             query: query,
             minPrice: _filters['minPrice']?.toDouble(),
             maxPrice: _filters['maxPrice']?.toDouble(),
@@ -99,7 +99,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             sortDescending: _filters['sortDescending'] as bool?,
             categoryId: _filters['categoryId']?.toString(),
           );
-      
+
       setState(() {
         _searchResults = results;
         _isLoading = false;
@@ -126,18 +126,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     double minRating = 0;
     String? sortBy;
     bool sortDescending = false;
-    
+
     // If filters exist, set the values
     if (_filters.isNotEmpty) {
       selectedCategory = _filters['categoryId'];
-      
-      if (_filters.containsKey('minPrice') && _filters.containsKey('maxPrice')) {
+
+      if (_filters.containsKey('minPrice') &&
+          _filters.containsKey('maxPrice')) {
         priceRange = RangeValues(
           _filters['minPrice'].toDouble(),
           _filters['maxPrice'].toDouble(),
         );
       }
-      
+
       minRating = _filters['minRating']?.toDouble() ?? 0;
       sortBy = _filters['sortBy'];
       sortDescending = _filters['sortDescending'] ?? false;
@@ -159,10 +160,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           builder: (context, setState) {
             return Container(
               padding: EdgeInsets.only(
-                top: 16,
-                left: 16,
-                right: 16,
-                bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+                top:
+                    ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24),
+                left:
+                    ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24),
+                right:
+                    ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24),
+                bottom: ResponsiveUtil.spacing(
+                        mobile: 16, tablet: 20, desktop: 24) +
+                    MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -173,10 +179,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     children: [
                       Text(
                         "Filter Search",
-                        style: theme.textTheme.titleLarge,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontSize: ResponsiveUtil.fontSize(
+                              mobile: 20, tablet: 22, desktop: 24),
+                        ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: Icon(
+                          Icons.close,
+                          size: ResponsiveUtil.iconSize(
+                              mobile: 24, tablet: 26, desktop: 28),
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -185,8 +198,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   Expanded(
                     child: ListView(
                       children: [
-                        const Text("Price Range"),
-                        const SizedBox(height: 8),
+                        Text(
+                          "Price Range",
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16, tablet: 18, desktop: 20),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
                         RangeSlider(
                           values: priceRange,
                           min: 0,
@@ -205,14 +225,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("\$${priceRange.start.round()}"),
-                            Text("\$${priceRange.end.round()}"),
+                            Text(
+                              "\$${priceRange.start.round()}",
+                              style: TextStyle(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 14, tablet: 15, desktop: 16),
+                              ),
+                            ),
+                            Text(
+                              "\$${priceRange.end.round()}",
+                              style: TextStyle(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 14, tablet: 15, desktop: 16),
+                              ),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        
-                        const Text("Minimum Rating"),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 16.h),
+                        Text(
+                          "Minimum Rating",
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16, tablet: 18, desktop: 20),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
                         Slider(
                           value: minRating,
                           min: 0,
@@ -228,22 +266,41 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("Any"),
+                            Text(
+                              "Any",
+                              style: TextStyle(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 14, tablet: 15, desktop: 16),
+                              ),
+                            ),
                             Row(
                               children: List.generate(
                                 minRating.round(),
-                                (index) => const Icon(Icons.star, color: Colors.amber, size: 16),
+                                (index) => Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: ResponsiveUtil.iconSize(
+                                      mobile: 16, tablet: 18, desktop: 20),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        
-                        const Text("Sort By"),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 16.h),
+                        Text(
+                          "Sort By",
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16, tablet: 18, desktop: 20),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
                         Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                          spacing: ResponsiveUtil.spacing(
+                              mobile: 8, tablet: 10, desktop: 12),
+                          runSpacing: ResponsiveUtil.spacing(
+                              mobile: 8, tablet: 10, desktop: 12),
                           children: [
                             _buildFilterChip(
                               "Relevance",
@@ -312,38 +369,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             });
                             _performSearch(_searchController.text);
                           },
-                          child: const Text("Clear Filters"),
+                          child: Text(
+                            "Clear Filters",
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                  mobile: 14, tablet: 15, desktop: 16),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16.w),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context);
-                              // Apply the filters
+                            // Apply the filters
                             final newFilters = <String, dynamic>{
                               'minPrice': priceRange.start,
                               'maxPrice': priceRange.end,
                               'minRating': minRating,
                             };
-                            
+
                             if (sortBy != null) {
                               newFilters['sortBy'] = sortBy;
                               newFilters['sortDescending'] = sortDescending;
                             }
-                            
+
                             if (selectedCategory != null) {
                               newFilters['categoryId'] = selectedCategory;
                             }
-                            
+
                             this.setState(() {
                               _filters = newFilters;
                             });
-                            
+
                             // Re-search with new filters
                             _performSearch(_searchController.text);
                           },
-                          child: const Text("Apply Filters"),
+                          child: Text(
+                            "Apply Filters",
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                  mobile: 14, tablet: 15, desktop: 16),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -359,9 +428,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
     final theme = Theme.of(context);
-    
+
     return ChoiceChip(
-      label: Text(label),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize:
+              ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
+        ),
+      ),
       selected: isSelected,
       onSelected: (_) => onTap(),
       backgroundColor: theme.cardColor,
@@ -369,14 +444,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       labelStyle: TextStyle(
         color: isSelected ? theme.colorScheme.primary : null,
         fontWeight: isSelected ? FontWeight.bold : null,
+        fontSize: ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -387,11 +463,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           decoration: InputDecoration(
             hintText: "Search products...",
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(
+              color: Colors.grey[400],
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 16, tablet: 17, desktop: 18),
+            ),
             suffixIcon: _searchController.text.isEmpty
                 ? null
                 : IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: Icon(
+                      Icons.clear,
+                      size: ResponsiveUtil.iconSize(
+                          mobile: 20, tablet: 22, desktop: 24),
+                    ),
                     onPressed: () {
                       _searchController.clear();
                       setState(() {
@@ -407,7 +491,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Icon(
+              Icons.filter_list,
+              size:
+                  ResponsiveUtil.iconSize(mobile: 24, tablet: 26, desktop: 28),
+            ),
             onPressed: _searchResults.isEmpty ? null : _showFilterDialog,
           ),
         ],
@@ -421,23 +509,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (_isLoading) {
       return _buildSearchShimmer();
     }
-    
+
     if (_searchResults.isEmpty) {
       return _searchController.text.isEmpty
           ? _buildRecentSearches()
           : _buildNoResults();
     }
-    
+
     return _buildSearchResults();
   }
 
   Widget _buildSearchResults() {
     return GridView.builder(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.65,
-        crossAxisSpacing: 12,      mainAxisSpacing: 12,
+      padding: EdgeInsets.all(
+          ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveUtil.gridColumns(context),
+        childAspectRatio: ResponsiveUtil.isDesktop(context)
+            ? 0.7
+            : ResponsiveUtil.isTablet(context)
+                ? 0.68
+                : 0.65,
+        crossAxisSpacing:
+            ResponsiveUtil.spacing(mobile: 12, tablet: 16, desktop: 20),
+        mainAxisSpacing:
+            ResponsiveUtil.spacing(mobile: 12, tablet: 16, desktop: 20),
       ),
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
@@ -448,7 +544,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProductDetailsScreen(productId: product.id),
+                builder: (context) =>
+                    ProductDetailsScreen(productId: product.id),
               ),
             );
           },
@@ -456,7 +553,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ref.read(cartProvider.notifier).addToCart(product, 1);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("${product.name} added to cart"),
+                content: Text(
+                  "${product.name} added to cart",
+                  style: TextStyle(
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 14, tablet: 15, desktop: 16),
+                  ),
+                ),
                 action: SnackBarAction(
                   label: "VIEW CART",
                   onPressed: () {
@@ -473,36 +576,49 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildNoResults() {
     final theme = Theme.of(context);
-    
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 80,
-            color: theme.colorScheme.primary.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "No results found",
-            style: theme.textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Try different keywords or filters",
-            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off,
+              size:
+                  ResponsiveUtil.iconSize(mobile: 80, tablet: 90, desktop: 100),
+              color: theme.colorScheme.primary.withOpacity(0.5),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              "No results found",
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 18, tablet: 20, desktop: 22),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              "Try different keywords or filters",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.grey,
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14, tablet: 15, desktop: 16),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildRecentSearches() {
     final theme = Theme.of(context);
-    
+
     return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      padding: EdgeInsets.all(
+          ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -511,7 +627,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               Text(
                 "Recent Searches",
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 16, tablet: 18, desktop: 20),
+                ),
               ),
               if (_recentSearches.isNotEmpty)
                 TextButton(
@@ -521,17 +640,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     });
                     // In a real app, clear from shared preferences or database
                   },
-                  child: const Text("Clear All"),
+                  child: Text(
+                    "Clear All",
+                    style: TextStyle(
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14, tablet: 15, desktop: 16),
+                    ),
+                  ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Expanded(
             child: _recentSearches.isEmpty
                 ? Center(
                     child: Text(
                       "No recent searches",
-                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
+                      ),
                     ),
                   )
                 : ListView.builder(
@@ -539,10 +668,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     itemBuilder: (context, index) {
                       final search = _recentSearches[index];
                       return ListTile(
-                        leading: const Icon(Icons.history),
-                        title: Text(search),
+                        leading: Icon(
+                          Icons.history,
+                          size: ResponsiveUtil.iconSize(
+                              mobile: 20, tablet: 22, desktop: 24),
+                        ),
+                        title: Text(
+                          search,
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16, tablet: 17, desktop: 18),
+                          ),
+                        ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.close, size: 16),
+                          icon: Icon(
+                            Icons.close,
+                            size: ResponsiveUtil.iconSize(
+                                mobile: 16, tablet: 18, desktop: 20),
+                          ),
                           onPressed: () {
                             setState(() {
                               _recentSearches.removeAt(index);
@@ -568,18 +711,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: GridView.builder(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.65,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+        padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: ResponsiveUtil.gridColumns(context),
+          childAspectRatio: ResponsiveUtil.isDesktop(context)
+              ? 0.7
+              : ResponsiveUtil.isTablet(context)
+                  ? 0.68
+                  : 0.65,
+          crossAxisSpacing:
+              ResponsiveUtil.spacing(mobile: 12, tablet: 16, desktop: 20),
+          mainAxisSpacing:
+              ResponsiveUtil.spacing(mobile: 12, tablet: 16, desktop: 20),
         ),
         itemCount: 6,
         itemBuilder: (context, index) {
           return Card(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+              borderRadius: BorderRadius.circular(
+                  ResponsiveUtil.spacing(mobile: 8, tablet: 10, desktop: 12)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,10 +738,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Expanded(
                   flex: 3,
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(AppConstants.borderRadiusMedium),
+                        top: Radius.circular(ResponsiveUtil.spacing(
+                            mobile: 8, tablet: 10, desktop: 12)),
                       ),
                     ),
                   ),
@@ -598,26 +750,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Expanded(
                   flex: 2,
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(ResponsiveUtil.spacing(
+                        mobile: 12, tablet: 14, desktop: 16)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          height: 14,
+                          height: 14.h,
                           width: double.infinity,
                           color: Colors.white,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         Container(
-                          height: 14,
-                          width: 80,
+                          height: 14.h,
+                          width: 80.w,
                           color: Colors.white,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         Container(
-                          height: 14,
-                          width: 60,
+                          height: 14.h,
+                          width: 60.w,
                           color: Colors.white,
                         ),
                       ],

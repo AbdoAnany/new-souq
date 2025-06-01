@@ -60,17 +60,14 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         title: Text(
           AppConstants.appName,
           style: TextStyle(
-            fontSize: ResponsiveUtil.fontSize(mobile: 20, tablet: 22, desktop: 24),
+            fontSize: 22.sp,
             fontWeight: FontWeight.bold,
             color: theme.primaryColor,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.notifications_outlined, 
-              size: ResponsiveUtil.iconSize(mobile: 22, tablet: 24, desktop: 26),
-            ),
+            icon: Icon(Icons.notifications_outlined, size: 24.sp),
             onPressed: () {
               Navigator.push(
                 context,
@@ -81,10 +78,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             },
           ),
           IconButton(
-            icon: Icon(
-              Icons.favorite_border, 
-              size: ResponsiveUtil.iconSize(mobile: 22, tablet: 24, desktop: 26),
-            ),
+            icon: Icon(Icons.favorite_border, size: 24.sp),
             onPressed: () {
               Navigator.push(
                 context,
@@ -94,7 +88,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               );
             },
           ),
-          SizedBox(width: ResponsiveUtil.spacing(mobile: 6, tablet: 8, desktop: 10)),
+          SizedBox(width: 8.w),
         ],
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
@@ -111,19 +105,9 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             children: [
               // Welcome User Section
               Padding(
-                padding: ResponsiveUtil.padding(
-                  mobile: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  tablet: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                  desktop: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 8.h,
                 ),
                 child: Text(
                   "Hello, $userName! 👋",
@@ -137,19 +121,9 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
               // Search Bar
               Padding(
-                padding: ResponsiveUtil.padding(
-                  mobile: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  tablet: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                  desktop: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 8.h,
                 ),
                 child: InkWell(
                   onTap: () {

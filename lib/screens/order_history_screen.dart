@@ -6,6 +6,7 @@ import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_details_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
+import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/widgets/custom_button.dart';
 
 class OrderHistoryScreen extends ConsumerStatefulWidget {
@@ -15,14 +16,15 @@ class OrderHistoryScreen extends ConsumerStatefulWidget {
   ConsumerState<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
 }
 
-class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with SingleTickerProviderStateMixin {
+class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    
+
     // Load user orders when the screen is created
     Future.microtask(() {
       final user = ref.read(authProvider).value;
@@ -31,7 +33,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
       }
     });
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -42,10 +44,16 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final ordersAsyncValue = ref.watch(ordersProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: Text(
+          'My Orders',
+          style: TextStyle(
+            fontSize:
+                ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
+          ),
+        ),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -66,35 +74,43 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
           if (orders.isEmpty) {
             return _buildEmptyState(context);
           }
-          
+
           return TabBarView(
             controller: _tabController,
             children: [
               // All orders
               _buildOrderList(context, orders),
-              
+
               // Pending orders
               _buildOrderList(
-                context, 
-                orders.where((order) => order.status == OrderStatus.pending).toList(),
+                context,
+                orders
+                    .where((order) => order.status == OrderStatus.pending)
+                    .toList(),
               ),
-              
+
               // Confirmed orders
               _buildOrderList(
-                context, 
-                orders.where((order) => order.status == OrderStatus.confirmed).toList(),
+                context,
+                orders
+                    .where((order) => order.status == OrderStatus.confirmed)
+                    .toList(),
               ),
-              
+
               // Shipped orders
               _buildOrderList(
-                context, 
-                orders.where((order) => order.status == OrderStatus.shipped).toList(),
+                context,
+                orders
+                    .where((order) => order.status == OrderStatus.shipped)
+                    .toList(),
               ),
-              
+
               // Delivered orders
               _buildOrderList(
-                context, 
-                orders.where((order) => order.status == OrderStatus.delivered).toList(),
+                context,
+                orders
+                    .where((order) => order.status == OrderStatus.delivered)
+                    .toList(),
               ),
             ],
           );
@@ -104,17 +120,25 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
-                size: 48,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 48, tablet: 56, desktop: 64),
                 color: Colors.red,
               ),
-              const SizedBox(height: 16),
+              SizedBox(
+                  height: ResponsiveUtil.spacing(
+                      mobile: 16, tablet: 18, desktop: 20)),
               Text(
                 'Error loading orders',
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 16, tablet: 18, desktop: 20),
+                ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(
+                  height: ResponsiveUtil.spacing(
+                      mobile: 8, tablet: 10, desktop: 12)),
               TextButton(
                 onPressed: () {
                   final user = ref.read(authProvider).value;
@@ -122,7 +146,13 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                     ref.read(ordersProvider.notifier).loadUserOrders(user.id);
                   }
                 },
-                child: const Text('Retry'),
+                child: Text(
+                  'Retry',
+                  style: TextStyle(
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 14, tablet: 15, desktop: 16),
+                  ),
+                ),
               ),
             ],
           ),
@@ -130,35 +160,47 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
       ),
     );
   }
-  
+
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.shopping_bag_outlined,
-            size: 80,
+            size: ResponsiveUtil.iconSize(mobile: 80, tablet: 96, desktop: 112),
             color: theme.dividerColor,
           ),
-          const SizedBox(height: 16),
+          SizedBox(
+              height:
+                  ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
           Text(
             "No orders yet",
-            style: theme.textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 20, tablet: 24, desktop: 28),
+            ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(
+              height:
+                  ResponsiveUtil.spacing(mobile: 8, tablet: 10, desktop: 12)),
           Text(
             "You haven't placed any orders yet",
             style: theme.textTheme.bodyMedium?.copyWith(
               color: AppConstants.textSecondaryColor,
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 14, tablet: 15, desktop: 16),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
           SizedBox(
-            width: 200,
+              height:
+                  ResponsiveUtil.spacing(mobile: 32, tablet: 40, desktop: 48)),
+          SizedBox(
+            width:
+                ResponsiveUtil.spacing(mobile: 200, tablet: 240, desktop: 280),
             child: CustomButton(
               text: "Start Shopping",
               onPressed: () {
@@ -170,14 +212,17 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
       ),
     );
   }
-  
+
   Widget _buildOrderList(BuildContext context, List<OrderModel> orders) {
     if (orders.isEmpty) {
       return _buildEmptyTabState(context);
     }
-    
+
     return ListView.builder(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      padding: EdgeInsets.all(
+        ResponsiveUtil.spacing(
+            mobile: AppConstants.paddingMedium, tablet: 18, desktop: 20),
+      ),
       itemCount: orders.length,
       itemBuilder: (context, index) {
         final order = orders[index];
@@ -185,34 +230,41 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
       },
     );
   }
-  
+
   Widget _buildEmptyTabState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.inventory_2_outlined,
-            size: 64,
+            size: ResponsiveUtil.iconSize(mobile: 64, tablet: 72, desktop: 80),
             color: theme.dividerColor,
           ),
-          const SizedBox(height: 16),
+          SizedBox(
+              height:
+                  ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
           Text(
             "No orders in this category",
-            style: theme.textTheme.titleMedium,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 16, tablet: 18, desktop: 20),
+            ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildOrderCard(BuildContext context, OrderModel order) {
     final theme = Theme.of(context);
-    
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(
+        bottom: ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
@@ -227,7 +279,9 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
         },
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -239,18 +293,24 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                     'Order #${order.orderNumber}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 16, tablet: 17, desktop: 18),
                     ),
                   ),
                   Text(
                     FormatterUtil.formatDateShort(order.createdAt),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: AppConstants.textSecondaryColor,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 12, tablet: 13, desktop: 14),
                     ),
                   ),
                 ],
               ),
-              const Divider(height: 24),
-              
+              Divider(
+                  height: ResponsiveUtil.spacing(
+                      mobile: 24, tablet: 28, desktop: 32)),
+
               // Items preview
               Row(
                 children: [
@@ -258,32 +318,53 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                   Row(
                     children: order.items.take(3).map((item) {
                       final index = order.items.indexOf(item);
-                      
+                      final imageSize = ResponsiveUtil.spacing(
+                          mobile: 60, tablet: 66, desktop: 72);
+
                       return Container(
-                        width: 60,
-                        height: 60,
-                        margin: EdgeInsets.only(left: index > 0 ? -15 : 0),
+                        width: imageSize,
+                        height: imageSize,
+                        margin: EdgeInsets.only(
+                          left: index > 0
+                              ? ResponsiveUtil.spacing(
+                                  mobile: -15, tablet: -16, desktop: -18)
+                              : 0,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.white, width: 2),
-                          borderRadius: BorderRadius.circular(8),                          image: item.image != null ? DecorationImage(
-                            image: NetworkImage(item.image!),
-                            fit: BoxFit.cover,
-                          ) : null,
+                          borderRadius: BorderRadius.circular(
+                            ResponsiveUtil.spacing(
+                                mobile: 8, tablet: 9, desktop: 10),
+                          ),
+                          image: item.image != null
+                              ? DecorationImage(
+                                  image: NetworkImage(item.image!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
                           color: item.image == null ? Colors.grey[200] : null,
                         ),
                       );
                     }).toList(),
                   ),
-                  
+
                   // Show count of any additional items
                   if (order.items.length > 3) ...[
                     Container(
-                      width: 60,
-                      height: 60,
-                      margin: const EdgeInsets.only(left: -15),
+                      width: ResponsiveUtil.spacing(
+                          mobile: 60, tablet: 66, desktop: 72),
+                      height: ResponsiveUtil.spacing(
+                          mobile: 60, tablet: 66, desktop: 72),
+                      margin: EdgeInsets.only(
+                        left: ResponsiveUtil.spacing(
+                            mobile: -15, tablet: -16, desktop: -18),
+                      ),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white, width: 2),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveUtil.spacing(
+                              mobile: 8, tablet: 9, desktop: 10),
+                        ),
                         color: theme.primaryColor.withOpacity(0.1),
                       ),
                       child: Center(
@@ -292,14 +373,16 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: theme.primaryColor,
                             fontWeight: FontWeight.bold,
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14, tablet: 15, desktop: 16),
                           ),
                         ),
                       ),
                     ),
                   ],
-                  
+
                   const Spacer(),
-                  
+
                   // Total and status
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -308,17 +391,23 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                         FormatterUtil.formatCurrency(order.total),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          fontSize: ResponsiveUtil.fontSize(
+                              mobile: 16, tablet: 17, desktop: 18),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                              mobile: 4, tablet: 5, desktop: 6)),
                       _buildStatusChip(context, order.status),
                     ],
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 16),
-              
+
+              SizedBox(
+                  height: ResponsiveUtil.spacing(
+                      mobile: 16, tablet: 18, desktop: 20)),
+
               // Actions
               Row(
                 children: [
@@ -330,23 +419,37 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
                           foregroundColor: Colors.red,
                           side: const BorderSide(color: Colors.red),
                         ),
-                        child: const Text('Cancel Order'),
+                        child: Text(
+                          'Cancel Order',
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14, tablet: 15, desktop: 16),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(
+                        width: ResponsiveUtil.spacing(
+                            mobile: 12, tablet: 14, desktop: 16)),
                   ],
-                  
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => OrderDetailsScreen(orderId: order.id),
+                            builder: (context) =>
+                                OrderDetailsScreen(orderId: order.id),
                           ),
                         );
                       },
-                      child: const Text('View Details'),
+                      child: Text(
+                        'View Details',
+                        style: TextStyle(
+                          fontSize: ResponsiveUtil.fontSize(
+                              mobile: 14, tablet: 15, desktop: 16),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -357,10 +460,11 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
       ),
     );
   }
-    Widget _buildStatusChip(BuildContext context, OrderStatus status) {
+
+  Widget _buildStatusChip(BuildContext context, OrderStatus status) {
     Color chipColor;
     Color textColor = Colors.white;
-    
+
     switch (status) {
       case OrderStatus.pending:
         chipColor = Colors.amber;
@@ -383,40 +487,59 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
       case OrderStatus.returned:
         chipColor = Colors.grey;
         break;
-      default:
-        chipColor = Colors.grey;
-        break;
     }
-    
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtil.spacing(mobile: 8, tablet: 10, desktop: 12),
+        vertical: ResponsiveUtil.spacing(mobile: 4, tablet: 5, desktop: 6),
+      ),
       decoration: BoxDecoration(
         color: chipColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(
+          ResponsiveUtil.spacing(mobile: 12, tablet: 14, desktop: 16),
+        ),
       ),
       child: Text(
         status.name.toUpperCase(),
         style: TextStyle(
           color: textColor,
-          fontSize: 12,
+          fontSize:
+              ResponsiveUtil.fontSize(mobile: 10, tablet: 11, desktop: 12),
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
-  
+
   void _showCancelDialog(BuildContext context, OrderModel order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Cancel Order"),
+        title: Text(
+          "Cancel Order",
+          style: TextStyle(
+            fontSize:
+                ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
+          ),
+        ),
         content: Text(
-          "Are you sure you want to cancel order #${order.orderNumber}?\n\nThis action cannot be undone."
+          "Are you sure you want to cancel order #${order.orderNumber}?\n\nThis action cannot be undone.",
+          style: TextStyle(
+            fontSize:
+                ResponsiveUtil.fontSize(mobile: 14, tablet: 15, desktop: 16),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("No, Keep Order"),
+            child: Text(
+              "No, Keep Order",
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14, tablet: 15, desktop: 16),
+              ),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -442,7 +565,13 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with Si
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Yes, Cancel Order"),
+            child: Text(
+              "Yes, Cancel Order",
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14, tablet: 15, desktop: 16),
+              ),
+            ),
           ),
         ],
       ),

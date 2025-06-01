@@ -7,7 +7,7 @@ import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/screens/cart_screen.dart';
-import 'package:souq/utils/size_config.dart';
+import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -20,10 +20,12 @@ class CategoryProductsScreen extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
+  ConsumerState<CategoryProductsScreen> createState() =>
+      _CategoryProductsScreenState();
 }
 
-class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen> {
+class _CategoryProductsScreenState
+    extends ConsumerState<CategoryProductsScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _hasMoreProducts = true;
@@ -31,7 +33,7 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
   String? _selectedSort;
   RangeValues _priceRange = const RangeValues(0, 10000);
   double _minRating = 0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +49,8 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isLoading &&
         _hasMoreProducts) {
       _loadMoreProducts();
@@ -65,22 +68,23 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
 
   Future<void> _loadProducts() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final products = await ref.read(productServiceProvider).getProductsByCategory(
-        categoryId: widget.category.id,
-        minPrice: _priceRange.start,
-        maxPrice: _priceRange.end,
-        minRating: _minRating,
-        sortBy: _selectedSort,
-      );
-      
+      final products =
+          await ref.read(productServiceProvider).getProductsByCategory(
+                categoryId: widget.category.id,
+                minPrice: _priceRange.start,
+                maxPrice: _priceRange.end,
+                minRating: _minRating,
+                sortBy: _selectedSort,
+              );
+
       if (!mounted) return;
-      
+
       setState(() {
         _products = products;
         _isLoading = false;
@@ -88,11 +92,11 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
       });
     } catch (error) {
       if (!mounted) return;
-      
+
       setState(() {
         _isLoading = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to load products: ${error.toString()}'),
@@ -111,18 +115,19 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
 
     try {
       final lastProduct = _products.isNotEmpty ? _products.last : null;
-      
-      final moreProducts = await ref.read(productServiceProvider).getProductsByCategory(
-        categoryId: widget.category.id,
-        lastProductId: lastProduct?.id,
-        minPrice: _priceRange.start,
-        maxPrice: _priceRange.end,
-        minRating: _minRating,
-        sortBy: _selectedSort,
-      );
-      
+
+      final moreProducts =
+          await ref.read(productServiceProvider).getProductsByCategory(
+                categoryId: widget.category.id,
+                lastProductId: lastProduct?.id,
+                minPrice: _priceRange.start,
+                maxPrice: _priceRange.end,
+                minRating: _minRating,
+                sortBy: _selectedSort,
+              );
+
       if (!mounted) return;
-      
+
       setState(() {
         _products.addAll(moreProducts);
         _isLoading = false;
@@ -130,11 +135,11 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
       });
     } catch (error) {
       if (!mounted) return;
-      
+
       setState(() {
         _isLoading = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to load more products: ${error.toString()}'),
@@ -146,14 +151,19 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
 
   void _showFilterBottomSheet() {
     final theme = Theme.of(context);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: theme.scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppConstants.borderRadiusLarge),
+          top: Radius.circular(
+            ResponsiveUtil.spacing(
+                mobile: AppConstants.borderRadiusLarge,
+                tablet: 16,
+                desktop: 20),
+          ),
         ),
       ),
       builder: (context) {
@@ -166,7 +176,12 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
               expand: false,
               builder: (context, scrollController) {
                 return Padding(
-                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                  padding: EdgeInsets.all(
+                    ResponsiveUtil.spacing(
+                        mobile: AppConstants.paddingMedium,
+                        tablet: 18,
+                        desktop: 20),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -175,10 +190,17 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                         children: [
                           Text(
                             "Filter Products",
-                            style: theme.textTheme.titleLarge,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontSize: ResponsiveUtil.fontSize(
+                                  mobile: 18, tablet: 20, desktop: 22),
+                            ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close),
+                            icon: Icon(
+                              Icons.close,
+                              size: ResponsiveUtil.iconSize(
+                                  mobile: 24, tablet: 26, desktop: 28),
+                            ),
                             onPressed: () => Navigator.pop(context),
                           ),
                         ],
@@ -191,9 +213,14 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                             // Price Range
                             Text(
                               "Price Range",
-                              style: theme.textTheme.titleMedium,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 16, tablet: 17, desktop: 18),
+                              ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(
+                                height: ResponsiveUtil.spacing(
+                                    mobile: 8, tablet: 10, desktop: 12)),
                             RangeSlider(
                               values: _priceRange,
                               min: 0,
@@ -212,18 +239,37 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("\$${_priceRange.start.round()}"),
-                                Text("\$${_priceRange.end.round()}"),
+                                Text(
+                                  "\$${_priceRange.start.round()}",
+                                  style: TextStyle(
+                                    fontSize: ResponsiveUtil.fontSize(
+                                        mobile: 14, tablet: 15, desktop: 16),
+                                  ),
+                                ),
+                                Text(
+                                  "\$${_priceRange.end.round()}",
+                                  style: TextStyle(
+                                    fontSize: ResponsiveUtil.fontSize(
+                                        mobile: 14, tablet: 15, desktop: 16),
+                                  ),
+                                ),
                               ],
                             ),
-                            const SizedBox(height: 24),
-                            
+                            SizedBox(
+                                height: ResponsiveUtil.spacing(
+                                    mobile: 24, tablet: 28, desktop: 32)),
+
                             // Rating
                             Text(
                               "Minimum Rating",
-                              style: theme.textTheme.titleMedium,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 16, tablet: 17, desktop: 18),
+                              ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(
+                                height: ResponsiveUtil.spacing(
+                                    mobile: 8, tablet: 10, desktop: 12)),
                             Slider(
                               value: _minRating,
                               min: 0,
@@ -239,34 +285,60 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text("Any"),
+                                Text(
+                                  "Any",
+                                  style: TextStyle(
+                                    fontSize: ResponsiveUtil.fontSize(
+                                        mobile: 14, tablet: 15, desktop: 16),
+                                  ),
+                                ),
                                 Row(
                                   children: List.generate(
                                     _minRating.round(),
-                                    (index) => const Icon(Icons.star, color: Colors.amber, size: 16),
+                                    (index) => Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: ResponsiveUtil.iconSize(
+                                          mobile: 16, tablet: 18, desktop: 20),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
-                            
+                            SizedBox(
+                                height: ResponsiveUtil.spacing(
+                                    mobile: 24, tablet: 28, desktop: 32)),
+
                             // Sort By
                             Text(
                               "Sort By",
-                              style: theme.textTheme.titleMedium,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 16, tablet: 17, desktop: 18),
+                              ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(
+                                height: ResponsiveUtil.spacing(
+                                    mobile: 8, tablet: 10, desktop: 12)),
                             Wrap(
-                              spacing: 8,
+                              spacing: ResponsiveUtil.spacing(
+                                  mobile: 8, tablet: 10, desktop: 12),
+                              runSpacing: ResponsiveUtil.spacing(
+                                  mobile: 4, tablet: 6, desktop: 8),
                               children: [
                                 _buildChip("Newest", "newest", setState),
-                                _buildChip("Price: Low to High", "price_asc", setState),
-                                _buildChip("Price: High to Low", "price_desc", setState),
+                                _buildChip("Price: Low to High", "price_asc",
+                                    setState),
+                                _buildChip("Price: High to Low", "price_desc",
+                                    setState),
                                 _buildChip("Rating", "rating", setState),
-                                _buildChip("Popularity", "popularity", setState),
+                                _buildChip(
+                                    "Popularity", "popularity", setState),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(
+                                height: ResponsiveUtil.spacing(
+                                    mobile: 16, tablet: 18, desktop: 20)),
                           ],
                         ),
                       ),
@@ -283,19 +355,39 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                                 });
                               },
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: ResponsiveUtil.spacing(
+                                      mobile: 12, tablet: 14, desktop: 16),
+                                ),
                               ),
-                              child: const Text("Reset"),
+                              child: Text(
+                                "Reset",
+                                style: TextStyle(
+                                  fontSize: ResponsiveUtil.fontSize(
+                                      mobile: 14, tablet: 15, desktop: 16),
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                                  mobile: 16, tablet: 18, desktop: 20)),
                           Expanded(
                             child: ElevatedButton(
                               onPressed: _applyFilters,
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: ResponsiveUtil.spacing(
+                                      mobile: 12, tablet: 14, desktop: 16),
+                                ),
                               ),
-                              child: const Text("Apply Filters"),
+                              child: Text(
+                                "Apply Filters",
+                                style: TextStyle(
+                                  fontSize: ResponsiveUtil.fontSize(
+                                      mobile: 14, tablet: 15, desktop: 16),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -314,9 +406,17 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
   Widget _buildChip(String label, String value, StateSetter setState) {
     final theme = Theme.of(context);
     final isSelected = _selectedSort == value;
-    
+
     return ChoiceChip(
-      label: Text(label),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize:
+              ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
+          color: isSelected ? theme.colorScheme.primary : null,
+          fontWeight: isSelected ? FontWeight.bold : null,
+        ),
+      ),
       selected: isSelected,
       onSelected: (selected) {
         setState(() {
@@ -325,25 +425,31 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
       },
       backgroundColor: theme.cardColor,
       selectedColor: theme.colorScheme.primary.withOpacity(0.2),
-      labelStyle: TextStyle(
-        color: isSelected ? theme.colorScheme.primary : null,
-        fontWeight: isSelected ? FontWeight.bold : null,
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category.name),
+        title: Text(
+          widget.category.name,
+          style: TextStyle(
+            fontSize:
+                ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
+          ),
+        ),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Icon(
+              Icons.filter_list,
+              size:
+                  ResponsiveUtil.iconSize(mobile: 24, tablet: 26, desktop: 28),
+            ),
             onPressed: _showFilterBottomSheet,
           ),
         ],
@@ -353,24 +459,41 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
         child: _products.isEmpty && _isLoading
             ? _buildProductsShimmer()
             : _products.isEmpty
-                ? const Center(
-                    child: Text("No products found in this category."),
+                ? Center(
+                    child: Text(
+                      "No products found in this category.",
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 16, tablet: 18, desktop: 20),
+                      ),
+                    ),
                   )
                 : GridView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.65,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+                    padding: EdgeInsets.all(
+                      ResponsiveUtil.spacing(
+                          mobile: AppConstants.paddingMedium,
+                          tablet: 18,
+                          desktop: 20),
+                    ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: ResponsiveUtil.gridColumns(context),
+                      childAspectRatio: ResponsiveUtil.isDesktop(context)
+                          ? 0.7
+                          : ResponsiveUtil.isTablet(context)
+                              ? 0.68
+                              : 0.65,
+                      crossAxisSpacing: ResponsiveUtil.spacing(
+                          mobile: 12, tablet: 14, desktop: 16),
+                      mainAxisSpacing: ResponsiveUtil.spacing(
+                          mobile: 12, tablet: 14, desktop: 16),
                     ),
                     itemCount: _products.length + (_hasMoreProducts ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index >= _products.length) {
                         return _buildLoadingIndicator();
                       }
-                      
+
                       final product = _products[index];
                       return ProductCard(
                         product: product,
@@ -378,7 +501,8 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProductDetailsScreen(productId: product.id),
+                              builder: (context) =>
+                                  ProductDetailsScreen(productId: product.id),
                             ),
                           );
                         },
@@ -409,8 +533,12 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
   }
 
   Widget _buildLoadingIndicator() {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return Center(
+      child: SizedBox(
+        width: ResponsiveUtil.iconSize(mobile: 24, tablet: 28, desktop: 32),
+        height: ResponsiveUtil.iconSize(mobile: 24, tablet: 28, desktop: 32),
+        child: const CircularProgressIndicator(strokeWidth: 2),
+      ),
     );
   }
 
@@ -419,18 +547,32 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: GridView.builder(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.65,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+        padding: EdgeInsets.all(
+          ResponsiveUtil.spacing(
+              mobile: AppConstants.paddingMedium, tablet: 18, desktop: 20),
+        ),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: ResponsiveUtil.gridColumns(context),
+          childAspectRatio: ResponsiveUtil.isDesktop(context)
+              ? 0.7
+              : ResponsiveUtil.isTablet(context)
+                  ? 0.68
+                  : 0.65,
+          crossAxisSpacing:
+              ResponsiveUtil.spacing(mobile: 12, tablet: 14, desktop: 16),
+          mainAxisSpacing:
+              ResponsiveUtil.spacing(mobile: 12, tablet: 14, desktop: 16),
         ),
         itemCount: 6,
         itemBuilder: (context, index) {
           return Card(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+              borderRadius: BorderRadius.circular(
+                ResponsiveUtil.spacing(
+                    mobile: AppConstants.borderRadiusMedium,
+                    tablet: 10,
+                    desktop: 12),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,10 +580,15 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                 Expanded(
                   flex: 3,
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(AppConstants.borderRadiusMedium),
+                        top: Radius.circular(
+                          ResponsiveUtil.spacing(
+                              mobile: AppConstants.borderRadiusMedium,
+                              tablet: 10,
+                              desktop: 12),
+                        ),
                       ),
                     ),
                   ),
@@ -449,26 +596,38 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
                 Expanded(
                   flex: 2,
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(
+                      ResponsiveUtil.spacing(
+                          mobile: 12, tablet: 14, desktop: 16),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          height: 14,
+                          height: ResponsiveUtil.fontSize(
+                              mobile: 14, tablet: 15, desktop: 16),
                           width: double.infinity,
                           color: Colors.white,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                                mobile: 8, tablet: 10, desktop: 12)),
                         Container(
-                          height: 14,
-                          width: 80,
+                          height: ResponsiveUtil.fontSize(
+                              mobile: 14, tablet: 15, desktop: 16),
+                          width: ResponsiveUtil.spacing(
+                              mobile: 80, tablet: 90, desktop: 100),
                           color: Colors.white,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                                mobile: 8, tablet: 10, desktop: 12)),
                         Container(
-                          height: 14,
-                          width: 60,
+                          height: ResponsiveUtil.fontSize(
+                              mobile: 14, tablet: 15, desktop: 16),
+                          width: ResponsiveUtil.spacing(
+                              mobile: 60, tablet: 70, desktop: 80),
                           color: Colors.white,
                         ),
                       ],

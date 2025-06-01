@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../providers/admin_provider.dart';
 import '../../constants/app_constants.dart';
+import '../../utils/responsive_util.dart';
 import 'widgets/product_form_dialog.dart';
 
 class AdminProductsScreen extends ConsumerStatefulWidget {
@@ -33,12 +34,28 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Products'),
+        title: Text(
+          'Manage Products',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 18,
+              tablet: 20,
+              desktop: 22,
+            ),
+          ),
+        ),
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              Icons.refresh,
+              size: ResponsiveUtil.iconSize(
+                mobile: 24,
+                tablet: 26,
+                desktop: 28,
+              ),
+            ),
             onPressed: () {
               ref.read(adminProductsProvider.notifier).fetchProducts();
             },
@@ -49,7 +66,11 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         children: [
           // Search and Filter Bar
           Container(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            padding: EdgeInsets.all(ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 20,
+              desktop: 24,
+            )),
             color: theme.cardColor,
             child: Column(
               children: [
@@ -57,7 +78,21 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Search products...',
-                    prefixIcon: const Icon(Icons.search),
+                    hintStyle: TextStyle(
+                      fontSize: ResponsiveUtil.fontSize(
+                        mobile: 14,
+                        tablet: 15,
+                        desktop: 16,
+                      ),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 20,
+                        tablet: 22,
+                        desktop: 24,
+                      ),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(
                           AppConstants.borderRadiusMedium),
@@ -65,22 +100,51 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                     filled: true,
                     fillColor: AppConstants.backgroundColor,
                   ),
+                  style: TextStyle(
+                    fontSize: ResponsiveUtil.fontSize(
+                      mobile: 14,
+                      tablet: 15,
+                      desktop: 16,
+                    ),
+                  ),
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value.toLowerCase();
                     });
                   },
                 ),
-                const SizedBox(height: AppConstants.paddingMedium),
+                SizedBox(
+                    height: ResponsiveUtil.spacing(
+                  mobile: 16,
+                  tablet: 18,
+                  desktop: 20,
+                )),
                 // Category Filter
                 Row(
                   children: [
-                    const Text('Category: ',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Category: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: DropdownButton<String>(
                         value: _selectedCategory,
                         isExpanded: true,
+                        style: TextStyle(
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
                         items: ['All', ...AppConstants.productCategories]
                             .map((category) => DropdownMenuItem(
                                   value: category,
@@ -121,21 +185,44 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                       children: [
                         Icon(
                           Icons.inventory_2_outlined,
-                          size: 64,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 64,
+                            tablet: 72,
+                            desktop: 80,
+                          ),
                           color: Colors.grey[400],
                         ),
-                        const SizedBox(height: AppConstants.paddingMedium),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 16,
+                          tablet: 18,
+                          desktop: 20,
+                        )),
                         Text(
                           'No products found',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 18,
+                              tablet: 20,
+                              desktop: 22,
+                            ),
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: AppConstants.paddingSmall),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 8,
+                          tablet: 10,
+                          desktop: 12,
+                        )),
                         Text(
                           'Add some products to get started',
                           style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 14,
+                              tablet: 15,
+                              desktop: 16,
+                            ),
                             color: Colors.grey[500],
                           ),
                         ),
@@ -159,31 +246,70 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                   children: [
                     Icon(
                       Icons.error_outline,
-                      size: 64,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 64,
+                        tablet: 72,
+                        desktop: 80,
+                      ),
                       color: AppConstants.errorColor,
                     ),
-                    const SizedBox(height: AppConstants.paddingMedium),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 16,
+                      tablet: 18,
+                      desktop: 20,
+                    )),
                     Text(
                       'Error loading products',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18,
+                          tablet: 20,
+                          desktop: 22,
+                        ),
                         color: AppConstants.errorColor,
                       ),
                     ),
-                    const SizedBox(height: AppConstants.paddingSmall),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 8,
+                      tablet: 10,
+                      desktop: 12,
+                    )),
                     Text(
                       error.toString(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
+                        color: Colors.grey[600],
+                      ),
                     ),
-                    const SizedBox(height: AppConstants.paddingMedium),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 16,
+                      tablet: 18,
+                      desktop: 20,
+                    )),
                     ElevatedButton(
                       onPressed: () {
                         ref
                             .read(adminProductsProvider.notifier)
                             .fetchProducts();
                       },
-                      child: const Text('Try Again'),
+                      child: Text(
+                        'Try Again',
+                        style: TextStyle(
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -196,19 +322,44 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
         onPressed: () => _showProductDialog(context),
-        child: const Icon(Icons.add),
+        child: Icon(
+          Icons.add,
+          size: ResponsiveUtil.iconSize(
+            mobile: 24,
+            tablet: 26,
+            desktop: 28,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildProductCard(Product product) {
+    final imageSize = ResponsiveUtil.spacing(
+      mobile: 80,
+      tablet: 90,
+      desktop: 100,
+    );
+
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.paddingMedium,
-        vertical: AppConstants.paddingSmall,
+      margin: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 20,
+          desktop: 24,
+        ),
+        vertical: ResponsiveUtil.spacing(
+          mobile: 8,
+          tablet: 10,
+          desktop: 12,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        padding: EdgeInsets.all(ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 18,
+          desktop: 20,
+        )),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -221,20 +372,32 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                       BorderRadius.circular(AppConstants.borderRadiusMedium),
                   child: Image.network(
                     product.images.first,
-                    width: 80,
-                    height: 80,
+                    width: imageSize,
+                    height: imageSize,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        width: 80,
-                        height: 80,
+                        width: imageSize,
+                        height: imageSize,
                         color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 24,
+                            tablet: 26,
+                            desktop: 28,
+                          ),
+                        ),
                       );
                     },
                   ),
                 ),
-                const SizedBox(width: AppConstants.paddingMedium),
+                SizedBox(
+                    width: ResponsiveUtil.spacing(
+                  mobile: 16,
+                  tablet: 18,
+                  desktop: 20,
+                )),
                 // Product Info
                 Expanded(
                   child: Column(
@@ -245,8 +408,12 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                           Expanded(
                             child: Text(
                               product.name,
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: TextStyle(
+                                fontSize: ResponsiveUtil.fontSize(
+                                  mobile: 16,
+                                  tablet: 17,
+                                  desktop: 18,
+                                ),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -254,49 +421,89 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                           // Featured Badge
                           if (product.isFeatured)
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: ResponsiveUtil.spacing(
+                                  mobile: 8,
+                                  tablet: 10,
+                                  desktop: 12,
+                                ),
+                                vertical: ResponsiveUtil.spacing(
+                                  mobile: 4,
+                                  tablet: 5,
+                                  desktop: 6,
+                                ),
                               ),
                               decoration: BoxDecoration(
                                 color: AppConstants.accentColor,
                                 borderRadius: BorderRadius.circular(
                                     AppConstants.borderRadiusSmall),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Featured',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 12,
+                                  fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 12,
+                                    tablet: 13,
+                                    desktop: 14,
+                                  ),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                         ],
                       ),
-                      const SizedBox(height: AppConstants.paddingSmall),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
                       Text(
                         product.categoryId,
                         style: TextStyle(
                           color: AppConstants.textSecondaryColor,
-                          fontSize: 14,
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: AppConstants.paddingSmall),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
                       Row(
                         children: [
                           Text(
                             '\$${product.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16,
+                                tablet: 17,
+                                desktop: 18,
+                              ),
                               fontWeight: FontWeight.bold,
                               color: AppConstants.primaryColor,
                             ),
                           ),
-                          const SizedBox(width: AppConstants.paddingMedium),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                            mobile: 16,
+                            tablet: 18,
+                            desktop: 20,
+                          )),
                           Text(
                             'Stock: ${product.quantity}',
                             style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
                               color: product.quantity > 0
                                   ? AppConstants.accentColor
                                   : AppConstants.errorColor,
@@ -305,18 +512,55 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppConstants.paddingSmall),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
                       Row(
                         children: [
                           Icon(
                             Icons.star,
-                            size: 16,
+                            size: ResponsiveUtil.iconSize(
+                              mobile: 16,
+                              tablet: 17,
+                              desktop: 18,
+                            ),
                             color: Colors.amber[700],
                           ),
-                          const SizedBox(width: 4),
-                          Text('${product.rating.toStringAsFixed(1)}'),
-                          const SizedBox(width: AppConstants.paddingSmall),
-                          Text('(${product.reviewCount} reviews)'),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                            mobile: 4,
+                            tablet: 5,
+                            desktop: 6,
+                          )),
+                          Text(
+                            '${product.rating.toStringAsFixed(1)}',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                            mobile: 8,
+                            tablet: 10,
+                            desktop: 12,
+                          )),
+                          Text(
+                            '(${product.reviewCount} reviews)',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -324,7 +568,12 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.paddingMedium),
+            SizedBox(
+                height: ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            )),
             // Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -371,13 +620,25 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: Icon(icon, color: color),
+          icon: Icon(
+            icon,
+            color: color,
+            size: ResponsiveUtil.iconSize(
+              mobile: 20,
+              tablet: 22,
+              desktop: 24,
+            ),
+          ),
           onPressed: onPressed,
         ),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 12,
+              tablet: 13,
+              desktop: 14,
+            ),
             color: color,
           ),
         ),
@@ -405,19 +666,51 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Update Stock - ${product.name}'),
+        title: Text(
+          'Update Stock - ${product.name}',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            ),
+          ),
+        ),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
+            ),
+          ),
+          decoration: InputDecoration(
             labelText: 'Stock Quantity',
-            border: OutlineInputBorder(),
+            labelStyle: TextStyle(
+              fontSize: ResponsiveUtil.fontSize(
+                mobile: 14,
+                tablet: 15,
+                desktop: 16,
+              ),
+            ),
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -428,7 +721,16 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                   );
               Navigator.pop(context);
             },
-            child: const Text('Update'),
+            child: Text(
+              'Update',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -439,12 +741,39 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Product'),
-        content: Text('Are you sure you want to delete "${product.name}"?'),
+        title: Text(
+          'Delete Product',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            ),
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${product.name}"?',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -457,7 +786,16 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                   .deleteProduct(product.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),

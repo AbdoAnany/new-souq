@@ -18,50 +18,54 @@ class OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    if (isSmall) {
-      return InkWell(
-        onTap: onTap ?? () {
-          // Navigate to offer details or apply discount
-        },
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-        child: Container(
-          width: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.black.withOpacity(0.05),
-            //     blurRadius: 10,
-            //     offset: const Offset(0, 2),
-            //   ),
-            // ],
-          ),
-          child:   ClipRRect(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-            child: CachedNetworkImage(
-              imageUrl: offer.imageUrl,
-              fit: BoxFit.cover,
-              width: 200,
-              height: 100,
-              placeholder: (context, url) => Container(
-                color: Colors.grey[300],
-              ),
-              errorWidget: (context, url, error) => Container(
-                color: theme.primaryColor.withOpacity(0.2),
-                child: const Icon(Icons.error),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    
+    //
+    // if (isSmall) {
+    //   return InkWell(
+    //     onTap: onTap ??
+    //         () {
+    //           // Navigate to offer details or apply discount
+    //         },
+    //     borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+    //     child: Container(
+    //       width: 200,
+    //       decoration: BoxDecoration(
+    //         borderRadius:
+    //             BorderRadius.circular(AppConstants.borderRadiusMedium),
+    //         // boxShadow: [
+    //         //   BoxShadow(
+    //         //     color: Colors.black.withOpacity(0.05),
+    //         //     blurRadius: 10,
+    //         //     offset: const Offset(0, 2),
+    //         //   ),
+    //         // ],
+    //       ),
+    //       child: ClipRRect(
+    //         borderRadius:
+    //             BorderRadius.circular(AppConstants.borderRadiusMedium),
+    //         child: CachedNetworkImage(
+    //           imageUrl: offer.imageUrl,
+    //           fit: BoxFit.cover,
+    //           width: 200,
+    //           height: 100,
+    //           placeholder: (context, url) => Container(
+    //             color: Colors.grey[300],
+    //           ),
+    //           errorWidget: (context, url, error) => Container(
+    //             color: theme.primaryColor.withOpacity(0.2),
+    //             child: const Icon(Icons.error),
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   );
+    // }
+
     // Regular size offer card for carousel
     return InkWell(
-      onTap: onTap ?? () {
-        // Navigate to offer details or apply discount
-      },
+      onTap: onTap ??
+          () {
+            // Navigate to offer details or apply discount
+          },
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -78,7 +82,8 @@ class OfferCard extends StatelessWidget {
           children: [
             // Background image
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+              borderRadius:
+                  BorderRadius.circular(AppConstants.borderRadiusMedium),
               child: CachedNetworkImage(
                 imageUrl: offer.imageUrl,
                 fit: BoxFit.cover,
@@ -93,24 +98,8 @@ class OfferCard extends StatelessWidget {
                 ),
               ),
             ),
-            
-            // // Gradient overlay
-            // Container(
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-            //     gradient: LinearGradient(
-            //       begin: Alignment.centerLeft,
-            //       end: Alignment.centerRight,
-            //       colors: [
-            //         Colors.black.withOpacity(0.7),
-            //         Colors.transparent,
-            //         Colors.transparent,
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            //
-            // Content
+
+
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -123,11 +112,14 @@ class OfferCard extends StatelessWidget {
                       horizontal: 8.0,
                       vertical: 4.0,
                     ),
-                    decoration: BoxDecoration(                    color: AppConstants.secondaryColor,
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+                    decoration: BoxDecoration(
+                      color: AppConstants.secondaryColor,
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.borderRadiusSmall),
                     ),
                     child: Text(
-                      offer.type == OfferType.percentage && offer.discountPercentage != null
+                      offer.type == OfferType.percentage &&
+                              offer.discountPercentage != null
                           ? '${offer.discountPercentage!.toInt()}% OFF'
                           : offer.discountAmount != null
                               ? '\$${offer.discountAmount!.toInt()} OFF'
@@ -139,7 +131,7 @@ class OfferCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  // const SizedBox(height: 8),
 
                   // Title
                   SizedBox(
@@ -193,8 +185,9 @@ class OfferCard extends StatelessWidget {
                   //   ),
                   // ),
                 ],
-              ),            ),
-            
+              ),
+            ),
+
             // Expiry tag
             Positioned(
               top: 12,
@@ -206,7 +199,8 @@ class OfferCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadiusSmall),
                 ),
                 child: Text(
                   'Ends in ${_getRemainingDays(offer.endDate)} days',
@@ -222,7 +216,7 @@ class OfferCard extends StatelessWidget {
       ),
     );
   }
-  
+
   int _getRemainingDays(DateTime expiryDate) {
     final now = DateTime.now();
     final difference = expiryDate.difference(now).inDays;

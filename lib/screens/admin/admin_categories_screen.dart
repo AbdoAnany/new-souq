@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/category.dart';
 import '../../providers/admin_provider.dart';
 import '../../constants/app_constants.dart';
+import '../../utils/responsive_util.dart';
 import 'widgets/category_form_dialog.dart';
+
 // thia s new project wit without any data can add some dommy data and can add add screen to add data for admin user do the best way
 class AdminCategoriesScreen extends ConsumerStatefulWidget {
   const AdminCategoriesScreen({super.key});
@@ -32,16 +34,30 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Categories'),
+        title: Text(
+          'Manage Categories',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 18,
+              tablet: 20,
+              desktop: 22,
+            ),
+          ),
+        ),
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              Icons.refresh,
+              size: ResponsiveUtil.iconSize(
+                mobile: 24,
+                tablet: 26,
+                desktop: 28,
+              ),
+            ),
             onPressed: () {
-              ref
-                  .read(adminCategoriesProvider.notifier)
-                  .fetchCategories();
+              ref.read(adminCategoriesProvider.notifier).fetchCategories();
             },
           ),
         ],
@@ -50,18 +66,43 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
         children: [
           // Search Bar
           Container(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            padding: EdgeInsets.all(ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 20,
+              desktop: 24,
+            )),
             color: theme.cardColor,
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search categories...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: TextStyle(
+                  fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14,
+                    tablet: 15,
+                    desktop: 16,
+                  ),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: ResponsiveUtil.iconSize(
+                    mobile: 20,
+                    tablet: 22,
+                    desktop: 24,
+                  ),
+                ),
                 border: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadiusMedium),
                 ),
                 filled: true,
                 fillColor: AppConstants.backgroundColor,
+              ),
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
               ),
               onChanged: (value) {
                 setState(() {
@@ -87,21 +128,44 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                       children: [
                         Icon(
                           Icons.category_outlined,
-                          size: 64,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 64,
+                            tablet: 72,
+                            desktop: 80,
+                          ),
                           color: Colors.grey[400],
                         ),
-                        const SizedBox(height: AppConstants.paddingMedium),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 16,
+                          tablet: 18,
+                          desktop: 20,
+                        )),
                         Text(
                           'No categories found',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 18,
+                              tablet: 20,
+                              desktop: 22,
+                            ),
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: AppConstants.paddingSmall),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 8,
+                          tablet: 10,
+                          desktop: 12,
+                        )),
                         Text(
                           'Add some categories to get started',
                           style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 14,
+                              tablet: 15,
+                              desktop: 16,
+                            ),
                             color: Colors.grey[500],
                           ),
                         ),
@@ -125,31 +189,70 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                   children: [
                     Icon(
                       Icons.error_outline,
-                      size: 64,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 64,
+                        tablet: 72,
+                        desktop: 80,
+                      ),
                       color: AppConstants.errorColor,
                     ),
-                    const SizedBox(height: AppConstants.paddingMedium),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 16,
+                      tablet: 18,
+                      desktop: 20,
+                    )),
                     Text(
                       'Error loading categories',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18,
+                          tablet: 20,
+                          desktop: 22,
+                        ),
                         color: AppConstants.errorColor,
                       ),
                     ),
-                    const SizedBox(height: AppConstants.paddingSmall),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 8,
+                      tablet: 10,
+                      desktop: 12,
+                    )),
                     Text(
                       error.toString(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
+                        color: Colors.grey[600],
+                      ),
                     ),
-                    const SizedBox(height: AppConstants.paddingMedium),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 16,
+                      tablet: 18,
+                      desktop: 20,
+                    )),
                     ElevatedButton(
                       onPressed: () {
                         ref
                             .read(adminCategoriesProvider.notifier)
                             .fetchCategories();
                       },
-                      child: const Text('Try Again'),
+                      child: Text(
+                        'Try Again',
+                        style: TextStyle(
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -162,25 +265,52 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
         onPressed: () => _showCategoryDialog(context),
-        child: const Icon(Icons.add),
+        child: Icon(
+          Icons.add,
+          size: ResponsiveUtil.iconSize(
+            mobile: 24,
+            tablet: 26,
+            desktop: 28,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildCategoryCard(Category category) {
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.paddingMedium,
-        vertical: AppConstants.paddingSmall,
+      margin: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 20,
+          desktop: 24,
+        ),
+        vertical: ResponsiveUtil.spacing(
+          mobile: 8,
+          tablet: 10,
+          desktop: 12,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        padding: EdgeInsets.all(ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 18,
+          desktop: 20,
+        )),
         child: Row(
           children: [
             // Category Icon
             Container(
-              width: 60,
-              height: 60,
+              width: ResponsiveUtil.spacing(
+                mobile: 60,
+                tablet: 66,
+                desktop: 72,
+              ),
+              height: ResponsiveUtil.spacing(
+                mobile: 60,
+                tablet: 66,
+                desktop: 72,
+              ),
               decoration: BoxDecoration(
                 color: AppConstants.primaryColor.withOpacity(0.1),
                 borderRadius:
@@ -188,11 +318,20 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
               ),
               child: Icon(
                 _getCategoryIcon(category.name),
-                size: 32,
+                size: ResponsiveUtil.iconSize(
+                  mobile: 32,
+                  tablet: 36,
+                  desktop: 40,
+                ),
                 color: AppConstants.primaryColor,
               ),
             ),
-            const SizedBox(width: AppConstants.paddingMedium),
+            SizedBox(
+                width: ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            )),
             // Category Info
             Expanded(
               child: Column(
@@ -203,17 +342,29 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                       Expanded(
                         child: Text(
                           category.name,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 18,
+                              tablet: 19,
+                              desktop: 20,
+                            ),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       // Active Status
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveUtil.spacing(
+                            mobile: 8,
+                            tablet: 10,
+                            desktop: 12,
+                          ),
+                          vertical: ResponsiveUtil.spacing(
+                            mobile: 4,
+                            tablet: 5,
+                            desktop: 6,
+                          ),
                         ),
                         decoration: BoxDecoration(
                           color: category.isActive
@@ -224,35 +375,69 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                         ),
                         child: Text(
                           category.isActive ? 'Active' : 'Inactive',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 12,
+                              tablet: 13,
+                              desktop: 14,
+                            ),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppConstants.paddingSmall),
+                  SizedBox(
+                      height: ResponsiveUtil.spacing(
+                    mobile: 8,
+                    tablet: 10,
+                    desktop: 12,
+                  )),
                   Text(
                     category.description,
                     style: TextStyle(
                       color: AppConstants.textSecondaryColor,
-                      fontSize: 14,
+                      fontSize: ResponsiveUtil.fontSize(
+                        mobile: 14,
+                        tablet: 15,
+                        desktop: 16,
+                      ),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: AppConstants.paddingSmall),
+                  SizedBox(
+                      height: ResponsiveUtil.spacing(
+                    mobile: 8,
+                    tablet: 10,
+                    desktop: 12,
+                  )),
                   if (category.name.isNotEmpty)
                     Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
+                      spacing: ResponsiveUtil.spacing(
+                        mobile: 4,
+                        tablet: 5,
+                        desktop: 6,
+                      ),
+                      runSpacing: ResponsiveUtil.spacing(
+                        mobile: 4,
+                        tablet: 5,
+                        desktop: 6,
+                      ),
                       children: category.subcategories.take(3).map((tag) {
                         return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: ResponsiveUtil.spacing(
+                              mobile: 6,
+                              tablet: 7,
+                              desktop: 8,
+                            ),
+                            vertical: ResponsiveUtil.spacing(
+                              mobile: 2,
+                              tablet: 3,
+                              desktop: 4,
+                            ),
                           ),
                           decoration: BoxDecoration(
                             color: AppConstants.primaryColor.withOpacity(0.1),
@@ -266,7 +451,11 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                             tag.name,
                             style: TextStyle(
                               color: AppConstants.primaryColor,
-                              fontSize: 10,
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 10,
+                                tablet: 11,
+                                desktop: 12,
+                              ),
                             ),
                           ),
                         );
@@ -280,13 +469,25 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: Icon(
+                    Icons.edit,
+                    size: ResponsiveUtil.iconSize(
+                      mobile: 20,
+                      tablet: 22,
+                      desktop: 24,
+                    ),
+                  ),
                   color: AppConstants.primaryColor,
                   onPressed: () => _showCategoryDialog(context, category),
                 ),
                 IconButton(
                   icon: Icon(
                     category.isActive ? Icons.visibility_off : Icons.visibility,
+                    size: ResponsiveUtil.iconSize(
+                      mobile: 20,
+                      tablet: 22,
+                      desktop: 24,
+                    ),
                   ),
                   color: category.isActive
                       ? Colors.orange
@@ -294,7 +495,14 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                   onPressed: () => _toggleActive(category),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete),
+                  icon: Icon(
+                    Icons.delete,
+                    size: ResponsiveUtil.iconSize(
+                      mobile: 20,
+                      tablet: 22,
+                      desktop: 24,
+                    ),
+                  ),
                   color: AppConstants.errorColor,
                   onPressed: () => _confirmDelete(category),
                 ),
@@ -351,15 +559,42 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Category'),
+        title: Text(
+          'Delete Category',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 18,
+              tablet: 20,
+              desktop: 22,
+            ),
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Are you sure you want to delete "${category.name}"?'),
-            const SizedBox(height: AppConstants.paddingMedium),
+            Text(
+              'Are you sure you want to delete "${category.name}"?',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
+            SizedBox(
+                height: ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            )),
             Container(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              padding: EdgeInsets.all(ResponsiveUtil.spacing(
+                mobile: 16,
+                tablet: 18,
+                desktop: 20,
+              )),
               decoration: BoxDecoration(
                 color: Colors.orange.withOpacity(0.1),
                 borderRadius:
@@ -368,12 +603,31 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.orange[700]),
-                  const SizedBox(width: AppConstants.paddingSmall),
-                  const Expanded(
+                  Icon(
+                    Icons.warning,
+                    color: Colors.orange[700],
+                    size: ResponsiveUtil.iconSize(
+                      mobile: 20,
+                      tablet: 22,
+                      desktop: 24,
+                    ),
+                  ),
+                  SizedBox(
+                      width: ResponsiveUtil.spacing(
+                    mobile: 8,
+                    tablet: 10,
+                    desktop: 12,
+                  )),
+                  Expanded(
                     child: Text(
                       'This will also affect products in this category.',
-                      style: TextStyle(fontSize: 12),
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 12,
+                          tablet: 13,
+                          desktop: 14,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -384,7 +638,16 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -397,7 +660,16 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
                   .deleteCategory(category.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),
