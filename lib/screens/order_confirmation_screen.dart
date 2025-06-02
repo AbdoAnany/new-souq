@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/cart.dart';
 import 'package:souq/models/user_order.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/widgets/custom_button.dart';
-import 'package:lottie/lottie.dart';
 
 class OrderConfirmationScreen extends ConsumerWidget {
   final String orderId;

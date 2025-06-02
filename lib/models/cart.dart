@@ -1,5 +1,4 @@
 import 'package:souq/models/product.dart';
-import 'package:souq/models/user.dart';
 
 
 class CartItem {

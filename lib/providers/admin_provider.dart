@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/models/product.dart';
 import 'package:souq/models/category.dart';
-import 'package:souq/models/user_order.dart';
+import 'package:souq/models/product.dart';
 import 'package:souq/models/user.dart';
+import 'package:souq/models/user_order.dart';
 import 'package:souq/services/admin_service.dart';
 
 // Admin Service Provider

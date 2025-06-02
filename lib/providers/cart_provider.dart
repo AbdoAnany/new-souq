@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/product.dart';
-import 'package:souq/services/cart_service.dart';
 import 'package:souq/providers/auth_provider.dart';
+import 'package:souq/services/cart_service.dart';
 
 class CartNotifier extends StateNotifier<AsyncValue<Cart?>> {
   final CartService _cartService;

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/product.dart';
-import 'package:souq/providers/auth_provider.dart';
-import 'package:souq/providers/product_provider.dart';
+import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/screens/categories_screen.dart';
+import 'package:souq/screens/home/home_tab.dart';
 import 'package:souq/screens/profile_screen.dart';
 import 'package:souq/screens/search_screen.dart';
-import 'package:souq/screens/home/home_tab.dart';
-import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/widgets/badge.dart' as custom_badge;
 
 class HomeScreen extends ConsumerStatefulWidget {

@@ -1,30 +1,30 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'firebase_options.dart';
-import 'models/user.dart';
 import 'constants/app_constants.dart';
 import 'constants/app_theme.dart';
-import 'providers/theme_provider.dart';
-import 'providers/locale_provider.dart';
+import 'firebase_options.dart';
+import 'models/user.dart';
 import 'providers/auth_provider.dart';
-import 'screens/splash_screen.dart';
+import 'providers/locale_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/dummy_data_service.dart';
 
 Future<void> main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Initialize Firebase
     await Firebase.initializeApp(
-      options:DefaultFirebaseOptions.currentPlatform,
+      options: DefaultFirebaseOptions.currentPlatform,
     );
-    
+
     // Set system UI overlay style
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -35,12 +35,12 @@ Future<void> main() async {
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
-      // Set preferred orientations
+    // Set preferred orientations
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    
+
     // Initialize dummy data if needed (only in development)
     try {
       final dummyDataService = DummyDataService();
@@ -56,7 +56,7 @@ Future<void> main() async {
       print('⚠️  Warning: Failed to initialize dummy data: $e');
       // Continue running the app even if dummy data initialization fails
     }
-    
+
     runApp(const ProviderScope(child: SouqApp()));
   } catch (e) {
     print('Error initializing app: $e');
@@ -76,7 +76,8 @@ Future<void> main() async {
   }
 }
 
-final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
+final authProvider =
+    StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
   final authService = ref.watch(authServiceProvider);
   return AuthNotifier(authService);
 });
@@ -137,7 +138,9 @@ class SouqApp extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 16),                ElevatedButton(                  onPressed: () {
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
                     // Refresh the auth provider to retry authentication
                     ref.invalidate(authProvider);
                   },

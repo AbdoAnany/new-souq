@@ -1,11 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/providers/admin_provider.dart';
-import 'package:souq/widgets/custom_button.dart';
 import 'package:souq/widgets/custom_text_field.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class AdminCategoriesScreen extends ConsumerStatefulWidget {
   const AdminCategoriesScreen({Key? key}) : super(key: key);

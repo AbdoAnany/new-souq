@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/models/category.dart';
-import 'package:souq/models/product.dart';
 import 'package:souq/models/offer.dart';
+import 'package:souq/models/product.dart';
 import 'package:souq/services/product_service.dart';
 
 class ProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {

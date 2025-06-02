@@ -1,25 +1,23 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/offer.dart';
-import 'package:souq/models/product.dart';
-import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
-import 'package:souq/screens/product_details_screen.dart';
-import 'package:souq/screens/offers_screen.dart';
-import 'package:souq/screens/notifications_screen.dart';
-import 'package:souq/screens/wishlist_screen.dart';
-import 'package:souq/screens/search_screen.dart';
+import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/categories_screen.dart';
 import 'package:souq/screens/category_products_screen.dart';
+import 'package:souq/screens/notifications_screen.dart';
+import 'package:souq/screens/offers_screen.dart';
+import 'package:souq/screens/product_details_screen.dart';
+import 'package:souq/screens/search_screen.dart';
+import 'package:souq/screens/wishlist_screen.dart';
+import 'package:souq/utils/size_config.dart';
+import 'package:souq/widgets/offer_card.dart';
 import 'package:souq/widgets/product_card.dart';
 import 'package:souq/widgets/section_header.dart';
-import 'package:souq/widgets/offer_card.dart';
-import 'package:souq/utils/size_config.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({Key? key}) : super(key: key);
