@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/category.dart';
-import 'package:souq/models/offer.dart';
 import 'package:souq/models/product.dart';
+import 'package:souq/models/offer.dart';
+import 'package:souq/models/category.dart';
+import 'package:souq/constants/app_constants.dart';
 
 class ProductService {
   static final ProductService _instance = ProductService._internal();
@@ -92,7 +92,8 @@ class ProductService {
       final querySnapshot = await query.get();
 
       return querySnapshot.docs
-          .map((doc) => Product.fromJson({...(doc.data() as Map<String, dynamic>), 'id': doc.id}))
+          .map((doc) => Product.fromJson(
+              {...(doc.data() as Map<String, dynamic>), 'id': doc.id}))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch products: ${e.toString()}');
@@ -118,25 +119,30 @@ class ProductService {
 
       // Add category filter
       if (categoryId != null && categoryId.isNotEmpty) {
-        firestoreQuery = firestoreQuery.where('categoryId', isEqualTo: categoryId);
+        firestoreQuery =
+            firestoreQuery.where('categoryId', isEqualTo: categoryId);
       }
 
       // Add price filters
       if (minPrice != null) {
-        firestoreQuery = firestoreQuery.where('price', isGreaterThanOrEqualTo: minPrice);
+        firestoreQuery =
+            firestoreQuery.where('price', isGreaterThanOrEqualTo: minPrice);
       }
       if (maxPrice != null) {
-        firestoreQuery = firestoreQuery.where('price', isLessThanOrEqualTo: maxPrice);
+        firestoreQuery =
+            firestoreQuery.where('price', isLessThanOrEqualTo: maxPrice);
       }
 
       // Add rating filter
       if (minRating != null) {
-        firestoreQuery = firestoreQuery.where('rating', isGreaterThanOrEqualTo: minRating);
+        firestoreQuery =
+            firestoreQuery.where('rating', isGreaterThanOrEqualTo: minRating);
       }
 
       // Add sorting
       if (sortBy != null) {
-        firestoreQuery = firestoreQuery.orderBy(sortBy, descending: sortDescending ?? false);
+        firestoreQuery =
+            firestoreQuery.orderBy(sortBy, descending: sortDescending ?? false);
       } else {
         firestoreQuery = firestoreQuery.orderBy('createdAt', descending: true);
       }
@@ -149,7 +155,8 @@ class ProductService {
 
       final querySnapshot = await firestoreQuery.get();
       final products = querySnapshot.docs
-          .map((doc) => Product.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => Product.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
 
       // Filter by search query in memory (since Firestore doesn't support full-text search)
@@ -157,9 +164,10 @@ class ProductService {
         final lowercaseQuery = query.toLowerCase();
         return products.where((product) {
           return product.name.toLowerCase().contains(lowercaseQuery) ||
-                 product.description.toLowerCase().contains(lowercaseQuery) ||
-                 product.tags.any((tag) => tag.toLowerCase().contains(lowercaseQuery)) ||
-                 (product.brand?.toLowerCase().contains(lowercaseQuery) ?? false);
+              product.description.toLowerCase().contains(lowercaseQuery) ||
+              product.tags
+                  .any((tag) => tag.toLowerCase().contains(lowercaseQuery)) ||
+              (product.brand?.toLowerCase().contains(lowercaseQuery) ?? false);
         }).toList();
       }
 
@@ -192,12 +200,17 @@ class ProductService {
       final querySnapshot = await _firestore
           .collection(AppConstants.categoriesCollection)
           .where('isActive', isEqualTo: true)
-          .orderBy('name')
           .get();
+      print("Categories: " + querySnapshot.docs.toString());
 
-      return querySnapshot.docs
+      final categories = querySnapshot.docs
           .map((doc) => Category.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
+
+      // Sort by name client-side to avoid composite index requirement
+      categories.sort((a, b) => a.name.compareTo(b.name));
+
+      return categories;
     } catch (e) {
       throw Exception('Failed to fetch categories: ${e.toString()}');
     }
@@ -291,19 +304,30 @@ class ProductService {
   Future<List<Offer>> getActiveOffers() async {
     try {
       final now = DateTime.now();
+      // Simplified query to avoid composite index requirement
       final querySnapshot = await _firestore
           .collection(AppConstants.offersCollection)
           .where('isActive', isEqualTo: true)
-          .where('startDate', isLessThanOrEqualTo: now)
-          .where('endDate', isGreaterThan: now)
-          .orderBy('endDate')
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      // Filter and sort client-side to avoid composite index
+      final offers = querySnapshot.docs
           .map((doc) => Offer.fromJson({...doc.data(), 'id': doc.id}))
-          .where((offer) => offer.isValid)
+          .where((offer) =>
+              offer.isActive &&
+              now.isAfter(offer.startDate) &&
+              now.isBefore(offer.endDate) &&
+              offer.isValid)
           .toList();
+
+      // Sort client-side by endDate (ascending) then by createdAt (descending)
+      offers.sort((a, b) {
+        final endDateComparison = a.endDate.compareTo(b.endDate);
+        if (endDateComparison != 0) return endDateComparison;
+        return b.createdAt.compareTo(a.createdAt);
+      });
+
+      return offers;
     } catch (e) {
       throw Exception('Failed to fetch active offers: ${e.toString()}');
     }
@@ -390,7 +414,8 @@ class ProductService {
   }
 
   // Get price range for category
-  Future<Map<String, double>> getPriceRangeForCategory(String categoryId) async {
+  Future<Map<String, double>> getPriceRangeForCategory(
+      String categoryId) async {
     try {
       final querySnapshot = await _firestore
           .collection(AppConstants.productsCollection)

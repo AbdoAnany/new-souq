@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/constants/app_constants.dart';
-import 'package:souq/models/cart.dart' show Cart, CartItem;
+import 'package:souq/models/cart.dart' show Cart, CartItem, PaymentMethod;
 import 'package:souq/models/user.dart';
-import 'package:souq/models/user_order.dart';
+import 'package:souq/models/order.dart';
+import 'package:souq/constants/app_constants.dart';
 import 'package:souq/services/tracking_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +16,7 @@ class OrderService {
   final TrackingService _trackingService = TrackingService();
 
   // Place order
-  Future<UserOrder> placeOrder({
+  Future<OrderModel> placeOrder({
     required String userId,
     required Cart cart,
     required Address shippingAddress,
@@ -28,14 +28,14 @@ class OrderService {
     try {
       // Generate order number
       final orderNumber = _generateOrderNumber();
-      
+
       // Convert cart items to order items
       final orderItems = cart.items
           .map((cartItem) => OrderItem.fromCartItem(cartItem))
           .toList();
 
       // Create order
-      final order = UserOrder(
+      final order = OrderModel(
         id: _uuid.v4(),
         userId: userId,
         orderNumber: orderNumber,
@@ -73,7 +73,7 @@ class OrderService {
   }
 
   // Get user orders
-  Future<List<UserOrder>> getUserOrders({
+  Future<List<OrderModel>> getUserOrders({
     required String userId,
     int limit = 20,
     DocumentSnapshot? lastDocument,
@@ -92,7 +92,8 @@ class OrderService {
       final querySnapshot = await query.get();
 
       return querySnapshot.docs
-          .map((doc) => UserOrder.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => OrderModel.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch user orders: ${e.toString()}');
@@ -100,7 +101,7 @@ class OrderService {
   }
 
   // Get order by ID
-  Future<UserOrder?> getOrderById(String orderId) async {
+  Future<OrderModel?> getOrderById(String orderId) async {
     try {
       final docSnapshot = await _firestore
           .collection(AppConstants.ordersCollection)
@@ -108,15 +109,17 @@ class OrderService {
           .get();
 
       if (docSnapshot.exists) {
-        return UserOrder.fromJson({...docSnapshot.data()!, 'id': docSnapshot.id});
+        return OrderModel.fromJson(
+            {...docSnapshot.data()!, 'id': docSnapshot.id});
       }
       return null;
     } catch (e) {
       throw Exception('Failed to fetch order: ${e.toString()}');
     }
   }
+
   // Update order status
-  Future<UserOrder> updateOrderStatus({
+  Future<OrderModel> updateOrderStatus({
     required String orderId,
     required OrderStatus status,
     String? trackingNumber,
@@ -128,10 +131,11 @@ class OrderService {
           .get();
 
       if (!orderDoc.exists) {
-        throw Exception('UserOrder not found');
+        throw Exception('OrderModel not found');
       }
 
-      final order = UserOrder.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
+      final order =
+          OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
       final now = DateTime.now();
 
       Map<String, dynamic> updateData = {
@@ -170,16 +174,17 @@ class OrderService {
       throw Exception('Failed to update order status: ${e.toString()}');
     }
   }
+
   // Cancel order
-  Future<UserOrder> cancelOrder(String orderId) async {
+  Future<OrderModel> cancelOrder(String orderId) async {
     try {
       final order = await getOrderById(orderId);
       if (order == null) {
-        throw Exception('UserOrder not found');
+        throw Exception('OrderModel not found');
       }
 
       if (!order.canBeCancelled) {
-        throw Exception('UserOrder cannot be cancelled');
+        throw Exception('OrderModel cannot be cancelled');
       }
 
       // Update order status
@@ -196,42 +201,44 @@ class OrderService {
       throw Exception('Failed to cancel order: ${e.toString()}');
     }
   }
+
   // Get order stream for real-time updates
-  Stream<UserOrder> getOrderStream(String orderId) {
+  Stream<OrderModel> getOrderStream(String orderId) {
     return _firestore
         .collection(AppConstants.ordersCollection)
         .doc(orderId)
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists) {
-        return UserOrder.fromJson({...snapshot.data()!, 'id': snapshot.id});
+        return OrderModel.fromJson({...snapshot.data()!, 'id': snapshot.id});
       } else {
-        throw Exception('UserOrder not found');
+        throw Exception('OrderModel not found');
       }
     });
   }
-    Stream<UserOrder> ordersStream(String orderId) {
+
+  Stream<OrderModel> ordersStream(String orderId) {
     return _firestore
         .collection(AppConstants.ordersCollection)
         .doc(orderId)
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists) {
-        return UserOrder.fromJson({...snapshot.data()!, 'id': snapshot.id});
+        return OrderModel.fromJson({...snapshot.data()!, 'id': snapshot.id});
       } else {
-        throw Exception('UserOrder not found');
+        throw Exception('OrderModel not found');
       }
     });
   }
-  
+
   // Get all orders stream for real-time updates
-  Stream<List<UserOrder>> getOrderStreamAll() {
+  Stream<List<OrderModel>> getOrderStreamAll() {
     return _firestore
         .collection(AppConstants.ordersCollection)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => UserOrder.fromJson({...doc.data(), 'id': doc.id}))
+          .map((doc) => OrderModel.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     });
   }
@@ -243,11 +250,13 @@ class OrderService {
           .collection(AppConstants.ordersCollection)
           .where('orderNumber', isEqualTo: orderNumber)
           .limit(1)
-          .get();      if (querySnapshot.docs.isEmpty) {
-        throw Exception('UserOrder not found');
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception('OrderModel not found');
       }
 
-      final order = UserOrder.fromJson({
+      final order = OrderModel.fromJson({
         ...querySnapshot.docs.first.data(),
         'id': querySnapshot.docs.first.id,
       });
@@ -269,7 +278,8 @@ class OrderService {
   }) async {
     try {
       double subtotal = cart.subtotal;
-      double shipping = cart.subtotal >= 100 ? 0.0 : 10.0; // Free shipping over $100
+      double shipping =
+          cart.subtotal >= 100 ? 0.0 : 10.0; // Free shipping over $100
       double tax = subtotal * 0.1; // 10% tax
       double discount = 0.0;
 
@@ -292,8 +302,9 @@ class OrderService {
       throw Exception('Failed to calculate order total: ${e.toString()}');
     }
   }
+
   // Get orders by status
-  Future<List<UserOrder>> getOrdersByStatus({
+  Future<List<OrderModel>> getOrdersByStatus({
     required String userId,
     required OrderStatus status,
     int limit = 20,
@@ -308,10 +319,219 @@ class OrderService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserOrder.fromJson({...doc.data(), 'id': doc.id}))
+          .map((doc) => OrderModel.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch orders by status: ${e.toString()}');
+    }
+  }
+
+  // Admin-specific methods
+
+  // Get all orders for admin (without user filtering)
+  Future<List<OrderModel>> getAllOrders({
+    int limit = 50,
+    DocumentSnapshot? lastDocument,
+    OrderStatus? status,
+    String? searchQuery,
+  }) async {
+    try {
+      Query query = _firestore
+          .collection(AppConstants.ordersCollection)
+          .orderBy('createdAt', descending: true);
+
+      // Filter by status if provided
+      if (status != null) {
+        query = query.where('status', isEqualTo: status.name);
+      }
+
+      // Apply limit
+      query = query.limit(limit);
+
+      // Apply pagination
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      final querySnapshot = await query.get();
+      var orders = querySnapshot.docs
+          .map((doc) => OrderModel.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .toList();
+
+      // Apply search filtering if provided
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        orders = orders.where((order) {
+          final query = searchQuery.toLowerCase();
+          return order.orderNumber.toLowerCase().contains(query) ||
+              order.id.toLowerCase().contains(query) ||
+              '${order.shippingAddress.firstName} ${order.shippingAddress.lastName}'
+                  .toLowerCase()
+                  .contains(query);
+        }).toList();
+      }
+
+      return orders;
+    } catch (e) {
+      throw Exception('Failed to fetch all orders: ${e.toString()}');
+    }
+  }
+
+  // Get orders count by status for admin dashboard
+  Future<Map<OrderStatus, int>> getOrdersCountByStatus() async {
+    try {
+      final Map<OrderStatus, int> counts = {};
+
+      for (final status in OrderStatus.values) {
+        final querySnapshot = await _firestore
+            .collection(AppConstants.ordersCollection)
+            .where('status', isEqualTo: status.name)
+            .count()
+            .get();
+        counts[status] = querySnapshot.count ?? 0;
+      }
+
+      return counts;
+    } catch (e) {
+      throw Exception('Failed to get orders count by status: ${e.toString()}');
+    }
+  }
+
+  // Admin update order status with more options
+  Future<OrderModel> adminUpdateOrderStatus({
+    required String orderId,
+    required OrderStatus status,
+    String? trackingNumber,
+    String? notes,
+  }) async {
+    try {
+      final orderDoc = await _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(orderId)
+          .get();
+
+      if (!orderDoc.exists) {
+        throw Exception('Order not found');
+      }
+
+      final order =
+          OrderModel.fromJson({...orderDoc.data()!, 'id': orderDoc.id});
+      final now = DateTime.now();
+
+      Map<String, dynamic> updateData = {
+        'status': status.name,
+        'updatedAt': now.toIso8601String(),
+      };
+
+      // Add admin notes if provided
+      if (notes != null && notes.isNotEmpty) {
+        updateData['notes'] = notes;
+      }
+
+      // Add status-specific timestamps and data
+      switch (status) {
+        case OrderStatus.confirmed:
+          updateData['confirmedAt'] = now.toIso8601String();
+          break;
+        case OrderStatus.processing:
+          updateData['processedAt'] = now.toIso8601String();
+          break;
+        case OrderStatus.shipped:
+          updateData['shippedAt'] = now.toIso8601String();
+          if (trackingNumber != null && trackingNumber.isNotEmpty) {
+            updateData['trackingNumber'] = trackingNumber;
+          }
+          break;
+        case OrderStatus.delivered:
+          updateData['deliveredAt'] = now.toIso8601String();
+          break;
+        case OrderStatus.cancelled:
+          updateData['cancelledAt'] = now.toIso8601String();
+          if (notes != null) {
+            updateData['cancellationReason'] = notes;
+          }
+          // Restore product quantities for cancelled orders
+          await _restoreProductQuantities(order.items);
+          break;
+        default:
+          break;
+      }
+
+      await _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(orderId)
+          .update(updateData);
+
+      return order.copyWith(
+        status: status,
+        trackingNumber: trackingNumber ?? order.trackingNumber,
+        notes: notes ?? order.notes,
+        confirmedAt: status == OrderStatus.confirmed ? now : order.confirmedAt,
+        processedAt: status == OrderStatus.processing ? now : order.processedAt,
+        shippedAt: status == OrderStatus.shipped ? now : order.shippedAt,
+        deliveredAt: status == OrderStatus.delivered ? now : order.deliveredAt,
+        cancelledAt: status == OrderStatus.cancelled ? now : order.cancelledAt,
+        cancellationReason:
+            status == OrderStatus.cancelled ? notes : order.cancellationReason,
+        updatedAt: now,
+      );
+    } catch (e) {
+      throw Exception('Failed to update order status: ${e.toString()}');
+    }
+  }
+
+  // Get orders analytics for admin
+  Future<Map<String, dynamic>> getOrdersAnalytics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      Query query = _firestore.collection(AppConstants.ordersCollection);
+
+      if (startDate != null) {
+        query = query.where('createdAt', isGreaterThanOrEqualTo: startDate);
+      }
+      if (endDate != null) {
+        query = query.where('createdAt', isLessThanOrEqualTo: endDate);
+      }
+
+      final querySnapshot = await query.get();
+      final orders = querySnapshot.docs
+          .map((doc) => OrderModel.fromJson(
+              {...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .toList();
+
+      double totalRevenue = 0;
+      double totalShipping = 0;
+      double totalTax = 0;
+      Map<OrderStatus, int> statusCounts = {};
+      Map<String, int> topProducts = {};
+
+      for (final order in orders) {
+        totalRevenue += order.total;
+        totalShipping += order.shipping;
+        totalTax += order.tax;
+
+        statusCounts[order.status] = (statusCounts[order.status] ?? 0) + 1;
+
+        for (final item in order.items) {
+          topProducts[item.title] =
+              (topProducts[item.title] ?? 0) + item.quantity;
+        }
+      }
+
+      return {
+        'totalOrders': orders.length,
+        'totalRevenue': totalRevenue,
+        'totalShipping': totalShipping,
+        'totalTax': totalTax,
+        'averageOrderValue':
+            orders.isNotEmpty ? totalRevenue / orders.length : 0,
+        'statusCounts': statusCounts,
+        'topProducts': topProducts,
+      };
+    } catch (e) {
+      throw Exception('Failed to get orders analytics: ${e.toString()}');
     }
   }
 
@@ -395,32 +615,35 @@ class OrderService {
       // Log error but don't throw
       print('Failed to clear user cart: $e');
     }
-  }  // Generate tracking events for an order
-  List<TrackingEvent> generateTrackingEvents(UserOrder order) {
+  }
+
+  // Generate tracking events for an order
+  List<TrackingEvent> generateTrackingEvents(OrderModel order) {
     final events = <TrackingEvent>[];
 
-    // UserOrder placed
+    // OrderModel placed
     events.add(TrackingEvent(
-      status: 'Order Placed',
+      status: 'OrderModel Placed',
       description: 'Your order has been placed successfully',
       timestamp: order.createdAt,
       isCompleted: true,
     ));
 
-    // UserOrder confirmed
+    // OrderModel confirmed
     if (order.status.index >= OrderStatus.confirmed.index) {
       events.add(TrackingEvent(
-        status: 'Order Confirmed',
+        status: 'OrderModel Confirmed',
         description: 'Your order has been confirmed and is being prepared',
         timestamp: order.updatedAt,
         isCompleted: true,
       ));
     }
 
-    // UserOrder shipped
-    if (order.status.index >= OrderStatus.shipped.index && order.shippedAt != null) {
+    // OrderModel shipped
+    if (order.status.index >= OrderStatus.shipped.index &&
+        order.shippedAt != null) {
       events.add(TrackingEvent(
-        status: 'Order Shipped',
+        status: 'OrderModel Shipped',
         description: 'Your order has been shipped',
         timestamp: order.shippedAt!,
         isCompleted: true,
@@ -428,10 +651,11 @@ class OrderService {
       ));
     }
 
-    // UserOrder delivered
-    if (order.status.index >= OrderStatus.delivered.index && order.deliveredAt != null) {
+    // OrderModel delivered
+    if (order.status.index >= OrderStatus.delivered.index &&
+        order.deliveredAt != null) {
       events.add(TrackingEvent(
-        status: 'Order Delivered',
+        status: 'OrderModel Delivered',
         description: 'Your order has been delivered successfully',
         timestamp: order.deliveredAt!,
         isCompleted: true,
@@ -459,7 +683,7 @@ class OrderCalculation {
 }
 
 class OrderTrackingInfo {
-  final UserOrder order;
+  final OrderModel order;
   final List<TrackingEvent> trackingEvents;
 
   OrderTrackingInfo({

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/models/category.dart';
-import 'package:souq/models/offer.dart';
 import 'package:souq/models/product.dart';
+import 'package:souq/models/offer.dart';
 import 'package:souq/services/product_service.dart';
 
 class ProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
@@ -89,9 +89,11 @@ class OfferNotifier extends StateNotifier<AsyncValue<List<Offer>>> {
     state = const AsyncValue.loading();
     try {
       final offers = await _productService.getActiveOffers();
+      print('Offers: $offers');
       if (!_mounted) return;
       state = AsyncValue.data(offers);
     } catch (e, stackTrace) {
+      print('Error fetching offers: $e');
       if (!_mounted) return;
       state = AsyncValue.error(e, stackTrace);
     }
@@ -152,10 +154,12 @@ class CategoryNotifier extends StateNotifier<AsyncValue<List<Category>>> {
 
   Future<void> fetchCategories() async {
     state = const AsyncValue.loading();
+    print('Fetching categories...');
     try {
       final categories = await _productService.getCategories();
       state = AsyncValue.data(categories);
     } catch (e, stack) {
+      print('Error fetching categories: $e');
       state = AsyncValue.error(e, stack);
     }
   }

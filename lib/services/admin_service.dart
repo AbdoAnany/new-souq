@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/models/product.dart';
-import 'package:souq/models/user.dart' as user_model;
-import 'package:souq/models/user_order.dart';
+import 'package:souq/models/offer.dart';
+import 'package:uuid/uuid.dart';
 
 class AdminService {
   static final AdminService _instance = AdminService._internal();
@@ -12,69 +11,49 @@ class AdminService {
   AdminService._internal();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Uuid _uuid = const Uuid();
 
-  // Check if current user is admin
-  Future<bool> isCurrentUserAdmin() async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
-
+  // Product Management
+  Future<String> addProduct(Map<String, dynamic> productData) async {
     try {
-      final adminDoc = await _firestore
-          .collection('admin_users')
-          .doc(user.uid)
-          .get();
-      
-      return adminDoc.exists;
-    } catch (e) {
-      return false;
-    }
-  }
+      final productId = _uuid.v4();
+      final now = DateTime.now();
 
-  // Get admin user details
-  Future<Map<String, dynamic>?> getAdminDetails(String userId) async {
-    try {
-      final adminDoc = await _firestore
-          .collection('admin_users')
-          .doc(userId)
-          .get();
-      
-      if (adminDoc.exists) {
-        return adminDoc.data();
-      }
-      return null;
-    } catch (e) {
-      throw Exception('Failed to get admin details: $e');
-    }
-  }
+      final product = {
+        ...productData,
+        'id': productId,
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
+      };
 
-  // PRODUCT MANAGEMENT
-  
-  // Add new product
-  Future<void> addProduct(Product product) async {
-    try {
       await _firestore
           .collection(AppConstants.productsCollection)
-          .doc(product.id)
-          .set(product.toJson());
+          .doc(productId)
+          .set(product);
+
+      return productId;
     } catch (e) {
       throw Exception('Failed to add product: $e');
     }
   }
 
-  // Update product
-  Future<void> updateProduct(Product product) async {
+  Future<void> updateProduct(
+      String productId, Map<String, dynamic> updates) async {
     try {
+      final updateData = {
+        ...updates,
+        'updatedAt': DateTime.now().toIso8601String(),
+      };
+
       await _firestore
           .collection(AppConstants.productsCollection)
-          .doc(product.id)
-          .update(product.toJson());
+          .doc(productId)
+          .update(updateData);
     } catch (e) {
       throw Exception('Failed to update product: $e');
     }
   }
 
-  // Delete product
   Future<void> deleteProduct(String productId) async {
     try {
       await _firestore
@@ -86,73 +65,67 @@ class AdminService {
     }
   }
 
-  // Get all products for admin
-  Future<List<Product>> getAllProducts({
-    int? limit,
-    DocumentSnapshot? lastDocument,
-  }) async {
+  Future<List<Product>> getAllProducts() async {
     try {
-      Query query = _firestore
+      final querySnapshot = await _firestore
           .collection(AppConstants.productsCollection)
-          .orderBy('createdAt', descending: true);
+          .orderBy('createdAt', descending: true)
+          .get();
 
-      if (limit != null) {
-        query = query.limit(limit);
-      }
-
-      if (lastDocument != null) {
-        query = query.startAfterDocument(lastDocument);
-      }
-
-      final querySnapshot = await query.get();
-      
       return querySnapshot.docs
-          .map((doc) => Product.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
+          .map((doc) => Product.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     } catch (e) {
-      throw Exception('Failed to get products: $e');
+      throw Exception('Failed to fetch products: $e');
     }
   }
 
-  // CATEGORY MANAGEMENT
-
-  // Add new category
-  Future<void> addCategory(Category category) async {
+  // Category Management
+  Future<String> addCategory(Map<String, dynamic> categoryData) async {
     try {
+      final categoryId = _uuid.v4();
+      final now = DateTime.now();
+
+      final category = {
+        ...categoryData,
+        'id': categoryId,
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
+        'productCount': 0,
+        'isActive': true,
+      };
+
       await _firestore
           .collection(AppConstants.categoriesCollection)
-          .doc(category.id)
-          .set(category.toJson());
+          .doc(categoryId)
+          .set(category);
+
+      return categoryId;
     } catch (e) {
       throw Exception('Failed to add category: $e');
     }
   }
 
-  // Update category
-  Future<void> updateCategory(Category category) async {
+  Future<void> updateCategory(
+      String categoryId, Map<String, dynamic> updates) async {
     try {
+      final updateData = {
+        ...updates,
+        'updatedAt': DateTime.now().toIso8601String(),
+      };
+
       await _firestore
           .collection(AppConstants.categoriesCollection)
-          .doc(category.id)
-          .update(category.toJson());
+          .doc(categoryId)
+          .update(updateData);
     } catch (e) {
       throw Exception('Failed to update category: $e');
     }
   }
 
-  // Delete category
   Future<void> deleteCategory(String categoryId) async {
     try {
-      // Check if category has products
-      final productsQuery = await _firestore
-          .collection(AppConstants.productsCollection)
-          .where('categoryId', isEqualTo: categoryId)
-          .limit(1)
-          .get();
-
-      if (productsQuery.docs.isNotEmpty) {
-        throw Exception('Cannot delete category with existing products');
-      }      await _firestore
+      await _firestore
           .collection(AppConstants.categoriesCollection)
           .doc(categoryId)
           .delete();
@@ -161,257 +134,184 @@ class AdminService {
     }
   }
 
-  // Get all categories
   Future<List<Category>> getAllCategories() async {
     try {
       final querySnapshot = await _firestore
           .collection(AppConstants.categoriesCollection)
           .orderBy('name')
           .get();
-      
+
       return querySnapshot.docs
           .map((doc) => Category.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     } catch (e) {
-      throw Exception('Failed to get categories: $e');
+      throw Exception('Failed to fetch categories: $e');
     }
   }
 
-  // ORDER MANAGEMENT
-  // Get all orders
-  Future<List<UserOrder>> getAllOrders({
-    int? limit,
-    DocumentSnapshot? lastDocument,
-    OrderStatus? status,
-  }) async {
+  // Offer Management
+  Future<String> addOffer(Map<String, dynamic> offerData) async {
     try {
-      Query query = _firestore
-          .collection(AppConstants.ordersCollection)
-          .orderBy('createdAt', descending: true);
+      final offerId = _uuid.v4();
+      final now = DateTime.now();
 
-      if (status != null) {
-        query = query.where('status', isEqualTo: status.name);
-      }
-
-      if (limit != null) {
-        query = query.limit(limit);
-      }
-
-      if (lastDocument != null) {
-        query = query.startAfterDocument(lastDocument);
-      }
-
-      final querySnapshot = await query.get();
-      
-      return querySnapshot.docs
-          .map((doc) => UserOrder.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get orders: $e');
-    }
-  }
-
-  // Update order status
-  Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
-    try {
-      final updateData = <String, dynamic>{
-        'status': status.name,
-        'updatedAt': Timestamp.now(),
+      final offer = {
+        ...offerData,
+        'id': offerId,
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
+        'usedCount': 0,
+        'isActive': true,
       };
-
-      // Add timestamp for status changes
-      switch (status) {
-        case OrderStatus.confirmed:
-          updateData['confirmedAt'] = Timestamp.now();
-          break;
-        case OrderStatus.processing:
-          updateData['processedAt'] = Timestamp.now();
-          break;
-        case OrderStatus.shipped:
-          updateData['shippedAt'] = Timestamp.now();
-          break;
-        case OrderStatus.delivered:
-          updateData['deliveredAt'] = Timestamp.now();
-          break;
-        case OrderStatus.cancelled:
-          updateData['cancelledAt'] = Timestamp.now();
-          break;
-        default:
-          break;
-      }
 
       await _firestore
-          .collection(AppConstants.ordersCollection)
-          .doc(orderId)
+          .collection(AppConstants.offersCollection)
+          .doc(offerId)
+          .set(offer);
+
+      return offerId;
+    } catch (e) {
+      throw Exception('Failed to add offer: $e');
+    }
+  }
+
+  Future<void> updateOffer(String offerId, Map<String, dynamic> updates) async {
+    try {
+      final updateData = {
+        ...updates,
+        'updatedAt': DateTime.now().toIso8601String(),
+      };
+
+      await _firestore
+          .collection(AppConstants.offersCollection)
+          .doc(offerId)
           .update(updateData);
     } catch (e) {
-      throw Exception('Failed to update order status: $e');
+      throw Exception('Failed to update offer: $e');
     }
   }
 
-  // USER MANAGEMENT
-
-  // Get all users
-  Future<List<user_model.User>> getAllUsers({
-    int? limit,
-    DocumentSnapshot? lastDocument,
-  }) async {
+  Future<void> deleteOffer(String offerId) async {
     try {
-      Query query = _firestore
-          .collection(AppConstants.usersCollection)
-          .orderBy('createdAt', descending: true);
-
-      if (limit != null) {
-        query = query.limit(limit);
-      }
-
-      if (lastDocument != null) {
-        query = query.startAfterDocument(lastDocument);
-      }
-
-      final querySnapshot = await query.get();
-      
-      return querySnapshot.docs
-          .map((doc) => user_model.User.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
-          .toList();
+      await _firestore
+          .collection(AppConstants.offersCollection)
+          .doc(offerId)
+          .delete();
     } catch (e) {
-      throw Exception('Failed to get users: $e');
+      throw Exception('Failed to delete offer: $e');
     }
   }
 
-  // ANALYTICS
-
-  // Get dashboard analytics
-  Future<Map<String, dynamic>> getDashboardAnalytics() async {
-    try {
-      // Get counts
-      final [
-        totalProducts,
-        totalOrders,
-        totalUsers,
-        totalCategories
-      ] = await Future.wait([
-        _firestore.collection(AppConstants.productsCollection).count().get(),
-        _firestore.collection(AppConstants.ordersCollection).count().get(),
-        _firestore.collection(AppConstants.usersCollection).count().get(),
-        _firestore.collection(AppConstants.categoriesCollection).count().get(),
-      ]);
-
-      // Get recent orders
-      final recentOrdersQuery = await _firestore
-          .collection(AppConstants.ordersCollection)
-          .orderBy('createdAt', descending: true)
-          .limit(5)
-          .get();      final recentOrders = recentOrdersQuery.docs
-          .map((doc) => UserOrder.fromJson({...doc.data(), 'id': doc.id}))
-          .toList();
-
-      // Calculate total revenue
-      double totalRevenue = 0;
-      for (final order in recentOrders) {
-        totalRevenue += order.total;
-      }
-
-      // Get orders by status
-      final orderStatusCounts = <String, int>{};
-      for (final status in OrderStatus.values) {
-        final count = await _firestore
-            .collection(AppConstants.ordersCollection)
-            .where('status', isEqualTo: status.name)
-            .count()
-            .get();
-        orderStatusCounts[status.name] = count.count ?? 0;
-      }
-
-      return {
-        'totalProducts': totalProducts.count ?? 0,
-        'totalOrders': totalOrders.count ?? 0,
-        'totalUsers': totalUsers.count ?? 0,
-        'totalCategories': totalCategories.count ?? 0,
-        'totalRevenue': totalRevenue,
-        'recentOrders': recentOrders.map((o) => o.toJson()).toList(),
-        'orderStatusCounts': orderStatusCounts,
-      };
-    } catch (e) {
-      throw Exception('Failed to get analytics: $e');
-    }
-  }
-
-  // Get monthly sales data
-  Future<List<Map<String, dynamic>>> getMonthlySalesData() async {
-    try {
-      final now = DateTime.now();
-      final startOfYear = DateTime(now.year, 1, 1);
-      
-      final ordersQuery = await _firestore
-          .collection(AppConstants.ordersCollection)
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfYear))
-          .where('status', whereIn: ['delivered', 'shipped'])
-          .get();
-
-      final monthlyData = <int, double>{};
-        for (final orderDoc in ordersQuery.docs) {
-        final order = UserOrder.fromJson({...orderDoc.data(), 'id': orderDoc.id});
-        final month = order.createdAt.month;
-        monthlyData[month] = (monthlyData[month] ?? 0) + order.total;
-      }
-
-      final result = <Map<String, dynamic>>[];
-      for (int month = 1; month <= 12; month++) {
-        result.add({
-          'month': month,
-          'monthName': _getMonthName(month),
-          'sales': monthlyData[month] ?? 0,
-        });
-      }
-
-      return result;
-    } catch (e) {
-      throw Exception('Failed to get monthly sales data: $e');
-    }
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return months[month - 1];
-  }
-
-  // INVENTORY MANAGEMENT
-
-  // Get low stock products
-  Future<List<Product>> getLowStockProducts({int threshold = 10}) async {
+  Future<List<Offer>> getAllOffers() async {
     try {
       final querySnapshot = await _firestore
-          .collection(AppConstants.productsCollection)
-          .where('quantity', isLessThanOrEqualTo: threshold)
-          .where('inStock', isEqualTo: true)
-          .orderBy('quantity')
+          .collection(AppConstants.offersCollection)
+          .orderBy('createdAt', descending: true)
           .get();
 
       return querySnapshot.docs
-          .map((doc) => Product.fromJson({...doc.data(), 'id': doc.id}))
+          .map((doc) => Offer.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     } catch (e) {
-      throw Exception('Failed to get low stock products: $e');
+      throw Exception('Failed to fetch offers: $e');
     }
   }
 
-  // Update product stock
-  Future<void> updateProductStock(String productId, int newQuantity) async {
+  // Statistics
+  Future<Map<String, int>> getStatistics() async {
+    try {
+      final productCount = await _firestore
+          .collection(AppConstants.productsCollection)
+          .count()
+          .get();
+
+      final categoryCount = await _firestore
+          .collection(AppConstants.categoriesCollection)
+          .count()
+          .get();
+
+      final offerCount = await _firestore
+          .collection(AppConstants.offersCollection)
+          .count()
+          .get();
+
+      final orderCount = await _firestore
+          .collection(AppConstants.ordersCollection)
+          .count()
+          .get();
+
+      final userCount = await _firestore
+          .collection(AppConstants.usersCollection)
+          .count()
+          .get();
+
+      return {
+        'products': productCount.count ?? 0,
+        'categories': categoryCount.count ?? 0,
+        'offers': offerCount.count ?? 0,
+        'orders': orderCount.count ?? 0,
+        'users': userCount.count ?? 0,
+      };
+    } catch (e) {
+      throw Exception('Failed to fetch statistics: $e');
+    }
+  }
+
+  // Bulk operations
+  Future<void> toggleProductFeatured(String productId, bool isFeatured) async {
     try {
       await _firestore
           .collection(AppConstants.productsCollection)
           .doc(productId)
           .update({
-        'quantity': newQuantity,
-        'inStock': newQuantity > 0,
+        'isFeatured': isFeatured,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      throw Exception('Failed to toggle product featured status: $e');
+    }
+  }
+
+  Future<void> updateProductStock(String productId, int quantity) async {
+    try {
+      await _firestore
+          .collection(AppConstants.productsCollection)
+          .doc(productId)
+          .update({
+        'quantity': quantity,
+        'inStock': quantity > 0,
         'updatedAt': DateTime.now().toIso8601String(),
       });
     } catch (e) {
       throw Exception('Failed to update product stock: $e');
+    }
+  }
+
+  Future<void> toggleCategoryStatus(String categoryId, bool isActive) async {
+    try {
+      await _firestore
+          .collection(AppConstants.categoriesCollection)
+          .doc(categoryId)
+          .update({
+        'isActive': isActive,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      throw Exception('Failed to toggle category status: $e');
+    }
+  }
+
+  Future<void> toggleOfferStatus(String offerId, bool isActive) async {
+    try {
+      await _firestore
+          .collection(AppConstants.offersCollection)
+          .doc(offerId)
+          .update({
+        'isActive': isActive,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      throw Exception('Failed to toggle offer status: $e');
     }
   }
 }

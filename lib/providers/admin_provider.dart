@@ -1,81 +1,55 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/models/product.dart';
-import 'package:souq/models/user.dart';
-import 'package:souq/models/user_order.dart';
+import 'package:souq/models/offer.dart';
 import 'package:souq/services/admin_service.dart';
+import 'package:souq/services/dummy_data_service.dart';
 
 // Admin Service Provider
 final adminServiceProvider = Provider<AdminService>((ref) {
   return AdminService();
 });
 
-// Admin Authentication Provider
-final adminAuthProvider = StateNotifierProvider<AdminAuthNotifier, AsyncValue<bool>>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminAuthNotifier(adminService);
+// Dummy Data Service Provider
+final dummyDataServiceProvider = Provider<DummyDataService>((ref) {
+  return DummyDataService();
 });
 
-class AdminAuthNotifier extends StateNotifier<AsyncValue<bool>> {
-  final AdminService _adminService;
-
-  AdminAuthNotifier(this._adminService) : super(const AsyncValue.loading()) {
-    _checkAdminStatus();
-  }
-
-  Future<void> _checkAdminStatus() async {
-    try {
-      final isAdmin = await _adminService.isCurrentUserAdmin();
-      state = AsyncValue.data(isAdmin);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    await _checkAdminStatus();
-  }
-}
-
-// Admin Products Provider
-final adminProductsProvider = StateNotifierProvider<AdminProductsNotifier, AsyncValue<List<Product>>>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminProductsNotifier(adminService);
-});
-
+// Products Notifier for Admin
 class AdminProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
   final AdminService _adminService;
 
-  AdminProductsNotifier(this._adminService) : super(const AsyncValue.loading()) {
+  AdminProductsNotifier(this._adminService)
+      : super(const AsyncValue.loading()) {
     fetchProducts();
   }
 
   Future<void> fetchProducts() async {
+    state = const AsyncValue.loading();
     try {
-      state = const AsyncValue.loading();
-      final products = await _adminService.getAllProducts(limit: 50);
+      final products = await _adminService.getAllProducts();
       state = AsyncValue.data(products);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
     }
   }
 
-  Future<void> addProduct(Product product) async {
+  Future<void> addProduct(Map<String, dynamic> productData) async {
     try {
-      await _adminService.addProduct(product);
+      await _adminService.addProduct(productData);
       await fetchProducts(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to add product: $e');
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
-  Future<void> updateProduct(Product product) async {
+  Future<void> updateProduct(
+      String productId, Map<String, dynamic> updates) async {
     try {
-      await _adminService.updateProduct(product);
+      await _adminService.updateProduct(productId, updates);
       await fetchProducts(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to update product: $e');
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
@@ -84,49 +58,65 @@ class AdminProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
       await _adminService.deleteProduct(productId);
       await fetchProducts(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to delete product: $e');
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  Future<void> toggleFeatured(String productId, bool isFeatured) async {
+    try {
+      await _adminService.toggleProductFeatured(productId, isFeatured);
+      await fetchProducts(); // Refresh the list
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  Future<void> updateStock(String productId, int quantity) async {
+    try {
+      await _adminService.updateProductStock(productId, quantity);
+      await fetchProducts(); // Refresh the list
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 }
 
-// Admin Categories Provider
-final adminCategoriesProvider = StateNotifierProvider<AdminCategoriesNotifier, AsyncValue<List<Category>>>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminCategoriesNotifier(adminService);
-});
-
-class AdminCategoriesNotifier extends StateNotifier<AsyncValue<List<Category>>> {
+// Categories Notifier for Admin
+class AdminCategoriesNotifier
+    extends StateNotifier<AsyncValue<List<Category>>> {
   final AdminService _adminService;
 
-  AdminCategoriesNotifier(this._adminService) : super(const AsyncValue.loading()) {
+  AdminCategoriesNotifier(this._adminService)
+      : super(const AsyncValue.loading()) {
     fetchCategories();
   }
 
   Future<void> fetchCategories() async {
+    state = const AsyncValue.loading();
     try {
-      state = const AsyncValue.loading();
       final categories = await _adminService.getAllCategories();
       state = AsyncValue.data(categories);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
     }
   }
 
-  Future<void> addCategory(Category category) async {
+  Future<void> addCategory(Map<String, dynamic> categoryData) async {
     try {
-      await _adminService.addCategory(category);
+      await _adminService.addCategory(categoryData);
       await fetchCategories(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to add category: $e');
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
-  Future<void> updateCategory(Category category) async {
+  Future<void> updateCategory(
+      String categoryId, Map<String, dynamic> updates) async {
     try {
-      await _adminService.updateCategory(category);
+      await _adminService.updateCategory(categoryId, updates);
       await fetchCategories(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to update category: $e');
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
@@ -135,107 +125,118 @@ class AdminCategoriesNotifier extends StateNotifier<AsyncValue<List<Category>>> 
       await _adminService.deleteCategory(categoryId);
       await fetchCategories(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to delete category: $e');
-    }
-  }
-}
-
-// Admin Orders Provider
-final adminOrdersProvider = StateNotifierProvider<AdminOrdersNotifier, AsyncValue<List<UserOrder>>>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminOrdersNotifier(adminService);
-});
-
-class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<UserOrder>>> {
-  final AdminService _adminService;
-
-  AdminOrdersNotifier(this._adminService) : super(const AsyncValue.loading()) {
-    fetchOrders();
-  }
-
-  Future<void> fetchOrders() async {
-    try {
-      state = const AsyncValue.loading();
-      final orders = await _adminService.getAllOrders(limit: 50);
-      state = AsyncValue.data(orders);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
-  Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
+  Future<void> toggleStatus(String categoryId, bool isActive) async {
     try {
-      await _adminService.updateOrderStatus(orderId, status);
-      await fetchOrders(); // Refresh the list
+      await _adminService.toggleCategoryStatus(categoryId, isActive);
+      await fetchCategories(); // Refresh the list
     } catch (e) {
-      throw Exception('Failed to update order status: $e');
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 }
 
-// Admin Users Provider
-final adminUsersProvider = StateNotifierProvider<AdminUsersNotifier, AsyncValue<List<User>>>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminUsersNotifier(adminService);
-});
-
-class AdminUsersNotifier extends StateNotifier<AsyncValue<List<User>>> {
+// Offers Notifier for Admin
+class AdminOffersNotifier extends StateNotifier<AsyncValue<List<Offer>>> {
   final AdminService _adminService;
 
-  AdminUsersNotifier(this._adminService) : super(const AsyncValue.loading()) {
-    fetchUsers();
+  AdminOffersNotifier(this._adminService) : super(const AsyncValue.loading()) {
+    fetchOffers();
   }
 
-  Future<void> fetchUsers() async {
+  Future<void> fetchOffers() async {
+    state = const AsyncValue.loading();
     try {
-      state = const AsyncValue.loading();
-      final users = await _adminService.getAllUsers(limit: 50);
-      state = AsyncValue.data(users);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      final offers = await _adminService.getAllOffers();
+      state = AsyncValue.data(offers);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
+
+  Future<void> addOffer(Map<String, dynamic> offerData) async {
+    try {
+      await _adminService.addOffer(offerData);
+      await fetchOffers(); // Refresh the list
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  Future<void> updateOffer(String offerId, Map<String, dynamic> updates) async {
+    try {
+      await _adminService.updateOffer(offerId, updates);
+      await fetchOffers(); // Refresh the list
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  Future<void> deleteOffer(String offerId) async {
+    try {
+      await _adminService.deleteOffer(offerId);
+      await fetchOffers(); // Refresh the list
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+
+  Future<void> toggleStatus(String offerId, bool isActive) async {
+    try {
+      await _adminService.toggleOfferStatus(offerId, isActive);
+      await fetchOffers(); // Refresh the list
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 }
 
-// Admin Analytics Provider
-final adminAnalyticsProvider = StateNotifierProvider<AdminAnalyticsNotifier, AsyncValue<Map<String, dynamic>>>((ref) {
-  final adminService = ref.watch(adminServiceProvider);
-  return AdminAnalyticsNotifier(adminService);
-});
-
-class AdminAnalyticsNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>>> {
+// Statistics Notifier
+class StatisticsNotifier extends StateNotifier<AsyncValue<Map<String, int>>> {
   final AdminService _adminService;
 
-  AdminAnalyticsNotifier(this._adminService) : super(const AsyncValue.loading()) {
-    fetchAnalytics();
+  StatisticsNotifier(this._adminService) : super(const AsyncValue.loading()) {
+    fetchStatistics();
   }
-  Future<void> fetchAnalytics() async {
+
+  Future<void> fetchStatistics() async {
+    state = const AsyncValue.loading();
     try {
-      state = const AsyncValue.loading();
-      final analytics = await _adminService.getDashboardAnalytics();
-      state = AsyncValue.data(analytics);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      final stats = await _adminService.getStatistics();
+      state = AsyncValue.data(stats);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
     }
-  }
-
-  Future<void> loadAnalytics() async {
-    await fetchAnalytics();
-  }
-
-  Future<void> refresh() async {
-    await fetchAnalytics();
   }
 }
 
-// Admin Monthly Sales Provider
-final adminMonthlySalesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+// Providers
+final adminProductsProvider =
+    StateNotifierProvider<AdminProductsNotifier, AsyncValue<List<Product>>>(
+        (ref) {
   final adminService = ref.watch(adminServiceProvider);
-  return await adminService.getMonthlySalesData();
+  return AdminProductsNotifier(adminService);
 });
 
-// Admin Low Stock Products Provider
-final adminLowStockProvider = FutureProvider<List<Product>>((ref) async {
+final adminCategoriesProvider =
+    StateNotifierProvider<AdminCategoriesNotifier, AsyncValue<List<Category>>>(
+        (ref) {
   final adminService = ref.watch(adminServiceProvider);
-  return await adminService.getLowStockProducts();
+  return AdminCategoriesNotifier(adminService);
+});
+
+final adminOffersProvider =
+    StateNotifierProvider<AdminOffersNotifier, AsyncValue<List<Offer>>>((ref) {
+  final adminService = ref.watch(adminServiceProvider);
+  return AdminOffersNotifier(adminService);
+});
+
+final statisticsProvider =
+    StateNotifierProvider<StatisticsNotifier, AsyncValue<Map<String, int>>>(
+        (ref) {
+  final adminService = ref.watch(adminServiceProvider);
+  return StatisticsNotifier(adminService);
 });

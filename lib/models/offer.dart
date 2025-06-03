@@ -44,8 +44,10 @@ class Review {
       title: json['title'] ?? '',
       comment: json['comment'] ?? '',
       images: List<String>.from(json['images'] ?? []),
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
       isVerifiedPurchase: json['isVerifiedPurchase'] ?? false,
       helpfulCount: json['helpfulCount'] ?? 0,
       helpfulUserIds: List<String>.from(json['helpfulUserIds'] ?? []),
@@ -133,8 +135,10 @@ class Wishlist {
               ?.map((item) => WishlistItem.fromJson(item))
               .toList() ??
           [],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -193,7 +197,8 @@ class WishlistItem {
       id: json['id'] ?? '',
       productId: json['productId'] ?? '',
       product: Product.fromJson(json['product'] ?? {}),
-      addedAt: DateTime.parse(json['addedAt'] ?? DateTime.now().toIso8601String()),
+      addedAt:
+          DateTime.parse(json['addedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -274,14 +279,19 @@ class Offer {
       discountAmount: json['discountAmount']?.toDouble(),
       minimumPurchase: json['minimumPurchase']?.toDouble(),
       applicableProducts: List<String>.from(json['applicableProducts'] ?? []),
-      applicableCategories: List<String>.from(json['applicableCategories'] ?? []),
-      startDate: DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
-      endDate: DateTime.parse(json['endDate'] ?? DateTime.now().add(const Duration(days: 30)).toIso8601String()),
+      applicableCategories:
+          List<String>.from(json['applicableCategories'] ?? []),
+      startDate:
+          DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
+      endDate: DateTime.parse(json['endDate'] ??
+          DateTime.now().add(const Duration(days: 30)).toIso8601String()),
       isActive: json['isActive'] ?? true,
       usageLimit: json['usageLimit'] ?? 0,
       usedCount: json['usedCount'] ?? 0,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -309,10 +319,10 @@ class Offer {
 
   bool get isValid {
     final now = DateTime.now();
-    return isActive && 
-           now.isAfter(startDate) && 
-           now.isBefore(endDate) &&
-           (usageLimit == 0 || usedCount < usageLimit);
+    return isActive &&
+        now.isAfter(startDate) &&
+        now.isBefore(endDate) &&
+        (usageLimit == 0 || usedCount < usageLimit);
   }
 
   bool get isExpired => DateTime.now().isAfter(endDate);
@@ -326,7 +336,8 @@ class Offer {
   }
 
   bool canApplyToCategory(String categoryId) {
-    return applicableCategories.isEmpty || applicableCategories.contains(categoryId);
+    return applicableCategories.isEmpty ||
+        applicableCategories.contains(categoryId);
   }
 
   double calculateDiscount(double amount) {
@@ -336,7 +347,9 @@ class Offer {
 
     switch (type) {
       case OfferType.percentage:
-        return discountPercentage != null ? amount * (discountPercentage! / 100) : 0.0;
+        return discountPercentage != null
+            ? amount * (discountPercentage! / 100)
+            : 0.0;
       case OfferType.fixed:
         return discountAmount ?? 0.0;
       case OfferType.buyOneGetOne:

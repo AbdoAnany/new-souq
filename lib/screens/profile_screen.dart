@@ -1,12 +1,15 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
-import 'package:souq/screens/admin/admin_dashboard_screen.dart';
-import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/screens/wishlist_screen.dart';
+import 'package:souq/screens/order_history_screen.dart';
+import 'package:souq/utils/responsive_util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'admin/admin_dashboard_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -16,7 +19,7 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
@@ -24,69 +27,99 @@ class ProfileScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal:
+              ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Profile Header
             _buildProfileHeader(context, ref, authState),
-            
+
             // Account Settings Section
             _buildSectionHeader(context, 'Account Settings'),
-              _buildListItem(
+            _buildListItem(
               context: context,
-              leading: const Icon(Icons.person_outline),
+              leading: Icon(
+                Icons.person_outline,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Personal Information',
               onTap: () {
                 // Navigate to personal info screen
               },
             ),
-              _buildListItem(
+            _buildListItem(
               context: context,
-              leading: const Icon(Icons.location_on_outlined),
+              leading: Icon(
+                Icons.location_on_outlined,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Shipping Addresses',
               onTap: () {
                 // Navigate to addresses screen
               },
             ),
-            
+
             _buildListItem(
               context: context,
-              leading: const Icon(Icons.payment),
+              leading: Icon(
+                Icons.payment,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Payment Methods',
               onTap: () {
                 // Navigate to payment methods screen
               },
             ),
-            
+
             _buildListItem(
               context: context,
-              leading: const Icon(Icons.favorite_border),
+              leading: Icon(
+                Icons.favorite_border,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'My Wishlist',
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const WishlistScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const WishlistScreen()),
                 );
               },
             ),
-            
+
             _buildListItem(
               context: context,
-              leading: const Icon(Icons.shopping_bag_outlined),
+              leading: Icon(
+                Icons.shopping_bag_outlined,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Order History',
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const OrderHistoryScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const OrderHistoryScreen()),
                 );
               },
             ),
-            
+
             // App Settings Section
             _buildSectionHeader(context, 'App Settings'),
-              _buildListItem(
+            _buildListItem(
               context: context,
-              leading: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+              leading: Icon(
+                isDark ? Icons.light_mode : Icons.dark_mode,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Dark Mode',
               trailing: Switch(
                 value: isDark,
@@ -101,21 +134,42 @@ class ProfileScreen extends ConsumerWidget {
                 // ref.read(themeModeNotifierProvider.notifier).toggleTheme();
               },
             ),
-              _buildListItem(
+            _buildListItem(
               context: context,
-              leading: const Icon(Icons.language),
+              leading: Icon(
+                Icons.language,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Language',
               trailing: DropdownButton<String>(
                 value: 'en', // TODO: Get from proper locale provider
                 underline: const SizedBox(),
-                items: const [
+                style: TextStyle(
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 14, tablet: 15, desktop: 16),
+                  color: theme.textTheme.bodyMedium?.color,
+                ),
+                items: [
                   DropdownMenuItem(
                     value: 'en',
-                    child: Text('English'),
+                    child: Text(
+                      'English',
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'ar',
-                    child: Text('العربية'),
+                    child: Text(
+                      'العربية',
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
+                      ),
+                    ),
                   ),
                 ],
                 onChanged: (value) {
@@ -129,12 +183,17 @@ class ProfileScreen extends ConsumerWidget {
                 // No additional action needed as dropdown handles it
               },
             ),
-              _buildListItem(
+            _buildListItem(
               context: context,
-              leading: const Icon(Icons.notifications_outlined),
+              leading: Icon(
+                Icons.notifications_outlined,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Notifications',
               trailing: Switch(
-                value: true, // This would be from a notifications settings provider
+                value:
+                    true, // This would be from a notifications settings provider
                 activeColor: theme.colorScheme.primary,
                 onChanged: (value) {
                   // Toggle notifications
@@ -144,83 +203,100 @@ class ProfileScreen extends ConsumerWidget {
                 // Navigate to notification settings
               },
             ),
-            
+
             // Support Section
             _buildSectionHeader(context, 'Support'),
-              _buildListItem(
+            _buildListItem(
               context: context,
-              leading: const Icon(Icons.help_outline),
+              leading: Icon(
+                Icons.help_outline,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Help Center',
               onTap: () {
                 // Navigate to help center
               },
             ),
-            
+
             _buildListItem(
               context: context,
-              leading: const Icon(Icons.policy_outlined),
+              leading: Icon(
+                Icons.policy_outlined,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Privacy Policy',
               onTap: () {
                 // Show privacy policy
               },
             ),
-              _buildListItem(
+
+            _buildListItem(
               context: context,
-              leading: const Icon(Icons.description_outlined),
+              leading: Icon(
+                Icons.description_outlined,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
               title: 'Terms & Conditions',
               onTap: () {
                 // Show terms and conditions
               },
-            ),
-            
-            // Admin Section (only visible for admin users)
-            if (authState.value?.role == 'admin') ...[
-              _buildSectionHeader(context, 'Admin'),
-              _buildListItem(
-                context: context,
-                leading: const Icon(Icons.admin_panel_settings),
-                title: 'Admin Dashboard',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminDashboardScreen(),
-                    ),
-                  );
-                },
+            ), _buildListItem(
+              context: context,
+              leading: Icon(
+                Icons.description_outlined,
+                size: ResponsiveUtil.iconSize(
+                    mobile: 20, tablet: 22, desktop: 24),
               ),
-            ],
-            
+              title: 'dashboard',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AdminDashboardScreen()),
+                );
+
+              },
+            ),
+
             // Sign Out Button
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(
+                  ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
               child: ElevatedButton(
-                onPressed: authState.value != null 
+                onPressed: authState.value != null
                     ? () {
                         ref.read(authProvider.notifier).signOut();
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
                 ),
                 child: Text(
                   authState.value != null ? 'Sign Out' : 'Sign In',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 16, tablet: 18, desktop: 20),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
-            
+
             // App Version
             Center(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
+                padding: EdgeInsets.only(bottom: 16.h),
                 child: Text(
                   'Version ${AppConstants.appVersion}',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 12, tablet: 13, desktop: 14),
+                  ),
                 ),
               ),
             ),
@@ -230,13 +306,17 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, WidgetRef ref, AsyncValue<User?> authState) {
+  Widget _buildProfileHeader(
+      BuildContext context, WidgetRef ref, AsyncValue<User?> authState) {
     final theme = Theme.of(context);
-    
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(
+          ResponsiveUtil.spacing(mobile: 20, tablet: 24, desktop: 28)),
+      margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
         color: theme.primaryColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: authState.when(
         data: (user) {
@@ -244,75 +324,103 @@ class ProfileScreen extends ConsumerWidget {
             return Column(
               children: [
                 CircleAvatar(
-                  radius: 40,
+                  radius: ResponsiveUtil.iconSize(
+                      mobile: 40, tablet: 45, desktop: 50),
                   backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
                   child: Icon(
                     Icons.person,
-                    size: 40,
+                    size: ResponsiveUtil.iconSize(
+                        mobile: 40, tablet: 45, desktop: 50),
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 Text(
                   'Guest User',
-                  style: theme.textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: ResponsiveUtil.fontSize(
+                        mobile: 20, tablet: 22, desktop: 24),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 ElevatedButton(
                   onPressed: () {
                     // Navigate to login screen
                   },
-                  child: const Text('Sign In'),
+                  child: Text(
+                    'Sign In',
+                    style: TextStyle(
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14, tablet: 15, desktop: 16),
+                    ),
+                  ),
                 ),
               ],
             );
           }
-          
+
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CircleAvatar(
-                radius: 40,                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                radius: ResponsiveUtil.iconSize(
+                    mobile: 40, tablet: 45, desktop: 50),
+                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
                 backgroundImage: user.profileImageUrl != null
                     ? CachedNetworkImageProvider(user.profileImageUrl!)
                     : null,
                 child: user.profileImageUrl == null
                     ? Text(
-                        user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '',
+                        user.firstName.isNotEmpty
+                            ? user.firstName[0].toUpperCase()
+                            : '',
                         style: theme.textTheme.displayMedium?.copyWith(
                           color: theme.colorScheme.primary,
+                          fontSize: ResponsiveUtil.fontSize(
+                              mobile: 24, tablet: 28, desktop: 32),
                         ),
                       )
                     : null,
               ),
-              const SizedBox(width: 20),
+              SizedBox(width: 20.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '${user.firstName} ${user.lastName}',
-                      style: theme.textTheme.titleLarge,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 18, tablet: 20, desktop: 22),
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       user.email,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     Text(
                       user.phoneNumber ?? 'No phone number',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
                       ),
                     ),
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.edit),
+                icon: Icon(
+                  Icons.edit,
+                  size: ResponsiveUtil.iconSize(
+                      mobile: 20, tablet: 22, desktop: 24),
+                ),
                 onPressed: () {
                   // Navigate to edit profile
                 },
@@ -320,11 +428,22 @@ class ProfileScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: SizedBox(
+            width: ResponsiveUtil.iconSize(mobile: 40, tablet: 45, desktop: 50),
+            height:
+                ResponsiveUtil.iconSize(mobile: 40, tablet: 45, desktop: 50),
+            child: const CircularProgressIndicator(),
+          ),
+        ),
         error: (_, __) => Center(
           child: Text(
             'Failed to load profile',
-            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.red,
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 14, tablet: 15, desktop: 16),
+            ),
           ),
         ),
       ),
@@ -333,14 +452,16 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     final theme = Theme.of(context);
-    
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
       child: Text(
         title,
         style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.bold,
           color: theme.colorScheme.primary,
+          fontSize:
+              ResponsiveUtil.fontSize(mobile: 16, tablet: 18, desktop: 20),
         ),
       ),
     );
@@ -355,10 +476,32 @@ class ProfileScreen extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 16.w,
+        vertical: 4.h,
+      ),
       leading: leading,
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle) : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize:
+              ResponsiveUtil.fontSize(mobile: 16, tablet: 17, desktop: 18),
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14, tablet: 15, desktop: 16),
+              ),
+            )
+          : null,
+      trailing: trailing ??
+          Icon(
+            Icons.chevron_right,
+            size: ResponsiveUtil.iconSize(mobile: 20, tablet: 22, desktop: 24),
+          ),
       onTap: onTap,
     );
   }

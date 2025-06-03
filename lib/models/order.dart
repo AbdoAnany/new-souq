@@ -1,12 +1,7 @@
-// DEPRECATED: This file is deprecated due to naming conflicts with Firestore's internal Order enum.
-// Use user_order.dart instead which contains UserOrder class.
-// This file will be removed in a future version.
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/user.dart';
 
-@Deprecated('Use OrderStatus from user_order.dart instead')
 enum OrderStatus {
   pending,
   confirmed,
@@ -16,33 +11,7 @@ enum OrderStatus {
   cancelled,
   returned
 }
-@Deprecated('Use PaymentMethod from user_order.dart instead')
-enum PaymentMethod {
-  cashOnDelivery,
-  creditCard,
-  paypal,
-  stripe,
-  unknown
-}
 
-extension PaymentMethodExtension on PaymentMethod {
-  String get displayName {
-    switch (this) {
-      case PaymentMethod.cashOnDelivery:
-        return 'Cash on Delivery';
-      case PaymentMethod.creditCard:
-        return 'Credit Card';
-      case PaymentMethod.paypal:
-        return 'PayPal';
-      case PaymentMethod.stripe:
-        return 'Stripe';
-      case PaymentMethod.unknown:
-        return 'Unknown';
-    }
-  }
-}
-  
-@Deprecated('Use UserOrder from user_order.dart instead')
 class OrderModel {
   final String id;
   final String userId;
@@ -99,9 +68,6 @@ class OrderModel {
   });
 
   bool get canBeCancelled => status == OrderStatus.pending || status == OrderStatus.confirmed;
-
-  double get totalAmount => total;
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -285,8 +251,6 @@ class OrderItem {
     required this.total,
     this.customizations,
   });
-
-  String get productName => title;
 
   Map<String, dynamic> toJson() {
     return {

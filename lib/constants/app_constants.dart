@@ -103,6 +103,8 @@ class AppConstants {
   static const int ordersPerPage = 10;
   static const int reviewsPerPage = 10;
   static const int pageSize = 20;
+
+  static var noImageUri=Uri.parse("https://souq.com.sa/images/no-image.jpg");
 }
 
 class AppStrings {

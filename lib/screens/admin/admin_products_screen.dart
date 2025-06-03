@@ -1,505 +1,804 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/models/product.dart';
-import 'package:souq/providers/admin_provider.dart';
-import 'package:souq/widgets/custom_text_field.dart';
+import '../../models/product.dart';
+import '../../providers/admin_provider.dart';
+import '../../constants/app_constants.dart';
+import '../../utils/responsive_util.dart';
+import 'widgets/product_form_dialog.dart';
 
 class AdminProductsScreen extends ConsumerStatefulWidget {
-  const AdminProductsScreen({Key? key}) : super(key: key);
+  const AdminProductsScreen({super.key});
 
   @override
-  ConsumerState<AdminProductsScreen> createState() => _AdminProductsScreenState();
+  ConsumerState<AdminProductsScreen> createState() =>
+      _AdminProductsScreenState();
 }
 
 class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
   String _searchQuery = '';
-  final _searchController = TextEditingController();
+  String _selectedCategory = 'All';
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // Load products when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(adminProductsProvider.notifier).fetchProducts();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final productsState = ref.watch(adminProductsProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products Management'),
-        backgroundColor: theme.primaryColor,
+        title: Text(
+          'Manage Products',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 18,
+              tablet: 20,
+              desktop: 22,
+            ),
+          ),
+        ),
+        backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddProductDialog(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(adminProductsProvider),
+            icon: Icon(
+              Icons.refresh,
+              size: ResponsiveUtil.iconSize(
+                mobile: 24,
+                tablet: 26,
+                desktop: 28,
+              ),
+            ),
+            onPressed: () {
+              ref.read(adminProductsProvider.notifier).fetchProducts();
+            },
           ),
         ],
       ),
       body: Column(
         children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search products...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+          // Search and Filter Bar
+          Container(
+            padding: EdgeInsets.all(ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 20,
+              desktop: 24,
+            )),
+            color: theme.cardColor,
+            child: Column(
+              children: [
+                // Search Field
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search products...',
+                    hintStyle: TextStyle(
+                      fontSize: ResponsiveUtil.fontSize(
+                        mobile: 14,
+                        tablet: 15,
+                        desktop: 16,
+                      ),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 20,
+                        tablet: 22,
+                        desktop: 24,
+                      ),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadiusMedium),
+                    ),
+                    filled: true,
+                    fillColor: AppConstants.backgroundColor,
+                  ),
+                  style: TextStyle(
+                    fontSize: ResponsiveUtil.fontSize(
+                      mobile: 14,
+                      tablet: 15,
+                      desktop: 16,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
                 ),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
+                SizedBox(
+                    height: ResponsiveUtil.spacing(
+                  mobile: 16,
+                  tablet: 18,
+                  desktop: 20,
+                )),
+                // Category Filter
+                Row(
+                  children: [
+                    Text(
+                      'Category: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DropdownButton<String>(
+                        value: _selectedCategory,
+                        isExpanded: true,
+                        style: TextStyle(
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                        items: ['All', ...AppConstants.productCategories]
+                            .map((category) => DropdownMenuItem(
+                                  value: category,
+                                  child: Text(category),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value!;
+                          });
                         },
-                      )
-                    : null,
-              ),
-              onChanged: (value) => setState(() => _searchQuery = value),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-
+          const Divider(height: 1),
           // Products List
           Expanded(
             child: productsState.when(
+              data: (products) {
+                final filteredProducts = products.where((product) {
+                  final matchesSearch = product.name
+                          .toLowerCase()
+                          .contains(_searchQuery) ||
+                      product.description.toLowerCase().contains(_searchQuery);
+                  final matchesCategory = _selectedCategory == 'All' ||
+                      product.categoryId == _selectedCategory;
+                  return matchesSearch && matchesCategory;
+                }).toList();
+
+                if (filteredProducts.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 64,
+                            tablet: 72,
+                            desktop: 80,
+                          ),
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 16,
+                          tablet: 18,
+                          desktop: 20,
+                        )),
+                        Text(
+                          'No products found',
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 18,
+                              tablet: 20,
+                              desktop: 22,
+                            ),
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 8,
+                          tablet: 10,
+                          desktop: 12,
+                        )),
+                        Text(
+                          'Add some products to get started',
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 14,
+                              tablet: 15,
+                              desktop: 16,
+                            ),
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = filteredProducts[index];
+                    return _buildProductCard(product);
+                  },
+                );
+              },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error, size: 48, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Error: $error'),
+                    Icon(
+                      Icons.error_outline,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 64,
+                        tablet: 72,
+                        desktop: 80,
+                      ),
+                      color: AppConstants.errorColor,
+                    ),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 16,
+                      tablet: 18,
+                      desktop: 20,
+                    )),
+                    Text(
+                      'Error loading products',
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18,
+                          tablet: 20,
+                          desktop: 22,
+                        ),
+                        color: AppConstants.errorColor,
+                      ),
+                    ),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 8,
+                      tablet: 10,
+                      desktop: 12,
+                    )),
+                    Text(
+                      error.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    SizedBox(
+                        height: ResponsiveUtil.spacing(
+                      mobile: 16,
+                      tablet: 18,
+                      desktop: 20,
+                    )),
                     ElevatedButton(
-                      onPressed: () => ref.refresh(adminProductsProvider),
-                      child: const Text('Retry'),
+                      onPressed: () {
+                        ref
+                            .read(adminProductsProvider.notifier)
+                            .fetchProducts();
+                      },
+                      child: Text(
+                        'Try Again',
+                        style: TextStyle(
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              data: (products) {
-                final filteredProducts = products.where((product) {
-                  return product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                         product.category.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                         product.sku?.toLowerCase().contains(_searchQuery.toLowerCase()) == true;
-                }).toList();
-
-                if (filteredProducts.isEmpty) {
-                  return const Center(
-                    child: Text('No products found'),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filteredProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = filteredProducts[index];
-                    return _ProductCard(
-                      product: product,
-                      onEdit: () => _showEditProductDialog(context, product),
-                      onDelete: () => _showDeleteProductDialog(context, product),
-                    );
-                  },
-                );
-              },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  void _showAddProductDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const _ProductFormDialog(),
-    );
-  }
-
-  void _showEditProductDialog(BuildContext context, Product product) {
-    showDialog(
-      context: context,
-      builder: (context) => _ProductFormDialog(product: product),
-    );
-  }
-
-  void _showDeleteProductDialog(BuildContext context, Product product) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Product'),
-        content: Text('Are you sure you want to delete "${product.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppConstants.primaryColor,
+        foregroundColor: Colors.white,
+        onPressed: () => _showProductDialog(context),
+        child: Icon(
+          Icons.add,
+          size: ResponsiveUtil.iconSize(
+            mobile: 24,
+            tablet: 26,
+            desktop: 28,
           ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                await ref.read(adminProductsProvider.notifier).deleteProduct(product.id);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Product deleted successfully')),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
+        ),
       ),
     );
   }
-}
 
-class _ProductCard extends StatelessWidget {
-  final Product product;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _ProductCard({
-    required this.product,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget _buildProductCard(Product product) {
+    final imageSize = ResponsiveUtil.spacing(
+      mobile: 80,
+      tablet: 90,
+      desktop: 100,
+    );
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: CachedNetworkImage(
-            imageUrl: product.images.isNotEmpty ? product.images.first : '',
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              width: 60,
-              height: 60,
-              color: Colors.grey[300],
-              child: const Icon(Icons.image),
-            ),
-            errorWidget: (context, url, error) => Container(
-              width: 60,
-              height: 60,
-              color: Colors.grey[300],
-              child: const Icon(Icons.image),
-            ),
-          ),
+      margin: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 20,
+          desktop: 24,
         ),
-        title: Text(
-          product.name,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        vertical: ResponsiveUtil.spacing(
+          mobile: 8,
+          tablet: 10,
+          desktop: 12,
         ),
-        subtitle: Column(
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 18,
+          desktop: 20,
+        )),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Category: ${product.category}'),
-            Text('Price: \$${product.price.toStringAsFixed(2)}'),
-            Text('Stock: ${product.quantity}'),
-            if (product.sku != null) Text('SKU: ${product.sku}'),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: product.inStock ? Colors.green : Colors.red,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                product.inStock ? 'In Stock' : 'Out of Stock',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            PopupMenuButton(
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadiusMedium),
+                  child: Image.network(
+                    product.images.first,
+                    width: imageSize,
+                    height: imageSize,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: imageSize,
+                        height: imageSize,
+                        color: Colors.grey[300],
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 24,
+                            tablet: 26,
+                            desktop: 28,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
+                SizedBox(
+                    width: ResponsiveUtil.spacing(
+                  mobile: 16,
+                  tablet: 18,
+                  desktop: 20,
+                )),
+                // Product Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              product.name,
+                              style: TextStyle(
+                                fontSize: ResponsiveUtil.fontSize(
+                                  mobile: 16,
+                                  tablet: 17,
+                                  desktop: 18,
+                                ),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          // Featured Badge
+                          if (product.isFeatured)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: ResponsiveUtil.spacing(
+                                  mobile: 8,
+                                  tablet: 10,
+                                  desktop: 12,
+                                ),
+                                vertical: ResponsiveUtil.spacing(
+                                  mobile: 4,
+                                  tablet: 5,
+                                  desktop: 6,
+                                ),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppConstants.accentColor,
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.borderRadiusSmall),
+                              ),
+                              child: Text(
+                                'Featured',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: ResponsiveUtil.fontSize(
+                                    mobile: 12,
+                                    tablet: 13,
+                                    desktop: 14,
+                                  ),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
+                      Text(
+                        product.categoryId,
+                        style: TextStyle(
+                          color: AppConstants.textSecondaryColor,
+                          fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14,
+                            tablet: 15,
+                            desktop: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
+                      Row(
+                        children: [
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 16,
+                                tablet: 17,
+                                desktop: 18,
+                              ),
+                              fontWeight: FontWeight.bold,
+                              color: AppConstants.primaryColor,
+                            ),
+                          ),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                            mobile: 16,
+                            tablet: 18,
+                            desktop: 20,
+                          )),
+                          Text(
+                            'Stock: ${product.quantity}',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
+                              color: product.quantity > 0
+                                  ? AppConstants.accentColor
+                                  : AppConstants.errorColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                          height: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star,
+                            size: ResponsiveUtil.iconSize(
+                              mobile: 16,
+                              tablet: 17,
+                              desktop: 18,
+                            ),
+                            color: Colors.amber[700],
+                          ),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                            mobile: 4,
+                            tablet: 5,
+                            desktop: 6,
+                          )),
+                          Text(
+                            '${product.rating.toStringAsFixed(1)}',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              width: ResponsiveUtil.spacing(
+                            mobile: 8,
+                            tablet: 10,
+                            desktop: 12,
+                          )),
+                          Text(
+                            '(${product.reviewCount} reviews)',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ],
-              onSelected: (value) {
-                if (value == 'edit') {
-                  onEdit();
-                } else if (value == 'delete') {
-                  onDelete();
-                }
-              },
+            ),
+            SizedBox(
+                height: ResponsiveUtil.spacing(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            )),
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildActionButton(
+                  icon: Icons.edit,
+                  label: 'Edit',
+                  color: AppConstants.primaryColor,
+                  onPressed: () => _showProductDialog(context, product),
+                ),
+                _buildActionButton(
+                  icon: product.isFeatured ? Icons.star : Icons.star_border,
+                  label: product.isFeatured ? 'Unfeature' : 'Feature',
+                  color: Colors.amber[700]!,
+                  onPressed: () => _toggleFeatured(product),
+                ),
+                _buildActionButton(
+                  icon: Icons.inventory,
+                  label: 'Stock',
+                  color: AppConstants.accentColor,
+                  onPressed: () => _showStockDialog(product),
+                ),
+                _buildActionButton(
+                  icon: Icons.delete,
+                  label: 'Delete',
+                  color: AppConstants.errorColor,
+                  onPressed: () => _confirmDelete(product),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class _ProductFormDialog extends ConsumerStatefulWidget {
-  final Product? product;
-
-  const _ProductFormDialog({this.product});
-
-  @override
-  ConsumerState<_ProductFormDialog> createState() => _ProductFormDialogState();
-}
-
-class _ProductFormDialogState extends ConsumerState<_ProductFormDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _originalPriceController = TextEditingController();
-  final _categoryController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _skuController = TextEditingController();
-  final _brandController = TextEditingController();
-  final _imageUrlController = TextEditingController();
-
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.product != null) {
-      final product = widget.product!;
-      _nameController.text = product.name;
-      _descriptionController.text = product.description;
-      _priceController.text = product.price.toString();
-      _originalPriceController.text = product.originalPrice?.toString() ?? '';
-      _categoryController.text = product.category;
-      _quantityController.text = product.quantity.toString();
-      _skuController.text = product.sku ?? '';
-      _brandController.text = product.brand ?? '';
-      _imageUrlController.text = product.images.isNotEmpty ? product.images.first : '';
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _priceController.dispose();
-    _originalPriceController.dispose();
-    _categoryController.dispose();
-    _quantityController.dispose();
-    _skuController.dispose();
-    _brandController.dispose();
-    _imageUrlController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.product == null ? 'Add Product' : 'Edit Product'),
-      content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomTextField(
-                  controller: _nameController,
-                  label: 'Product Name',
-                  validator: (value) => value?.isEmpty == true ? 'Required' : null,
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _descriptionController,
-                  label: 'Description',
-                  maxLines: 3,
-                  validator: (value) => value?.isEmpty == true ? 'Required' : null,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _priceController,
-                        label: 'Price',
-                        keyboardType: TextInputType.number,
-                        validator: (value) => value?.isEmpty == true ? 'Required' : null,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _originalPriceController,
-                        label: 'Original Price (Optional)',
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _categoryController,
-                  label: 'Category',
-                  validator: (value) => value?.isEmpty == true ? 'Required' : null,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _quantityController,
-                        label: 'Quantity',
-                        keyboardType: TextInputType.number,
-                        validator: (value) => value?.isEmpty == true ? 'Required' : null,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _skuController,
-                        label: 'SKU (Optional)',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _brandController,
-                  label: 'Brand (Optional)',
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _imageUrlController,
-                  label: 'Image URL',
-                  validator: (value) => value?.isEmpty == true ? 'Required' : null,
-                ),
-              ],
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            icon,
+            color: color,
+            size: ResponsiveUtil.iconSize(
+              mobile: 20,
+              tablet: 22,
+              desktop: 24,
             ),
           ),
+          onPressed: onPressed,
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _saveProduct,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(),
-                )
-              : Text(widget.product == null ? 'Add' : 'Update'),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 12,
+              tablet: 13,
+              desktop: 14,
+            ),
+            color: color,
+          ),
         ),
       ],
     );
   }
 
-  Future<void> _saveProduct() async {
-    if (!_formKey.currentState!.validate()) return;
+  void _showProductDialog(BuildContext context, [Product? product]) {
+    showDialog(
+      context: context,
+      builder: (context) => ProductFormDialog(product: product),
+    );
+  }
 
-    setState(() => _isLoading = true);
-
-    try {
-      final product = Product(
-        id: widget.product?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text,
-        description: _descriptionController.text,
-        price: double.parse(_priceController.text),
-        originalPrice: _originalPriceController.text.isNotEmpty 
-            ? double.parse(_originalPriceController.text) 
-            : null,
-        categoryId: _categoryController.text.toLowerCase().replaceAll(' ', '-'),
-        category: _categoryController.text,
-        images: [_imageUrlController.text],
-        inStock: int.parse(_quantityController.text) > 0,
-        quantity: int.parse(_quantityController.text),
-        rating: widget.product?.rating ?? 0.0,
-        reviewCount: widget.product?.reviewCount ?? 0,
-        specifications: widget.product?.specifications ?? {},
-        tags: widget.product?.tags ?? [],
-        createdAt: widget.product?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-        isFeatured: widget.product?.isFeatured ?? false,
-        brand: _brandController.text.isNotEmpty ? _brandController.text : null,
-        sku: _skuController.text.isNotEmpty ? _skuController.text : null,
-      );
-
-      if (widget.product == null) {
-        await ref.read(adminProductsProvider.notifier).addProduct(product);
-        if (mounted) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Product added successfully')),
-          );
-        }
-      } else {
-        await ref.read(adminProductsProvider.notifier).updateProduct(product);
-        if (mounted) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Product updated successfully')),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+  void _toggleFeatured(Product product) {
+    ref.read(adminProductsProvider.notifier).toggleFeatured(
+          product.id,
+          !product.isFeatured,
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+  }
+
+  void _showStockDialog(Product product) {
+    final controller = TextEditingController(text: product.quantity.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Update Stock - ${product.name}',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            ),
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
+            ),
+          ),
+          decoration: InputDecoration(
+            labelText: 'Stock Quantity',
+            labelStyle: TextStyle(
+              fontSize: ResponsiveUtil.fontSize(
+                mobile: 14,
+                tablet: 15,
+                desktop: 16,
+              ),
+            ),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newStock = int.tryParse(controller.text) ?? 0;
+              ref.read(adminProductsProvider.notifier).updateStock(
+                    product.id,
+                    newStock,
+                  );
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Update',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Delete Product',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 16,
+              tablet: 18,
+              desktop: 20,
+            ),
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${product.name}"?',
+          style: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.errorColor,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              ref
+                  .read(adminProductsProvider.notifier)
+                  .deleteProduct(product.id);
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

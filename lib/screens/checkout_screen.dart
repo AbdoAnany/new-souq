@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
+import 'package:souq/models/cart.dart';
 import 'package:souq/models/user.dart';
-import 'package:souq/models/user_order.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_confirmation_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
+import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/utils/validator.dart';
 import 'package:souq/widgets/custom_button.dart';
 import 'package:souq/widgets/custom_text_field.dart';
@@ -26,7 +28,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _selectedPaymentMethod = AppConstants.cashOnDelivery;
   bool _sameAsBillingAddress = true;
   bool _isPlacingOrder = false;
-  
+
   // Address form controllers
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -38,7 +40,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _stateController = TextEditingController();
   final _postalCodeController = TextEditingController();
   final _countryController = TextEditingController();
-  
+
   // Shipping address controllers (if different from billing)
   final _shippingFirstNameController = TextEditingController();
   final _shippingLastNameController = TextEditingController();
@@ -49,7 +51,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _shippingStateController = TextEditingController();
   final _shippingPostalCodeController = TextEditingController();
   final _shippingCountryController = TextEditingController();
-  
+
   // Payment details
   final _cardNumberController = TextEditingController();
   final _cardHolderNameController = TextEditingController();
@@ -66,7 +68,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
-    
+
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -77,7 +79,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _stateController.dispose();
     _postalCodeController.dispose();
     _countryController.dispose();
-    
+
     _shippingFirstNameController.dispose();
     _shippingLastNameController.dispose();
     _shippingPhoneController.dispose();
@@ -87,14 +89,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _shippingStateController.dispose();
     _shippingPostalCodeController.dispose();
     _shippingCountryController.dispose();
-    
+
     _cardNumberController.dispose();
     _cardHolderNameController.dispose();
     _expiryDateController.dispose();
     _cvvController.dispose();
-    
+
     super.dispose();
   }
+
   void _prefillUserInfo() {
     final user = ref.read(authProvider).value;
     if (user != null) {
@@ -102,7 +105,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       _lastNameController.text = user.lastName;
       _emailController.text = user.email;
       _phoneController.text = user.phoneNumber ?? '';
-        // Pre-fill address if available
+      // Pre-fill address if available
       if (user.addresses.isNotEmpty) {
         final defaultAddress = user.addresses.first;
         _addressLine1Controller.text = defaultAddress.street;
@@ -171,29 +174,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     setState(() {
       _isPlacingOrder = true;
     });
-    
+
     try {
       // Get user ID
       final user = ref.read(authProvider).value;
       if (user == null) {
         throw Exception('You must be logged in to place an order');
       }
-      
+
       // Get cart from provider
       final cart = ref.read(cartProvider).value;
       if (cart == null || cart.isEmpty) {
         throw Exception('Your cart is empty');
-      }        // Create shipping address
+      } // Create shipping address
       final shippingAddress = _sameAsBillingAddress
           ? Address(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               firstName: _firstNameController.text,
               lastName: _lastNameController.text,
               title: 'Billing Address',
-              street: _addressLine1Controller.text + 
-                     (_addressLine2Controller.text.isNotEmpty ? ', ${_addressLine2Controller.text}' : ''),
+              street: _addressLine1Controller.text +
+                  (_addressLine2Controller.text.isNotEmpty
+                      ? ', ${_addressLine2Controller.text}'
+                      : ''),
               addressLine1: _addressLine1Controller.text,
-              addressLine2: _addressLine2Controller.text.isNotEmpty ? _addressLine2Controller.text : null,
+              addressLine2: _addressLine2Controller.text.isNotEmpty
+                  ? _addressLine2Controller.text
+                  : null,
               city: _cityController.text,
               state: _stateController.text,
               postalCode: _postalCodeController.text,
@@ -205,14 +212,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               lastName: _shippingLastNameController.text,
               title: 'Shipping Address',
               street: _shippingAddressLine1Controller.text +
-                     (_shippingAddressLine2Controller.text.isNotEmpty ? ', ${_shippingAddressLine2Controller.text}' : ''),
+                  (_shippingAddressLine2Controller.text.isNotEmpty
+                      ? ', ${_shippingAddressLine2Controller.text}'
+                      : ''),
               addressLine1: _shippingAddressLine1Controller.text,
-              addressLine2: _shippingAddressLine2Controller.text.isNotEmpty ? _shippingAddressLine2Controller.text : null,
+              addressLine2: _shippingAddressLine2Controller.text.isNotEmpty
+                  ? _shippingAddressLine2Controller.text
+                  : null,
               city: _shippingCityController.text,
               state: _shippingStateController.text,
               postalCode: _shippingPostalCodeController.text,
               country: _shippingCountryController.text,
-            );      
+            );
       // Create billing address
       final billingAddress = Address(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -220,19 +231,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         lastName: _lastNameController.text,
         title: 'Billing Address',
         street: _addressLine1Controller.text +
-               (_addressLine2Controller.text.isNotEmpty ? ', ${_addressLine2Controller.text}' : ''),
+            (_addressLine2Controller.text.isNotEmpty
+                ? ', ${_addressLine2Controller.text}'
+                : ''),
         addressLine1: _addressLine1Controller.text,
-        addressLine2: _addressLine2Controller.text.isNotEmpty ? _addressLine2Controller.text : null,
+        addressLine2: _addressLine2Controller.text.isNotEmpty
+            ? _addressLine2Controller.text
+            : null,
         city: _cityController.text,
         state: _stateController.text,
         postalCode: _postalCodeController.text,
         country: _countryController.text,
       );
-      
+
       // Convert payment method string to enum
       PaymentMethod paymentMethod;
       String? paymentId;
-      
+
       switch (_selectedPaymentMethod) {
         case AppConstants.cashOnDelivery:
           paymentMethod = PaymentMethod.cashOnDelivery;
@@ -244,19 +259,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         default:
           paymentMethod = PaymentMethod.cashOnDelivery;
       }
-      
+
       // Place order using order provider
       final order = await ref.read(ordersProvider.notifier).placeOrder(
-        userId: user.id,
-        cart: cart,
-        shippingAddress: shippingAddress,
-        billingAddress: billingAddress,
-        paymentMethod: paymentMethod,
-        paymentId: paymentId,
-      );
-      
+            userId: user.id,
+            cart: cart,
+            shippingAddress: shippingAddress,
+            billingAddress: billingAddress,
+            paymentMethod: paymentMethod,
+            paymentId: paymentId,
+          );
+
       if (!mounted) return;
-      
+
       // Navigate to order confirmation
       Navigator.pushReplacement(
         context,
@@ -300,11 +315,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Text(
             "Billing Address",
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 20, tablet: 22, desktop: 24),
+                ),
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           // Name fields
           Row(
             children: [
@@ -315,7 +332,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   validator: AppValidator.validateName,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: CustomTextField(
                   controller: _lastNameController,
@@ -325,8 +342,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           // Contact fields
           CustomTextField(
             controller: _phoneController,
@@ -334,30 +351,31 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             keyboardType: TextInputType.phone,
             validator: AppValidator.validatePhoneNumber,
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           CustomTextField(
             controller: _emailController,
             label: AppStrings.email,
             keyboardType: TextInputType.emailAddress,
             validator: AppValidator.validateEmail,
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           // Address fields
           CustomTextField(
             controller: _addressLine1Controller,
             label: "Address Line 1",
-            validator: (value) => AppValidator.validateRequired(value, "Address"),
+            validator: (value) =>
+                AppValidator.validateRequired(value, "Address"),
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           CustomTextField(
             controller: _addressLine2Controller,
             label: "Address Line 2 (Optional)",
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           Row(
             children: [
               Expanded(
@@ -367,18 +385,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   validator: AppValidator.validateCity,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: CustomTextField(
                   controller: _stateController,
                   label: "State/Province",
-                  validator: (value) => AppValidator.validateRequired(value, "State"),
+                  validator: (value) =>
+                      AppValidator.validateRequired(value, "State"),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           Row(
             children: [
               Expanded(
@@ -389,12 +408,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   validator: AppValidator.validatePostalCode,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: CustomTextField(
                   controller: _countryController,
                   label: AppStrings.country,
-                  validator: (value) => AppValidator.validateRequired(value, "Country"),
+                  validator: (value) =>
+                      AppValidator.validateRequired(value, "Country"),
                 ),
               ),
             ],
@@ -411,11 +431,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         Text(
           "Shipping Address",
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
         ),
-        const SizedBox(height: 16),
-        
+        SizedBox(height: 16.h),
+
         // Same as billing checkbox
         Row(
           children: [
@@ -430,8 +452,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             const Text("Same as billing address"),
           ],
         ),
-        const SizedBox(height: 16),
-        
+        SizedBox(height: 16.h),
+
         if (!_sameAsBillingAddress)
           Form(
             key: _formKey,
@@ -447,7 +469,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         validator: AppValidator.validateName,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: CustomTextField(
                         controller: _shippingLastNameController,
@@ -457,8 +479,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                
+                SizedBox(height: 16.h),
+
                 // Contact field
                 CustomTextField(
                   controller: _shippingPhoneController,
@@ -466,22 +488,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   keyboardType: TextInputType.phone,
                   validator: AppValidator.validatePhoneNumber,
                 ),
-                const SizedBox(height: 16),
-                
+                SizedBox(height: 16.h),
+
                 // Address fields
                 CustomTextField(
                   controller: _shippingAddressLine1Controller,
                   label: "Address Line 1",
-                  validator: (value) => AppValidator.validateRequired(value, "Address"),
+                  validator: (value) =>
+                      AppValidator.validateRequired(value, "Address"),
                 ),
-                const SizedBox(height: 16),
-                
+                SizedBox(height: 16.h),
+
                 CustomTextField(
                   controller: _shippingAddressLine2Controller,
                   label: "Address Line 2 (Optional)",
                 ),
-                const SizedBox(height: 16),
-                
+                SizedBox(height: 16.h),
+
                 Row(
                   children: [
                     Expanded(
@@ -491,18 +514,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         validator: AppValidator.validateCity,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: CustomTextField(
                         controller: _shippingStateController,
                         label: "State/Province",
-                        validator: (value) => AppValidator.validateRequired(value, "State"),
+                        validator: (value) =>
+                            AppValidator.validateRequired(value, "State"),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                
+                SizedBox(height: 16.h),
+
                 Row(
                   children: [
                     Expanded(
@@ -513,12 +537,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         validator: AppValidator.validatePostalCode,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: CustomTextField(
                         controller: _shippingCountryController,
                         label: AppStrings.country,
-                        validator: (value) => AppValidator.validateRequired(value, "Country"),
+                        validator: (value) =>
+                            AppValidator.validateRequired(value, "Country"),
                       ),
                     ),
                   ],
@@ -532,7 +557,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildPaymentMethodForm() {
     final theme = Theme.of(context);
-    
+
     return Form(
       key: _formKey,
       child: Column(
@@ -542,10 +567,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             "Payment Method",
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 20, tablet: 22, desktop: 24),
             ),
           ),
-          const SizedBox(height: 16),
-          
+          SizedBox(height: 16.h),
+
           // Payment method selection
           _buildPaymentOption(
             AppConstants.cashOnDelivery,
@@ -557,15 +584,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             "Credit Card",
             Icons.credit_card,
           ),
-          
+
           // Credit card form
           if (_selectedPaymentMethod == AppConstants.creditCard) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(
+                  ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                borderRadius:
+                    BorderRadius.circular(AppConstants.borderRadiusMedium),
                 border: Border.all(color: theme.dividerColor),
               ),
               child: Column(
@@ -578,16 +607,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     validator: AppValidator.validateCreditCard,
                     prefixIcon: const Icon(Icons.credit_card),
                   ),
-                  const SizedBox(height: 16),
-                  
+                  SizedBox(height: 16.h),
                   CustomTextField(
                     controller: _cardHolderNameController,
                     label: "Card Holder Name",
-                    validator: (value) => AppValidator.validateRequired(value, "Card holder name"),
+                    validator: (value) => AppValidator.validateRequired(
+                        value, "Card holder name"),
                     prefixIcon: const Icon(Icons.person_outline),
                   ),
-                  const SizedBox(height: 16),
-                  
+                  SizedBox(height: 16.h),
                   Row(
                     children: [
                       Expanded(
@@ -599,7 +627,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           prefixIcon: const Icon(Icons.date_range),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16.w),
                       Expanded(
                         child: CustomTextField(
                           controller: _cvvController,
@@ -624,7 +652,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildPaymentOption(String value, String title, IconData icon) {
     final theme = Theme.of(context);
     final isSelected = _selectedPaymentMethod == value;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -632,10 +660,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         });
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(
+            ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
         decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor.withOpacity(0.1) : theme.cardColor,
+          color: isSelected
+              ? theme.primaryColor.withOpacity(0.1)
+              : theme.cardColor,
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           border: Border.all(
             color: isSelected ? theme.primaryColor : theme.dividerColor,
@@ -647,8 +678,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             Icon(
               icon,
               color: isSelected ? theme.primaryColor : theme.iconTheme.color,
+              size:
+                  ResponsiveUtil.iconSize(mobile: 24, tablet: 28, desktop: 32),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Text(
                 title,
@@ -657,7 +690,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   color: isSelected ? theme.primaryColor : null,
                 ),
               ),
-            ),            Radio<String>(
+            ),
+            Radio<String>(
               value: value,
               groupValue: _selectedPaymentMethod,
               onChanged: (value) {
@@ -676,18 +710,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildOrderSummary() {
     final theme = Theme.of(context);
     final cartAsyncValue = ref.watch(cartProvider);
-    
+
     return cartAsyncValue.when(
       data: (cart) {
         if (cart == null) {
           return const Text("No items in cart");
         }
-        
+
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(
+              ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
           decoration: BoxDecoration(
             color: theme.cardColor,
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius:
+                BorderRadius.circular(AppConstants.borderRadiusMedium),
             border: Border.all(color: theme.dividerColor),
           ),
           child: Column(
@@ -700,6 +736,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     AppStrings.orderSummary,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18, tablet: 20, desktop: 22),
                     ),
                   ),
                   TextButton(
@@ -708,26 +746,38 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       "Edit Cart",
                       style: TextStyle(
                         color: theme.primaryColor,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 15, desktop: 16),
                       ),
                     ),
                   ),
                 ],
               ),
-              const Divider(),
-              
+              Divider(height: 24.h),
+
               // Item count
               Text(
                 "${cart.items.length} ${cart.items.length == 1 ? 'item' : 'items'} in cart",
-                style: theme.textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: ResponsiveUtil.fontSize(
+                      mobile: 14, tablet: 15, desktop: 16),
+                ),
               ),
-              const SizedBox(height: 8),
-                // Price breakdown
-              _buildPriceLine("Subtotal", FormatterUtil.formatCurrency(cart.subtotal)),
-              _buildPriceLine(AppStrings.shipping, cart.shipping > 0 ? FormatterUtil.formatCurrency(cart.shipping) : "Free", isFree: cart.shipping == 0),
-              _buildPriceLine(AppStrings.tax, FormatterUtil.formatCurrency(cart.tax)),
-              
-              const Divider(height: 24),
-              
+              SizedBox(height: 8.h),
+              // Price breakdown
+              _buildPriceLine(
+                  "Subtotal", FormatterUtil.formatCurrency(cart.subtotal)),
+              _buildPriceLine(
+                  AppStrings.shipping,
+                  cart.shipping > 0
+                      ? FormatterUtil.formatCurrency(cart.shipping)
+                      : "Free",
+                  isFree: cart.shipping == 0),
+              _buildPriceLine(
+                  AppStrings.tax, FormatterUtil.formatCurrency(cart.tax)),
+
+              Divider(height: 24.h),
+
               // Total
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -736,6 +786,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     AppStrings.total,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18, tablet: 20, desktop: 22),
                     ),
                   ),
                   Text(
@@ -743,6 +795,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.primaryColor,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18, tablet: 20, desktop: 22),
                     ),
                   ),
                 ],
@@ -761,22 +815,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _buildPriceLine(String label, String value, {bool isDiscount = false, bool isFree = false}) {
+  Widget _buildPriceLine(String label, String value,
+      {bool isDiscount = false, bool isFree = false}) {
     final theme = Theme.of(context);
-    
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: theme.textTheme.bodyMedium,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 14, tablet: 15, desktop: 16),
+            ),
           ),
           Text(
             value,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: isDiscount || isFree ? Colors.green : null,
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 14, tablet: 15, desktop: 16),
             ),
           ),
         ],
@@ -796,6 +856,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         return const SizedBox();
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -810,7 +871,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         children: [
           // Stepper indicator
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(
+                vertical: ResponsiveUtil.spacing(
+                    mobile: 16, tablet: 20, desktop: 24)),
             child: Row(
               children: [
                 _buildStepIndicator(0, "Billing"),
@@ -821,25 +884,26 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ],
             ),
           ),
-          
+
           // Step content
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              padding: EdgeInsets.all(
+                  ResponsiveUtil.spacing(mobile: 16, tablet: 20, desktop: 24)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Current step content
                   _buildStepContent(),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Order summary
+
+                  SizedBox(height: 24.h),
+
+                  // OrderModel summary
                   _buildOrderSummary(),
-                  
-                  const SizedBox(height: 24),
-                  
+
+                  SizedBox(height: 24.h),
+
                   // Navigation buttons
                   Row(
                     children: [
@@ -852,20 +916,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             isOutlined: true,
                           ),
                         ),
-                      if (_currentStep > 0)
-                        const SizedBox(width: 16),
+                      if (_currentStep > 0) SizedBox(width: 16.w),
                       Expanded(
                         flex: 2,
                         child: CustomButton(
-                          text: _currentStep < 2 ? "Continue" : AppStrings.placeOrder,
+                          text: _currentStep < 2
+                              ? "Continue"
+                              : AppStrings.placeOrder,
                           onPressed: _nextStep,
                           isLoading: _isPlacingOrder,
                         ),
                       ),
                     ],
                   ),
-                  
-                  const SizedBox(height: 24),
+
+                  SizedBox(height: 24.h),
                 ],
               ),
             ),
@@ -879,13 +944,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final theme = Theme.of(context);
     final isActive = _currentStep == step;
     final isCompleted = _currentStep > step;
-    
+
     return Expanded(
       child: Column(
         children: [
           Container(
-            width: 30,
-            height: 30,
+            width: ResponsiveUtil.spacing(mobile: 30, tablet: 36, desktop: 42),
+            height: ResponsiveUtil.spacing(mobile: 30, tablet: 36, desktop: 42),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isCompleted
@@ -896,23 +961,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
             child: Center(
               child: isCompleted
-                  ? const Icon(Icons.check, color: Colors.white, size: 18)
+                  ? Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: ResponsiveUtil.iconSize(
+                          mobile: 18, tablet: 20, desktop: 22),
+                    )
                   : Text(
                       (step + 1).toString(),
                       style: TextStyle(
                         color: isActive ? Colors.white : Colors.grey[600],
                         fontWeight: FontWeight.bold,
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 16, desktop: 18),
                       ),
                     ),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             label,
             style: TextStyle(
-              color: isActive || isCompleted ? theme.primaryColor : Colors.grey[600],
+              color: isActive || isCompleted
+                  ? theme.primaryColor
+                  : Colors.grey[600],
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              fontSize: 12,
+              fontSize:
+                  ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
             ),
           ),
         ],
@@ -923,10 +998,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildStepConnector(int step) {
     final theme = Theme.of(context);
     final isCompleted = _currentStep > step;
-    
+
     return Container(
-      width: 40,
-      height: 2,
+      width: ResponsiveUtil.spacing(mobile: 40, tablet: 50, desktop: 60),
+      height: 2.h,
       color: isCompleted ? theme.primaryColor : Colors.grey[300],
     );
   }

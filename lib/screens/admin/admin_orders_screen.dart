@@ -1,23 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/models/user_order.dart';
-import 'package:souq/providers/admin_provider.dart';
+import 'package:souq/constants/app_constants.dart';
+import 'package:souq/models/order.dart';
+import 'package:souq/providers/admin_order_provider.dart';
+import 'package:souq/screens/admin/widgets/order_details_dialog.dart';
+import 'package:souq/screens/admin/widgets/order_status_update_dialog.dart';
 import 'package:souq/utils/formatter_util.dart';
+import 'package:souq/utils/responsive_util.dart';
 
 class AdminOrdersScreen extends ConsumerStatefulWidget {
-  const AdminOrdersScreen({Key? key}) : super(key: key);
+  const AdminOrdersScreen({super.key});
 
   @override
   ConsumerState<AdminOrdersScreen> createState() => _AdminOrdersScreenState();
 }
 
-class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
+class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  final _searchController = TextEditingController();
-  OrderStatus? _selectedStatus;
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 8, vsync: this);
+
+    // Load orders when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(adminOrdersProvider.notifier).fetchAllOrders();
+    });
+  }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -25,343 +43,594 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ordersState = ref.watch(adminOrdersProvider);
+    final ordersAsync = ref.watch(adminOrdersProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Orders Management'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search orders...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(
+                    color: Colors.white70,
+                    fontSize: ResponsiveUtil.fontSize(
+                      mobile: 14,
+                      tablet: 15,
+                      desktop: 16,
+                    ),
+                  ),
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14,
+                    tablet: 15,
+                    desktop: 16,
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+              )
+            : Text(
+                'Manage Orders',
+                style: TextStyle(
+                  fontSize: ResponsiveUtil.fontSize(
+                    mobile: 18,
+                    tablet: 20,
+                    desktop: 22,
+                  ),
+                ),
+              ),
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(adminOrdersProvider),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search and Filter Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search orders...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                  ),
-                  onChanged: (value) => setState(() => _searchQuery = value),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<OrderStatus?>(
-                  value: _selectedStatus,
-                  decoration: InputDecoration(
-                    labelText: 'Filter by Status',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('All Statuses'),
-                    ),
-                    ...OrderStatus.values.map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(_getStatusDisplayName(status)),
-                    )),
-                  ],
-                  onChanged: (value) => setState(() => _selectedStatus = value),
-                ),
-              ],
-            ),
-          ),
-
-          // Orders List
-          Expanded(
-            child: ordersState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error, size: 48, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Error: $error'),
-                    ElevatedButton(
-                      onPressed: () => ref.refresh(adminOrdersProvider),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              size: ResponsiveUtil.iconSize(
+                mobile: 24,
+                tablet: 26,
+                desktop: 28,
               ),
-              data: (orders) {
-                final filteredOrders = orders.where((order) {
-                  final matchesSearch = order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                                       order.userId.toLowerCase().contains(_searchQuery.toLowerCase());
-                  final matchesStatus = _selectedStatus == null || order.status == _selectedStatus;
-                  return matchesSearch && matchesStatus;
-                }).toList();
-
-                if (filteredOrders.isEmpty) {
-                  return const Center(
-                    child: Text('No orders found'),
-                  );
+            ),
+            onPressed: () {
+              setState(() {
+                if (_isSearching) {
+                  _searchController.clear();
+                  _searchQuery = '';
                 }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filteredOrders.length,
-                  itemBuilder: (context, index) {
-                    final order = filteredOrders[index];
-                    return _OrderCard(
-                      order: order,
-                      onStatusUpdate: (status) => _updateOrderStatus(order, status),
-                    );
-                  },
-                );
-              },
-            ),
+                _isSearching = !_isSearching;
+              });
+            },
           ),
-        ],
-      ),    );
-  }
-
-  String _getStatusDisplayName(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return 'Pending';
-      case OrderStatus.confirmed:
-        return 'Confirmed';
-      case OrderStatus.processing:
-        return 'Processing';
-      case OrderStatus.shipped:
-        return 'Shipped';
-      case OrderStatus.delivered:
-        return 'Delivered';
-      case OrderStatus.cancelled:
-        return 'Cancelled';
-      case OrderStatus.returned:
-        return 'Returned';
-    }
-  }
-
-  Future<void> _updateOrderStatus(UserOrder order, OrderStatus newStatus) async {
-    try {
-      await ref.read(adminOrdersProvider.notifier).updateOrderStatus(order.id, newStatus);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Order status updated to ${_getStatusDisplayName(newStatus)}')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
-  }
-}
-
-class _OrderCard extends StatelessWidget {
-  final UserOrder order;
-  final Function(OrderStatus) onStatusUpdate;
-
-  const _OrderCard({
-    required this.order,
-    required this.onStatusUpdate,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Order Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Order #${order.id.substring(0, 8)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                _buildStatusChip(context, order.status),
-              ],
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              size: ResponsiveUtil.iconSize(
+                mobile: 24,
+                tablet: 26,
+                desktop: 28,
+              ),
             ),
-            const SizedBox(height: 12),
-
-            // Order Details
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Customer: ${order.userId}',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Date: ${FormatterUtil.formatDate(order.createdAt)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Items: ${order.items.length}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+            onPressed: () {
+              ref.read(adminOrdersProvider.notifier).fetchAllOrders();
+            },
+          ),
+          PopupMenuButton<String>(
+            iconSize: ResponsiveUtil.iconSize(
+              mobile: 24,
+              tablet: 26,
+              desktop: 28,
+            ),
+            onSelected: (value) {
+              switch (value) {
+                case 'analytics':
+                  _showAnalytics();
+                  break;
+                case 'export':
+                  _exportOrders();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'analytics',
+                child: Row(
                   children: [
-                    Text(
-                      FormatterUtil.formatCurrency(order.total),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
+                    Icon(
+                      Icons.analytics,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 20,
+                        tablet: 22,
+                        desktop: 24,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(
+                        width: ResponsiveUtil.spacing(
+                      mobile: 8,
+                      tablet: 10,
+                      desktop: 12,
+                    )),
                     Text(
-                      'Payment: ${order.paymentMethod}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
+                      'Analytics',
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Order Items Preview
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Items:',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+              PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.download,
+                      size: ResponsiveUtil.iconSize(
+                        mobile: 20,
+                        tablet: 22,
+                        desktop: 24,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  ...order.items.take(3).map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      '• ${item.productName} (x${item.quantity})',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  )),
-                  if (order.items.length > 3)
+                    SizedBox(
+                        width: ResponsiveUtil.spacing(
+                      mobile: 8,
+                      tablet: 10,
+                      desktop: 12,
+                    )),
                     Text(
-                      '... and ${order.items.length - 3} more items',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[600],
+                      'Export',
+                      style: TextStyle(
+                        fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14,
+                          tablet: 15,
+                          desktop: 16,
+                        ),
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
+            ],
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          labelStyle: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
             ),
-
-            const SizedBox(height: 16),
-
-            // Status Update Actions
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<OrderStatus>(
-                    value: order.status,
-                    decoration: InputDecoration(
-                      labelText: 'Update Status',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    items: OrderStatus.values.map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(_getStatusDisplayName(status)),
-                    )).toList(),
-                    onChanged: (newStatus) {
-                      if (newStatus != null && newStatus != order.status) {
-                        _showUpdateConfirmation(context, newStatus);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Navigate to detailed order view
-                    // This could be implemented as a separate detailed admin order screen
-                  },
-                  icon: const Icon(Icons.visibility),
-                  label: const Text('View'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                  ),
-                ),
-              ],
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
             ),
+          ),
+          tabs: const [
+            Tab(text: 'All'),
+            Tab(text: 'Pending'),
+            Tab(text: 'Confirmed'),
+            Tab(text: 'Processing'),
+            Tab(text: 'Shipped'),
+            Tab(text: 'Delivered'),
+            Tab(text: 'Cancelled'),
+            Tab(text: 'Returned'),
           ],
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+        ),
+      ),
+      body: ordersAsync.when(
+        data: (orders) {
+          final filteredOrders = _getFilteredOrders(orders);
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildOrdersList(filteredOrders), // All
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.pending)),
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.confirmed)),
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.processing)),
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.shipped)),
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.delivered)),
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.cancelled)),
+              _buildOrdersList(
+                  _filterByStatus(filteredOrders, OrderStatus.returned)),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => _buildErrorWidget(error.toString()),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showOrdersStats,
+        backgroundColor: theme.primaryColor,
+        icon: Icon(
+          Icons.bar_chart,
+          color: Colors.white,
+          size: ResponsiveUtil.iconSize(
+            mobile: 20,
+            tablet: 22,
+            desktop: 24,
+          ),
+        ),
+        label: Text(
+          'Statistics',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 14,
+              tablet: 15,
+              desktop: 16,
+            ),
+          ),
         ),
       ),
     );
   }
-  Widget _buildStatusChip(BuildContext context, OrderStatus status) {
+
+  List<OrderModel> _getFilteredOrders(List<OrderModel> orders) {
+    if (_searchQuery.isEmpty) return orders;
+
+    return orders.where((order) {
+      return order.orderNumber.toLowerCase().contains(_searchQuery) ||
+          order.id.toLowerCase().contains(_searchQuery) ||
+          '${order.shippingAddress.firstName} ${order.shippingAddress.lastName}'
+              .toLowerCase()
+              .contains(_searchQuery);
+    }).toList();
+  }
+
+  List<OrderModel> _filterByStatus(
+      List<OrderModel> orders, OrderStatus status) {
+    return orders.where((order) => order.status == status).toList();
+  }
+
+  Widget _buildOrdersList(List<OrderModel> orders) {
+    if (orders.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(adminOrdersProvider.notifier).fetchAllOrders();
+      },
+      child: ListView.builder(
+        padding: EdgeInsets.all(ResponsiveUtil.spacing(
+          mobile: 16,
+          tablet: 20,
+          desktop: 24,
+        )),
+        itemCount: orders.length,
+        itemBuilder: (context, index) {
+          final order = orders[index];
+          return _buildOrderCard(order);
+        },
+      ),
+    );
+  }
+
+  Widget _buildOrderCard(OrderModel order) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: EdgeInsets.only(
+        bottom: ResponsiveUtil.spacing(
+          mobile: 12,
+          tablet: 14,
+          desktop: 16,
+        ),
+      ),
+      child: InkWell(
+        onTap: () => _showOrderDetails(order),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(ResponsiveUtil.spacing(
+            mobile: 16,
+            tablet: 18,
+            desktop: 20,
+          )),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Order #${order.orderNumber}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 16,
+                              tablet: 17,
+                              desktop: 18,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 4,
+                          tablet: 5,
+                          desktop: 6,
+                        )),
+                        Text(
+                          '${order.shippingAddress.firstName} ${order.shippingAddress.lastName}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppConstants.textSecondaryColor,
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 14,
+                              tablet: 15,
+                              desktop: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildStatusChip(order.status),
+                ],
+              ),
+
+              SizedBox(
+                  height: ResponsiveUtil.spacing(
+                mobile: 12,
+                tablet: 14,
+                desktop: 16,
+              )),
+
+              // Order details
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow('Items', '${order.items.length} items'),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 4,
+                          tablet: 5,
+                          desktop: 6,
+                        )),
+                        _buildInfoRow(
+                            'Total', FormatterUtil.formatCurrency(order.total)),
+                        SizedBox(
+                            height: ResponsiveUtil.spacing(
+                          mobile: 4,
+                          tablet: 5,
+                          desktop: 6,
+                        )),
+                        _buildInfoRow('Date',
+                            FormatterUtil.formatDateShort(order.createdAt)),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () => _showOrderDetails(order),
+                        icon: Icon(
+                          Icons.visibility,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 20,
+                            tablet: 22,
+                            desktop: 24,
+                          ),
+                        ),
+                        color: AppConstants.primaryColor,
+                        tooltip: 'View Details',
+                      ),
+                      IconButton(
+                        onPressed: () => _showStatusUpdateDialog(order),
+                        icon: Icon(
+                          Icons.edit,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 20,
+                            tablet: 22,
+                            desktop: 24,
+                          ),
+                        ),
+                        color: AppConstants.accentColor,
+                        tooltip: 'Update Status',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              // Quick action buttons for pending/confirmed orders
+              if (order.status == OrderStatus.pending ||
+                  order.status == OrderStatus.confirmed) ...[
+                SizedBox(
+                    height: ResponsiveUtil.spacing(
+                  mobile: 12,
+                  tablet: 14,
+                  desktop: 16,
+                )),
+                Row(
+                  children: [
+                    if (order.status == OrderStatus.pending) ...[
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () =>
+                              _quickUpdateStatus(order, OrderStatus.confirmed),
+                          icon: Icon(
+                            Icons.check,
+                            size: ResponsiveUtil.iconSize(
+                              mobile: 16,
+                              tablet: 17,
+                              desktop: 18,
+                            ),
+                          ),
+                          label: Text(
+                            'Confirm',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 12,
+                                tablet: 13,
+                                desktop: 14,
+                              ),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.green,
+                            side: const BorderSide(color: Colors.green),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                          width: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
+                    ],
+                    if (order.status == OrderStatus.confirmed) ...[
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () =>
+                              _quickUpdateStatus(order, OrderStatus.processing),
+                          icon: Icon(
+                            Icons.settings,
+                            size: ResponsiveUtil.iconSize(
+                              mobile: 16,
+                              tablet: 17,
+                              desktop: 18,
+                            ),
+                          ),
+                          label: Text(
+                            'Process',
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 12,
+                                tablet: 13,
+                                desktop: 14,
+                              ),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.orange,
+                            side: const BorderSide(color: Colors.orange),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                          width: ResponsiveUtil.spacing(
+                        mobile: 8,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
+                    ],
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showStatusUpdateDialog(order),
+                        icon: Icon(
+                          Icons.edit,
+                          size: ResponsiveUtil.iconSize(
+                            mobile: 16,
+                            tablet: 17,
+                            desktop: 18,
+                          ),
+                        ),
+                        label: Text(
+                          'Update',
+                          style: TextStyle(
+                            fontSize: ResponsiveUtil.fontSize(
+                              mobile: 12,
+                              tablet: 13,
+                              desktop: 14,
+                            ),
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppConstants.primaryColor,
+                          side: BorderSide(color: AppConstants.primaryColor),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: AppConstants.textSecondaryColor,
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 12,
+              tablet: 13,
+              desktop: 14,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: ResponsiveUtil.fontSize(
+              mobile: 12,
+              tablet: 13,
+              desktop: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusChip(OrderStatus status) {
     Color chipColor;
     Color textColor = Colors.white;
-    
+
     switch (status) {
       case OrderStatus.pending:
-        chipColor = Colors.amber;
+        chipColor = Colors.orange;
         break;
       case OrderStatus.confirmed:
         chipColor = Colors.blue;
         break;
       case OrderStatus.processing:
-        chipColor = Colors.orange;
+        chipColor = Colors.purple;
         break;
       case OrderStatus.shipped:
-        chipColor = Colors.purple;
+        chipColor = Colors.indigo;
         break;
       case OrderStatus.delivered:
         chipColor = Colors.green;
@@ -370,64 +639,297 @@ class _OrderCard extends StatelessWidget {
         chipColor = Colors.red;
         break;
       case OrderStatus.returned:
-        chipColor = Colors.grey;
+        chipColor = Colors.brown;
         break;
     }
-    
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtil.spacing(
+          mobile: 12,
+          tablet: 14,
+          desktop: 16,
+        ),
+        vertical: ResponsiveUtil.spacing(
+          mobile: 6,
+          tablet: 7,
+          desktop: 8,
+        ),
+      ),
       decoration: BoxDecoration(
         color: chipColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        _getStatusDisplayName(status),
+        status.name.toUpperCase(),
         style: TextStyle(
           color: textColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontSize: ResponsiveUtil.fontSize(
+            mobile: 10,
+            tablet: 11,
+            desktop: 12,
+          ),
+          fontWeight: FontWeight.bold,
         ),
-      ),    );
+      ),
+    );
   }
 
-  String _getStatusDisplayName(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return 'Pending';
-      case OrderStatus.confirmed:
-        return 'Confirmed';
-      case OrderStatus.processing:
-        return 'Processing';
-      case OrderStatus.shipped:
-        return 'Shipped';
-      case OrderStatus.delivered:
-        return 'Delivered';
-      case OrderStatus.cancelled:
-        return 'Cancelled';
-      case OrderStatus.returned:
-        return 'Returned';
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: ResponsiveUtil.iconSize(
+              mobile: 64,
+              tablet: 72,
+              desktop: 80,
+            ),
+            color: Colors.grey,
+          ),
+          SizedBox(
+              height: ResponsiveUtil.spacing(
+            mobile: 16,
+            tablet: 18,
+            desktop: 20,
+          )),
+          Text(
+            'No orders found',
+            style: TextStyle(
+              fontSize: ResponsiveUtil.fontSize(
+                mobile: 18,
+                tablet: 20,
+                desktop: 22,
+              ),
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(
+              height: ResponsiveUtil.spacing(
+            mobile: 8,
+            tablet: 10,
+            desktop: 12,
+          )),
+          Text(
+            'Orders will appear here when customers place them',
+            style: TextStyle(
+              fontSize: ResponsiveUtil.fontSize(
+                mobile: 14,
+                tablet: 15,
+                desktop: 16,
+              ),
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: AppConstants.errorColor,
+            size: ResponsiveUtil.iconSize(
+              mobile: 48,
+              tablet: 54,
+              desktop: 60,
+            ),
+          ),
+          SizedBox(
+              height: ResponsiveUtil.spacing(
+            mobile: 16,
+            tablet: 18,
+            desktop: 20,
+          )),
+          Text(
+            'Error loading orders',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtil.fontSize(
+                    mobile: 16,
+                    tablet: 18,
+                    desktop: 20,
+                  ),
+                ),
+          ),
+          SizedBox(
+              height: ResponsiveUtil.spacing(
+            mobile: 8,
+            tablet: 10,
+            desktop: 12,
+          )),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppConstants.textSecondaryColor,
+                  fontSize: ResponsiveUtil.fontSize(
+                    mobile: 14,
+                    tablet: 15,
+                    desktop: 16,
+                  ),
+                ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+              height: ResponsiveUtil.spacing(
+            mobile: 16,
+            tablet: 18,
+            desktop: 20,
+          )),
+          ElevatedButton(
+            onPressed: () =>
+                ref.read(adminOrdersProvider.notifier).fetchAllOrders(),
+            child: Text(
+              'Retry',
+              style: TextStyle(
+                fontSize: ResponsiveUtil.fontSize(
+                  mobile: 14,
+                  tablet: 15,
+                  desktop: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOrderDetails(OrderModel order) {
+    showDialog(
+      context: context,
+      builder: (context) => OrderDetailsDialog(order: order),
+    );
+  }
+
+  void _showStatusUpdateDialog(OrderModel order) {
+    showDialog(
+      context: context,
+      builder: (context) => OrderStatusUpdateDialog(
+        order: order,
+        onUpdate: (status, trackingNumber, notes) async {
+          try {
+            await ref.read(adminOrdersProvider.notifier).updateOrderStatus(
+                  orderId: order.id,
+                  status: status,
+                  trackingNumber: trackingNumber,
+                  notes: notes,
+                );
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Order status updated to ${status.name}'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to update order: ${e.toString()}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> _quickUpdateStatus(
+      OrderModel order, OrderStatus newStatus) async {
+    try {
+      await ref.read(adminOrdersProvider.notifier).updateOrderStatus(
+            orderId: order.id,
+            status: newStatus,
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order ${order.orderNumber} ${newStatus.name}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update order: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  void _showUpdateConfirmation(BuildContext context, OrderStatus newStatus) {
+  void _showOrdersStats() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Update Order Status'),
-        content: Text('Are you sure you want to update this order status to ${_getStatusDisplayName(newStatus)}?'),
+        title: const Text('Order Statistics'),
+        content: Consumer(
+          builder: (context, ref, child) {
+            final statsAsync = ref.watch(adminOrderStatsProvider);
+
+            return statsAsync.when(
+              data: (stats) => SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: stats.entries.map((entry) {
+                    return ListTile(
+                      leading: _buildStatusChip(entry.key),
+                      title: Text('${entry.key.name} Orders'),
+                      trailing: Text(
+                        '${entry.value}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              loading: () => const CircularProgressIndicator(),
+              error: (error, stack) => Text('Error: $error'),
+            );
+          },
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onStatusUpdate(newStatus);
-            },
-            child: const Text('Update'),
+            child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAnalytics() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Analytics feature coming soon!'),
+      ),
+    );
+  }
+
+  void _exportOrders() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Export feature coming soon!'),
       ),
     );
   }
