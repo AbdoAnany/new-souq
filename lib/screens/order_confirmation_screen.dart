@@ -7,7 +7,6 @@ import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/widgets/custom_button.dart';
-import 'package:lottie/lottie.dart';
 import '../utils/responsive_util.dart';
 
 class OrderConfirmationScreen extends ConsumerWidget {
