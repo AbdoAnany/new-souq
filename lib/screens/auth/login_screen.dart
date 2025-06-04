@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/constants/app_constants.dart';
-import 'package:souq/constants/app_theme.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/auth/forgot_password_screen.dart';
 import 'package:souq/screens/auth/signup_screen.dart';

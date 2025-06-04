@@ -4,6 +4,7 @@ import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/widgets/offer_form_dialog.dart';
+
 import '../../utils/responsive_util.dart';
 
 class AdminOffersScreen extends ConsumerStatefulWidget {

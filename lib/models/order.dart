@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/user.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 enum OrderStatus {
   pending,
   confirmed,

@@ -35,7 +35,7 @@ class ResponsiveAppTheme {
     ),
 
     // Card Theme with responsive dimensions
-    cardTheme: CardThemeData(
+    cardTheme: CardTheme(
       color: AppConstants.cardColor,
       elevation: 2,
       margin: EdgeInsets.all(8.w),
@@ -177,7 +177,7 @@ class ResponsiveAppTheme {
     ),
 
     // Dialog Theme
-    dialogTheme: DialogThemeData(
+    dialogTheme: DialogTheme(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.r),
       ),
@@ -331,7 +331,7 @@ class ResponsiveAppTheme {
     ),
 
     // Card Theme
-    cardTheme: CardThemeData(
+    cardTheme: CardTheme(
       color: AppConstants.darkCardColor,
       elevation: 2,
       margin: EdgeInsets.all(8.w),

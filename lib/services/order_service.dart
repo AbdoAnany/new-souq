@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/models/cart.dart' show Cart, CartItem, PaymentMethod;
-import 'package:souq/models/user.dart';
-import 'package:souq/models/order.dart';
 import 'package:souq/constants/app_constants.dart';
+import 'package:souq/models/cart.dart' show Cart, CartItem, PaymentMethod;
+import 'package:souq/models/order.dart';
+import 'package:souq/models/user.dart';
 import 'package:souq/services/tracking_service.dart';
 import 'package:uuid/uuid.dart';
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:souq/constants/app_constants.dart';
-
 class AppTheme {
   // Light Theme
   static ThemeData lightTheme = ThemeData(
@@ -239,7 +238,7 @@ class AppTheme {
     ),
     
     // Card Theme
-    cardTheme: CardThemeData(
+    cardTheme: CardTheme(
       color: AppConstants.darkCardColor,
       elevation: 2,
       shape: RoundedRectangleBorder(

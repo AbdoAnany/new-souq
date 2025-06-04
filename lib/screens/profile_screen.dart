@@ -1,13 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
-import 'package:souq/screens/wishlist_screen.dart';
+import 'package:souq/providers/theme_provider.dart';
 import 'package:souq/screens/order_history_screen.dart';
+import 'package:souq/screens/wishlist_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import 'admin/admin_dashboard_screen.dart';
 
@@ -17,6 +18,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final themeMode = ref.watch(themeModeProvider);
     final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authProvider);
 
@@ -125,13 +127,12 @@ class ProfileScreen extends ConsumerWidget {
                 value: isDark,
                 activeColor: theme.colorScheme.primary,
                 onChanged: (value) {
-                  // TODO: Create and use proper theme provider
-                  // ref.read(themeModeNotifierProvider.notifier).toggleTheme();
+                  ref.read(themeModeProvider.notifier).setThemeMode(
+                      value ? ThemeMode.dark : ThemeMode.light);
                 },
               ),
               onTap: () {
-                // TODO: Create and use proper theme provider
-                // ref.read(themeModeNotifierProvider.notifier).toggleTheme();
+                ref.read(themeModeProvider.notifier).toggleTheme();
               },
             ),
             _buildListItem(

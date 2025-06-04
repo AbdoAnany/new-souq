@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
+import 'package:souq/utils/responsive_util.dart';
 
 class OfferCard extends StatelessWidget {
   final Offer offer;
@@ -18,56 +20,56 @@ class OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    //
-    // if (isSmall) {
-    //   return InkWell(
-    //     onTap: onTap ??
-    //         () {
-    //           // Navigate to offer details or apply discount
-    //         },
-    //     borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-    //     child: Container(
-    //       width: 200,
-    //       decoration: BoxDecoration(
-    //         borderRadius:
-    //             BorderRadius.circular(AppConstants.borderRadiusMedium),
-    //         // boxShadow: [
-    //         //   BoxShadow(
-    //         //     color: Colors.black.withOpacity(0.05),
-    //         //     blurRadius: 10,
-    //         //     offset: const Offset(0, 2),
-    //         //   ),
-    //         // ],
-    //       ),
-    //       child: ClipRRect(
-    //         borderRadius:
-    //             BorderRadius.circular(AppConstants.borderRadiusMedium),
-    //         child: CachedNetworkImage(
-    //           imageUrl: offer.imageUrl,
-    //           fit: BoxFit.cover,
-    //           width: 200,
-    //           height: 100,
-    //           placeholder: (context, url) => Container(
-    //             color: Colors.grey[300],
-    //           ),
-    //           errorWidget: (context, url, error) => Container(
-    //             color: theme.primaryColor.withOpacity(0.2),
-    //             child: const Icon(Icons.error),
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //   );
-    // }
+
+    if (isSmall) {
+      // Small offer card for horizontal list
+      return InkWell(
+        onTap: onTap ?? () {
+          // Navigate to offer details or apply discount
+        },
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        child: Container(
+          width: ResponsiveUtil.spacing(mobile: 200, tablet: 220, desktop: 250),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            child: CachedNetworkImage(
+              imageUrl: offer.imageUrl,
+              fit: BoxFit.cover,
+              height: ResponsiveUtil.spacing(mobile: 100, tablet: 110, desktop: 130),
+              placeholder: (context, url) => Container(
+                color: Colors.grey[300],
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: theme.primaryColor.withOpacity(0.2),
+                child: const Icon(Icons.error),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     // Regular size offer card for carousel
     return InkWell(
-      onTap: onTap ??
-          () {
-            // Navigate to offer details or apply discount
-          },
+      onTap: onTap ?? () {
+        // Navigate to offer details or apply discount
+      },
       child: Container(
-        width: double.infinity,
+        // Specify explicit width instead of infinity
+        width: MediaQuery.of(context).size.width * 0.85,
+        constraints: BoxConstraints(
+          maxWidth: ResponsiveUtil.spacing(mobile: 450, tablet: 500, desktop: 550),
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           boxShadow: [
@@ -82,144 +84,93 @@ class OfferCard extends StatelessWidget {
           children: [
             // Background image
             ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(AppConstants.borderRadiusMedium),
-              child: CachedNetworkImage(
-                imageUrl: offer.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                // height: 180,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey[300],
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: theme.primaryColor.withOpacity(0.2),
-                  child: const Icon(Icons.error),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: CachedNetworkImage(
+                  imageUrl: offer.imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[300],
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: theme.primaryColor.withOpacity(0.2),
+                    child: const Icon(Icons.error),
+                  ),
                 ),
               ),
             ),
 
-
+            // Offer content
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Discount badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4.0,
+                  Text(
+                    offer.title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 2,
+                          offset: const Offset(1, 1),
+                        ),
+                      ],
                     ),
-                    decoration: BoxDecoration(
-                      color: AppConstants.secondaryColor,
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.borderRadiusSmall),
-                    ),
-                    child: Text(
-                      offer.type == OfferType.percentage &&
-                              offer.discountPercentage != null
-                          ? '${offer.discountPercentage!.toInt()}% OFF'
-                          : offer.discountAmount != null
-                              ? '\$${offer.discountAmount!.toInt()} OFF'
-                              : 'SPECIAL OFFER',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  // const SizedBox(height: 8),
-
-                  // Title
-                  SizedBox(
-                    // width: 200,
-                    child: Text(
-                      offer.title,
-                      style: const TextStyle(
+                  SizedBox(height: 8.h),
+                  if (offer.description != null && offer.description!.isNotEmpty)
+                    Text(
+                      offer.description!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
+                        fontSize: ResponsiveUtil.fontSize(mobile: 14, tablet: 16, desktop: 18),
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 2,
+                            offset: const Offset(1, 1),
+                          ),
+                        ],
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Description
-                  SizedBox(
-                    width: 200,
-                    child: Text(
-                      offer.description,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.0,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // // CTA Button
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     // Apply offer or navigate
-                  //   },
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: Colors.white,
-                  //     foregroundColor: theme.primaryColor,
-                  //     padding: const EdgeInsets.symmetric(
-                  //       horizontal: 16.0,
-                  //       vertical: 8.0,
-                  //     ),
-                  //   ),
-                  //   child: const Text(
-                  //     'Shop Now',
-                  //     style: TextStyle(
-                  //       fontWeight: FontWeight.bold,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
 
-            // Expiry tag
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 4.0,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.borderRadiusSmall),
-                ),
-                child: Text(
-                  'Ends in ${_getRemainingDays(offer.endDate)} days',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10.0,
+            // Discount badge
+            if (offer.discountPercentage != null && offer.discountPercentage! > 0)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    "${offer.discountPercentage}% OFF",
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
     );
-  }
-
-  int _getRemainingDays(DateTime expiryDate) {
-    final now = DateTime.now();
-    final difference = expiryDate.difference(now).inDays;
-    return difference > 0 ? difference : 0;
   }
 }
