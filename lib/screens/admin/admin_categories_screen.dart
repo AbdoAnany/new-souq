@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/constants/app_constants.dart';
+import '../../core/widgets/my_app_bar.dart';
 import '../../models/category.dart';
 import '../../providers/admin_provider.dart';
-import '../../constants/app_constants.dart';
 import '../../utils/responsive_util.dart';
 import 'widgets/category_form_dialog.dart';
 
@@ -33,7 +35,7 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           'Manage Categories',
           style: TextStyle(
@@ -44,8 +46,7 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
             ),
           ),
         ),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
+
         actions: [
           IconButton(
             icon: Icon(

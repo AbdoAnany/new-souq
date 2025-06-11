@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 
 class OfferCard extends StatelessWidget {
@@ -19,17 +18,56 @@ class OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-
+    //
+    // if (isSmall) {
+    //   return InkWell(
+    //     onTap: onTap ??
+    //         () {
+    //           // Navigate to offer details or apply discount
+    //         },
+    //     borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+    //     child: Container(
+    //       width: 200,
+    //       decoration: BoxDecoration(
+    //         borderRadius:
+    //             BorderRadius.circular(AppConstants.borderRadiusMedium),
+    //         // boxShadow: [
+    //         //   BoxShadow(
+    //         //     color: Colors.black.withOpacity(0.05),
+    //         //     blurRadius: 10,
+    //         //     offset: const Offset(0, 2),
+    //         //   ),
+    //         // ],
+    //       ),
+    //       child: ClipRRect(
+    //         borderRadius:
+    //             BorderRadius.circular(AppConstants.borderRadiusMedium),
+    //         child: CachedNetworkImage(
+    //           imageUrl: offer.imageUrl,
+    //           fit: BoxFit.cover,
+    //           width: 200,
+    //           height: 100,
+    //           placeholder: (context, url) => Container(
+    //             color: Colors.grey[300],
+    //           ),
+    //           errorWidget: (context, url, error) => Container(
+    //             color: theme.primaryColor.withOpacity(0.2),
+    //             child: const Icon(Icons.error),
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   );
+    // }
 
     // Regular size offer card for carousel
     return InkWell(
-      onTap: onTap ?? () {
-        // Navigate to offer details or apply discount
-      },
-      child:         Container(
+      onTap: onTap ??
+          () {
+            // Navigate to offer details or apply discount
+          },
+      child: Container(
         width: double.infinity,
-         height: 180.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           boxShadow: [
@@ -41,16 +79,16 @@ class OfferCard extends StatelessWidget {
           ],
         ),
         child: Stack(
-          fit: StackFit.expand,
           children: [
             // Background image
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+              borderRadius:
+                  BorderRadius.circular(AppConstants.borderRadiusMedium),
               child: CachedNetworkImage(
                 imageUrl: offer.imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
-                height: 180.h,
+                // height: 180,
                 placeholder: (context, url) => Container(
                   color: Colors.grey[300],
                 ),
@@ -61,84 +99,114 @@ class OfferCard extends StatelessWidget {
               ),
             ),
 
+
             Padding(
-              padding:  EdgeInsets.all(18.0.sp),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Discount badge
                   Container(
-                    padding:  EdgeInsets.symmetric(
-                      horizontal: 8.0.w,
-                      vertical: 4.0.h,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
                     ),
                     decoration: BoxDecoration(
                       color: AppConstants.secondaryColor,
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.borderRadiusSmall),
                     ),
                     child: Text(
                       offer.type == OfferType.percentage &&
-                          offer.discountPercentage != null
+                              offer.discountPercentage != null
                           ? '${offer.discountPercentage!.toInt()}% OFF'
                           : offer.discountAmount != null
-                          ? '\$${offer.discountAmount!.toInt()} OFF'
-                          : 'SPECIAL OFFER',
-                      style:  TextStyle(
+                              ? '\$${offer.discountAmount!.toInt()} OFF'
+                              : 'SPECIAL OFFER',
+                      style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 14.0.sp,
+                        fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  // const SizedBox(height: 8),
 
                   // Title
-                  Text(
-                    offer.title,
-                    style:  TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0.sp,
-                      fontWeight: FontWeight.bold,
+                  SizedBox(
+                    // width: 200,
+                    child: Text(
+                      offer.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 8.h),
+                  const SizedBox(height: 8),
 
                   // Description
-                  Text(
-                    offer.description,
-                    style:  TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.0.sp,
+                  SizedBox(
+                    width: 200,
+                    child: Text(
+                      offer.description,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.0,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 16),
+
+                  // // CTA Button
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     // Apply offer or navigate
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.white,
+                  //     foregroundColor: theme.primaryColor,
+                  //     padding: const EdgeInsets.symmetric(
+                  //       horizontal: 16.0,
+                  //       vertical: 8.0,
+                  //     ),
+                  //   ),
+                  //   child: const Text(
+                  //     'Shop Now',
+                  //     style: TextStyle(
+                  //       fontWeight: FontWeight.bold,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
 
             // Expiry tag
             Positioned(
-              top: 12.h,
-              right: 12.w,
+              top: 12,
+              right: 12,
               child: Container(
-                padding:  EdgeInsets.symmetric(
-                  horizontal: 8.0.w,
-                  vertical: 4.0.h,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 4.0,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadiusSmall),
                 ),
                 child: Text(
                   'Ends in ${_getRemainingDays(offer.endDate)} days',
-                  style:  TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 10.0.sp,
+                    fontSize: 10.0,
                   ),
                 ),
               ),

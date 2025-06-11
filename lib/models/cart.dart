@@ -1,6 +1,4 @@
 import 'package:souq/models/product.dart';
-import 'package:souq/models/user.dart';
-import 'package:souq/models/order.dart';
 
 class CartItem {
   final String id;

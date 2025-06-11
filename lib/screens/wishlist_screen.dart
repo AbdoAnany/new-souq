@@ -7,7 +7,7 @@ import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/widgets/product_card.dart';
+import '/core/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
 
 class WishlistScreen extends ConsumerWidget {

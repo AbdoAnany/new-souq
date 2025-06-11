@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import '../core/widgets/custom_button.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
@@ -11,8 +12,8 @@ import 'package:souq/screens/order_confirmation_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/utils/validator.dart';
-import 'package:souq/widgets/custom_button.dart';
-import 'package:souq/widgets/custom_text_field.dart';
+import '/core/constants/app_constants.dart';
+import '/core/widgets/custom_text_field.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({Key? key}) : super(key: key);

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:souq/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/utils/formatter_util.dart';

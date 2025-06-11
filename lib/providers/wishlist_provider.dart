@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/models/wishlist.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/services/wishlist_service.dart';
 

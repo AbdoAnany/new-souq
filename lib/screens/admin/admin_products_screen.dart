@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/constants/app_constants.dart';
+import '../../core/widgets/my_app_bar.dart';
 import '../../models/product.dart';
 import '../../providers/admin_provider.dart';
-import '../../constants/app_constants.dart';
 import '../../utils/responsive_util.dart';
 import 'widgets/product_form_dialog.dart';
 
@@ -24,16 +26,18 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
     // Load products when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(adminProductsProvider.notifier).fetchProducts();
+      ref.read(adminCategoriesProvider.notifier).fetchCategories();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final productsState = ref.watch(adminProductsProvider);
+    final categoriesSate = ref.watch(adminCategoriesProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           'Manage Products',
           style: TextStyle(
@@ -44,8 +48,6 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
             ),
           ),
         ),
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(
@@ -133,29 +135,46 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        value: _selectedCategory,
-                        isExpanded: true,
-                        style: TextStyle(
-                          fontSize: ResponsiveUtil.fontSize(
-                            mobile: 14,
-                            tablet: 15,
-                            desktop: 16,
-                          ),
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
-                        items: ['All', ...AppConstants.productCategories]
-                            .map((category) => DropdownMenuItem(
-                                  value: category,
-                                  child: Text(category),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategory = value!;
-                          });
+                   Expanded(
+                      child: categoriesSate.when(
+                        data: (categories) {
+                          // Add 'All' to the beginning of the list
+                          final dropdownItems = ['All', ...categories.map((c) => c.name)];
+                          return DropdownButton<String>(
+                            value: _selectedCategory,
+                            isExpanded: true,
+                            style: TextStyle(
+                              fontSize: ResponsiveUtil.fontSize(
+                                mobile: 14,
+                                tablet: 15,
+                                desktop: 16,
+                              ),
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            items: dropdownItems
+                                .map((category) => DropdownMenuItem(
+                                      value: category == 'All' ? 'All' : category,
+                                      child: Text(category),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCategory = value!;
+                              });
+                            },
+                          );
                         },
+                        loading: () => const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        error: (_, __) => Text(
+                          'Failed to load categories',
+                          style: TextStyle(color: AppConstants.errorColor),
+                        ),
                       ),
                     ),
                   ],

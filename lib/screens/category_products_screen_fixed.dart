@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:shimmer/shimmer.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/models/product.dart';
-import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
-import 'package:souq/screens/product_details_screen.dart';
+import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
-import 'package:souq/utils/size_config.dart';
-import 'package:souq/widgets/product_card.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:souq/screens/product_details_screen.dart';
+import '/core/widgets/product_card.dart';
+
+import '../core/widgets/my_app_bar.dart';
 
 class CategoryProductsScreen extends ConsumerStatefulWidget {
   final Category category;
@@ -337,10 +338,9 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
     final theme = Theme.of(context);
     
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(widget.category.name),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),

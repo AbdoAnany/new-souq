@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/user.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 enum OrderStatus {
   pending,
   confirmed,
@@ -147,7 +146,7 @@ static PaymentMethod stringToPaymentMethod(String method) {
       paymentId: json['paymentId'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: (json['updatedAt'] as Timestamp).toDate(),
-      notes: json['notes'],
+      notes: json['notes']??'',
       confirmedAt: json['confirmedAt'] != null
           ? (json['confirmedAt'] as Timestamp).toDate()
           : null,

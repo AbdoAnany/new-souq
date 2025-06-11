@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/admin_provider.dart';
+
+import '../../../core/constants/app_constants.dart';
 
 class OfferFormDialog extends ConsumerStatefulWidget {
   final Offer? offer;

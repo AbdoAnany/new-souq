@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/widgets/offer_card.dart';
+import '/core/widgets/offer_card.dart';
 
 class OffersScreen extends ConsumerWidget {
   const OffersScreen({Key? key}) : super(key: key);

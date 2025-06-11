@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/providers/admin_provider.dart';
-import 'package:souq/screens/admin/admin_products_screen.dart';
 import 'package:souq/screens/admin/admin_categories_screen.dart';
 import 'package:souq/screens/admin/admin_offers_screen.dart';
 import 'package:souq/screens/admin/admin_orders_screen.dart';
+import 'package:souq/screens/admin/admin_products_screen.dart';
 import 'package:souq/services/dummy_data_service.dart';
 import 'package:souq/utils/responsive_util.dart';
+
+import '../../core/widgets/my_app_bar.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -36,12 +38,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     final statisticsState = ref.watch(statisticsProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: const Text('Admin Dashboard'),
-        centerTitle: true,
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
+
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(
@@ -190,16 +189,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildStatisticsGrid(Map<String, int> stats) {
     return GridView.count(
-      crossAxisCount: ResponsiveUtil.isDesktop(context)
-          ? 4
-          : ResponsiveUtil.isTablet(context)
-              ? 3
-              : 2,
-      childAspectRatio: ResponsiveUtil.isDesktop(context)
-          ? 1.3
-          : ResponsiveUtil.isTablet(context)
-              ? 1.4
-              : 1.5,
+      crossAxisCount: 2,
+      childAspectRatio: 1,
       crossAxisSpacing:
           ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       mainAxisSpacing:
@@ -239,8 +230,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       String title, String value, IconData icon, Color color) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(
-            ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
+        padding: EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -277,16 +267,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildStatisticsLoading() {
     return GridView.count(
-      crossAxisCount: ResponsiveUtil.isDesktop(context)
-          ? 4
-          : ResponsiveUtil.isTablet(context)
-              ? 3
-              : 2,
-      childAspectRatio: ResponsiveUtil.isDesktop(context)
-          ? 1.3
-          : ResponsiveUtil.isTablet(context)
-              ? 1.4
-              : 1.5,
+      crossAxisCount:2,
+      childAspectRatio: 1,
       crossAxisSpacing:
           ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       mainAxisSpacing:
@@ -310,16 +292,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildManagementGrid() {
     return GridView.count(
-      crossAxisCount: ResponsiveUtil.isDesktop(context)
-          ? 4
-          : ResponsiveUtil.isTablet(context)
-              ? 3
-              : 2,
-      childAspectRatio: ResponsiveUtil.isDesktop(context)
-          ? 1.2
-          : ResponsiveUtil.isTablet(context)
-              ? 1.15
-              : 1.2,
+      crossAxisCount:2,
+      childAspectRatio: 1,
       crossAxisSpacing:
           ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       mainAxisSpacing:
