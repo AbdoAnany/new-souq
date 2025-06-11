@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/product.dart';
 import 'package:uuid/uuid.dart';

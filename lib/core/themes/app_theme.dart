@@ -8,7 +8,7 @@ import '/core/themes/widget_theme/icon_theme.dart';
 import '/core/themes/widget_theme/input_decoration_theme.dart';
 import '/core/themes/widget_theme/selection_controls_theme.dart';
 import '/core/themes/widget_theme/tab_bar_theme.dart';
-import 'package:souq/core/import_core.dart';
+import '/core/import_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum AppThemeMode {

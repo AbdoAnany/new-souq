@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/auth/login_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/utils/validator.dart';
-import 'package:souq/core/widgets/custom_button.dart';
-import 'package:souq/core/widgets/custom_text_field.dart';
+import '/core/widgets/custom_button.dart';
+import '/core/widgets/custom_text_field.dart';
 
 import '../../core/widgets/my_app_bar.dart';
 

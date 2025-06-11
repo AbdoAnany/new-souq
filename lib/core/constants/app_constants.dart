@@ -59,17 +59,17 @@ class AppConstants {
   static const String fcmTokenKey = 'fcm_token';
   
   // Product Categories
-  static const List<String> productCategories = [
-    'Electronics',
-    'Fashion',
-    'Home & Garden',
-    'Sports',
-    'Books',
-    'Beauty',
-    'Automotive',
-    'Food',
-  ];
-  
+  // static const List<String> productCategories = [
+  //   'Electronics',
+  //   'Fashion',
+  //   'Home & Garden',
+  //   'Sports',
+  //   'Books',
+  //   'Beauty',
+  //   'Automotive',
+  //   'Food',
+  // ];
+  //
   // Order Status
   static const String orderPending = 'pending';
   static const String orderConfirmed = 'confirmed';

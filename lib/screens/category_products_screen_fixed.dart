@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/screens/product_details_screen.dart';
-import 'package:souq/core/widgets/product_card.dart';
+import '/core/widgets/product_card.dart';
 
 import '../core/widgets/my_app_bar.dart';
 

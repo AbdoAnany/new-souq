@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
+import '../core/widgets/custom_button.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_details_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/widgets/custom_button.dart';
+import '/core/constants/app_constants.dart';
 
 class OrderHistoryScreen extends ConsumerStatefulWidget {
   const OrderHistoryScreen({Key? key}) : super(key: key);

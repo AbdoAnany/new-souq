@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import '../core/widgets/custom_button.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/models/cart.dart'; // Import for PaymentMethod
 import 'package:souq/providers/order_provider.dart';
@@ -9,7 +10,7 @@ import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/services/tracking_service.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/widgets/custom_button.dart';
+import '/core/constants/app_constants.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 class OrderDetailsScreen extends ConsumerWidget {

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/widgets/product_card.dart';
+import '/core/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {

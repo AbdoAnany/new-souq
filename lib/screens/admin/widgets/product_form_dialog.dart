@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/product.dart';
 import '../../../providers/admin_provider.dart';
-import '../../../constants/app_constants.dart';
+import '../../../providers/product_provider.dart';
+import '/core/constants/app_constants.dart';
 
 class ProductFormDialog extends ConsumerStatefulWidget {
   final Product? product;
@@ -28,7 +29,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
   final _ratingController = TextEditingController();
   final _reviewCountController = TextEditingController();
 
-  String _selectedCategory = AppConstants.productCategories.first;
+  String? _selectedCategory;
   bool _isFeatured = false;
   bool _isLoading = false;
 
@@ -43,6 +44,10 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
       _reviewCountController.text = '0';
       _stockController.text = '10';
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(categoryProvider.notifier).fetchCategories();
+    });
   }
 
   void _initializeForm() {
@@ -56,7 +61,6 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     _skuController.text = product.sku ?? '';
     _weightController.text = product.weight?.toString() ?? '';
     _dimensionsController.text = product.dimensions ?? '';
-    // _materialsController.text = product.specifications?.join(', ') ?? '';
     _ratingController.text = product.rating.toString();
     _reviewCountController.text = product.reviewCount.toString();
     _selectedCategory = product.categoryId;
@@ -82,6 +86,8 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final categoriesState = ref.watch(categoryProvider);
+
     return Dialog(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
@@ -146,10 +152,10 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
                           labelText: 'Category',
                           border: OutlineInputBorder(),
                         ),
-                        items: AppConstants.productCategories
-                            .map((category) => DropdownMenuItem(
-                                  value: category,
-                                  child: Text(category),
+                        items: categoriesState.value
+                            ?.map((category) => DropdownMenuItem(
+                                  value: category.id,
+                                  child: Text(category.name),
                                 ))
                             .toList(),
                         onChanged: (value) {
@@ -399,7 +405,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
         description: _descriptionController.text.trim(),
         price: double.parse(_priceController.text),
         quantity: int.parse(_stockController.text),
-        categoryId: _selectedCategory,
+        categoryId: _selectedCategory ?? '0',
         images: [_imageUrlController.text.trim()],
         isFeatured: _isFeatured,
         brand: _brandController.text.trim().isEmpty
@@ -414,17 +420,11 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
         dimensions: _dimensionsController.text.trim().isEmpty
             ? null
             : _dimensionsController.text.trim(),
-        // materials: _materialsController.text.trim().isEmpty
-        //     ? null
-        //     : _materialsController.text
-        //         .trim()
-        //         .split(',')
-        //         .map((e) => e.trim())
-        //         .toList(),
         rating: double.parse(_ratingController.text),
         reviewCount: int.parse(_reviewCountController.text),
         createdAt: widget.product?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(), category: '',
+        updatedAt: DateTime.now(),
+        category: '',
       );
 
       if (widget.product == null) {

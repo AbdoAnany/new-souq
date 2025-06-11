@@ -1,4 +1,4 @@
-import 'package:souq/core/import_core.dart';
+import '/core/import_core.dart';
 
 CardTheme get cardTheme {
   return CardTheme(

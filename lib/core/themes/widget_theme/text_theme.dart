@@ -1,4 +1,4 @@
-import 'package:souq/core/import_core.dart';
+import '/core/import_core.dart';
 
 TextTheme get textTheme {
   TextTheme baseTextTheme = AppTextStyles.textTheme;

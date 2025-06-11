@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/utils/responsive_util.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/admin_categories_screen.dart';
 import 'package:souq/screens/admin/admin_offers_screen.dart';

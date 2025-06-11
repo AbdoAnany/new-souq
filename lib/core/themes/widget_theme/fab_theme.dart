@@ -1,4 +1,4 @@
-import 'package:souq/core/import_core.dart';
+import '/core/import_core.dart';
 
 FloatingActionButtonThemeData get floatingActionButtonTheme {
   return FloatingActionButtonThemeData(
