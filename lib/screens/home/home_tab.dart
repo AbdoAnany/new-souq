@@ -191,7 +191,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         carouselController: _carouselController,
                         options: carousel_slider.CarouselOptions(
                           height: ResponsiveUtil.spacing(
-                              mobile: 180, tablet: 220, desktop: 250),
+                              mobile: 185, tablet: 220, desktop: 250),
                           viewportFraction: ResponsiveUtil.isDesktop(context)
                               ? 0.8
                               : ResponsiveUtil.isTablet(context)
@@ -242,58 +242,55 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               SizedBox(height: 24.h),
 
               // Special Offers Section
-              SectionHeader(
-                title: AppStrings.offers,
-                onSeeAllPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const OffersScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              offersState.when(
-                loading: () => _buildOfferCardsShimmer(),
-                error: (error, stackTrace) =>
-                    _buildErrorWidget("Failed to load offers"),
-                data: (offers) {
-                  if (offers.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.w),
-                        child: Text(
-                          "No special offers available right now",
-                          style: TextStyle(
-                            fontSize: ResponsiveUtil.fontSize(
-                                mobile: 14, tablet: 16, desktop: 16),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return SizedBox(
-                    height: ResponsiveUtil.spacing(
-                        mobile: 120, tablet: 130, desktop: 150),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
-                      itemCount: offers.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w),
-                          child: OfferCard(
-                            offer: offers[index],
-                            isSmall: true,
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
+              // SectionHeader(
+              //   title: AppStrings.offers,
+              //   onSeeAllPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) => const OffersScreen(),
+              //       ),
+              //     );
+              //   },
+              // ),
+              //
+              // offersState.when(
+              //   loading: () => _buildOfferCardsShimmer(),
+              //   error: (error, stackTrace) =>
+              //       _buildErrorWidget("Failed to load offers"),
+              //   data: (offers) {
+              //     if (offers.isEmpty) {
+              //       return Center(
+              //         child: Padding(
+              //           padding: EdgeInsets.all(16.w),
+              //           child: Text(
+              //             "No special offers available right now",
+              //             style: TextStyle(
+              //               fontSize: ResponsiveUtil.fontSize(
+              //                   mobile: 14, tablet: 16, desktop: 16),
+              //             ),
+              //           ),
+              //         ),
+              //       );
+              //     }
+              //
+              //     return SizedBox(
+              //       height: ResponsiveUtil.spacing(
+              //           mobile: 125, tablet: 130, desktop: 150),
+              //       child: ListView.builder(
+              //         scrollDirection: Axis.horizontal,
+              //         padding: EdgeInsets.symmetric(horizontal: 8.w),
+              //         itemCount: offers.length,
+              //         itemBuilder: (context, index) {
+              //           return OfferCard(
+              //             offer: offers[index],
+              //             isSmall: true,
+              //           );
+              //         },
+              //       ),
+              //     );
+              //   },
+              // ),
 
               SizedBox(height: 24.h),
 
@@ -697,7 +694,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _buildOfferCardsShimmer() {
     return SizedBox(
-      height: ResponsiveUtil.spacing(mobile: 110, tablet: 130, desktop: 150),
+      height: ResponsiveUtil.spacing(mobile: 115, tablet: 130, desktop: 150),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
