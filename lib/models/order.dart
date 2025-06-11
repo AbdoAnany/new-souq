@@ -146,7 +146,7 @@ static PaymentMethod stringToPaymentMethod(String method) {
       paymentId: json['paymentId'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: (json['updatedAt'] as Timestamp).toDate(),
-      notes: json['notes'],
+      notes: json['notes']??'',
       confirmedAt: json['confirmedAt'] != null
           ? (json['confirmedAt'] as Timestamp).toDate()
           : null,

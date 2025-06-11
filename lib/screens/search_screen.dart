@@ -97,8 +97,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             maxPrice: _filters['maxPrice']?.toDouble(),
             minRating: _filters['minRating']?.toDouble(),
             sortBy: _filters['sortBy']?.toString(),
-            sortDescending: _filters['sortDescending'] as bool?,
-            categoryId: _filters['categoryId']?.toString(),
+            // sortDescending: _filters['sortDescending'] as bool?,
+            // categoryId: _filters['categoryId']?.toString(),
           );
 
       setState(() {

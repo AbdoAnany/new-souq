@@ -79,7 +79,8 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
                   });
                 },
               )
-            : Text(
+            :
+        Text(
                 'Manage Orders',
                 style: TextStyle(
                   fontSize: ResponsiveUtil.fontSize(

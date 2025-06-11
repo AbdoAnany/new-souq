@@ -189,16 +189,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildStatisticsGrid(Map<String, int> stats) {
     return GridView.count(
-      crossAxisCount: ResponsiveUtil.isDesktop(context)
-          ? 4
-          : ResponsiveUtil.isTablet(context)
-              ? 3
-              : 2,
-      childAspectRatio: ResponsiveUtil.isDesktop(context)
-          ? 1.3
-          : ResponsiveUtil.isTablet(context)
-              ? 1.4
-              : 1.5,
+      crossAxisCount: 2,
+      childAspectRatio: 1,
       crossAxisSpacing:
           ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       mainAxisSpacing:
@@ -238,8 +230,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       String title, String value, IconData icon, Color color) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(
-            ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20)),
+        padding: EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -276,16 +267,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildStatisticsLoading() {
     return GridView.count(
-      crossAxisCount: ResponsiveUtil.isDesktop(context)
-          ? 4
-          : ResponsiveUtil.isTablet(context)
-              ? 3
-              : 2,
-      childAspectRatio: ResponsiveUtil.isDesktop(context)
-          ? 1.3
-          : ResponsiveUtil.isTablet(context)
-              ? 1.4
-              : 1.5,
+      crossAxisCount:2,
+      childAspectRatio: 1,
       crossAxisSpacing:
           ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       mainAxisSpacing:
@@ -309,16 +292,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   Widget _buildManagementGrid() {
     return GridView.count(
-      crossAxisCount: ResponsiveUtil.isDesktop(context)
-          ? 4
-          : ResponsiveUtil.isTablet(context)
-              ? 3
-              : 2,
-      childAspectRatio: ResponsiveUtil.isDesktop(context)
-          ? 1.2
-          : ResponsiveUtil.isTablet(context)
-              ? 1.15
-              : 1.2,
+      crossAxisCount:2,
+      childAspectRatio: 1,
       crossAxisSpacing:
           ResponsiveUtil.spacing(mobile: 16, tablet: 18, desktop: 20),
       mainAxisSpacing:
