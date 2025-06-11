@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '/core/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart' show Cart, CartItem, PaymentMethod;
 import 'package:souq/models/order.dart';
 import 'package:souq/models/user.dart';
