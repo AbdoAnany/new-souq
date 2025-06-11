@@ -202,7 +202,7 @@ class ProductService {
           .collection(AppConstants.categoriesCollection)
           .where('isActive', isEqualTo: true)
           .get();
-      print("Categories: " + querySnapshot.docs.toString());
+      print("Categories: ${querySnapshot.docs}");
 
       final categories = querySnapshot.docs
           .map((doc) => Category.fromJson({...doc.data(), 'id': doc.id}))
