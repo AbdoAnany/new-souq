@@ -22,14 +22,11 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
           state = AsyncValue.data(orders);
         },
         onError: (error, stackTrace) {
-          print('Error fetching orders: $error');
           if (!mounted) return;
           state = AsyncValue.error(error, stackTrace);
         },
       );
     } catch (e) {
-      print('Error fetching eeee: $e');
-
       if (!mounted) return;
       state = AsyncValue.error(e, StackTrace.current);
     }
