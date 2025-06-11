@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/auth/login_screen.dart';
 import 'package:souq/screens/home_screen.dart';

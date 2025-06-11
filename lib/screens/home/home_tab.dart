@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
+import 'package:souq/core/widgets/my_app_bar.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/providers/product_provider.dart';
@@ -17,9 +18,8 @@ import 'package:souq/screens/search_screen.dart';
 import 'package:souq/screens/wishlist_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/utils/size_config.dart';
-import 'package:souq/widgets/offer_card.dart';
-import 'package:souq/widgets/product_card.dart';
-import 'package:souq/widgets/section_header.dart';
+import 'package:souq/core/widgets/offer_card.dart';import 'package:souq/core/widgets/product_card.dart';
+import 'package:souq/core/widgets/section_header.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({Key? key}) : super(key: key);
@@ -36,12 +36,15 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   @override
   void initState() {
     super.initState();
-    // Ensure we fetch featured products
-    ref.read(productsProvider.notifier).fetchFeaturedProducts();
-    // Ensure we fetch categories
-    ref.read(categoryProvider.notifier).fetchCategories();
-    // Fetch offers
-    ref.read(offerProvider.notifier).fetchOffers();
+    // Use Future.microtask to delay provider modifications until after the build phase
+    Future.microtask(() {
+      // Ensure we fetch featured products
+      ref.read(productsProvider.notifier).fetchFeaturedProducts();
+      // Ensure we fetch categories
+      ref.read(categoryProvider.notifier).fetchCategories();
+      // Fetch offers
+      ref.read(offerProvider.notifier).fetchOffers();
+    });
   }
 
   @override
@@ -53,10 +56,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     final authState = ref.watch(authProvider);
 
     final user = authState.value;
-    final userName = user != null ? "${user.firstName}" : "Guest";
+    final userName = user != null ? user.firstName : "Guest";
 
     return Scaffold(
-      appBar: AppBar(
+      appBar:
+
+      MyAppBar(
         title: Text(
           AppConstants.appName,
           style: TextStyle(
@@ -90,8 +95,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           ),
           SizedBox(width: 8.w),
         ],
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+
       ),
       body: RefreshIndicator(
         onRefresh: () async {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/widgets/offer_form_dialog.dart';
 
+import '../../core/widgets/my_app_bar.dart';
 import '../../utils/responsive_util.dart';
 
 class AdminOffersScreen extends ConsumerStatefulWidget {
@@ -32,7 +33,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
     final offersAsync = ref.watch(adminOffersProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           'Manage Offers',
           style: TextStyle(
@@ -43,8 +44,7 @@ class _AdminOffersScreenState extends ConsumerState<AdminOffersScreen> {
             ),
           ),
         ),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+
         actions: [
           IconButton(
             icon: Icon(

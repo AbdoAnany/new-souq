@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/admin_order_provider.dart';
 import 'package:souq/screens/admin/widgets/order_details_dialog.dart';
 import 'package:souq/screens/admin/widgets/order_status_update_dialog.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
+
+import '../../core/widgets/my_app_bar.dart';
 
 class AdminOrdersScreen extends ConsumerStatefulWidget {
   const AdminOrdersScreen({super.key});
@@ -46,7 +48,7 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
     final ordersAsync = ref.watch(adminOrdersProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: _isSearching
             ? TextField(
                 controller: _searchController,
@@ -87,8 +89,7 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen>
                   ),
                 ),
               ),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+
         actions: [
           IconButton(
             icon: Icon(

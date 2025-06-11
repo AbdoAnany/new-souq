@@ -7,7 +7,8 @@ import 'package:souq/providers/wishlist_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/widgets/product_card.dart';
+import 'package:souq/core/widgets/product_card.dart';
+import '../core/widgets/my_app_bar.dart';
 
 class WishlistScreen extends ConsumerWidget {
   const WishlistScreen({Key? key}) : super(key: key);
@@ -18,10 +19,9 @@ class WishlistScreen extends ConsumerWidget {
     final wishlistState = ref.watch(wishlistProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: const Text('My Wishlist'),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+
         actions: [
           wishlistState.maybeWhen(
             data: (products) => products.isNotEmpty

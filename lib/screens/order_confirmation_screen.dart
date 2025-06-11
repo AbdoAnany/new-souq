@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
-import 'package:souq/widgets/custom_button.dart';
+import 'package:souq/core/widgets/custom_button.dart';
 
 // import 'package:lottie/lottie.dart';
+import '../core/widgets/my_app_bar.dart';
 import '../utils/responsive_util.dart';
 
 class OrderConfirmationScreen extends ConsumerWidget {
@@ -30,7 +31,7 @@ class OrderConfirmationScreen extends ConsumerWidget {
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: MyAppBar(
           title: Text(
             'Order Confirmation',
             style: TextStyle(

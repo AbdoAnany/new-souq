@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../constants/app_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../models/product.dart';
 import '../../../providers/admin_provider.dart';
 

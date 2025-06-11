@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/admin_categories_screen.dart';
 import 'package:souq/screens/admin/admin_offers_screen.dart';
@@ -9,6 +9,8 @@ import 'package:souq/screens/admin/admin_orders_screen.dart';
 import 'package:souq/screens/admin/admin_products_screen.dart';
 import 'package:souq/services/dummy_data_service.dart';
 import 'package:souq/utils/responsive_util.dart';
+
+import '../../core/widgets/my_app_bar.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -36,12 +38,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     final statisticsState = ref.watch(statisticsProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: const Text('Admin Dashboard'),
-        centerTitle: true,
-        backgroundColor: AppConstants.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
+
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(

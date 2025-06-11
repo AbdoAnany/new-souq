@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/constants/app_constants.dart';
+import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/models/product.dart';
@@ -45,56 +45,57 @@ class ProductService {
           .where('categoryId', isEqualTo: categoryId)
           .where('inStock', isEqualTo: true);
 
-      // Apply price filter
-      if (minPrice != null) {
-        query = query.where('price', isGreaterThanOrEqualTo: minPrice);
-      }
-      if (maxPrice != null) {
-        query = query.where('price', isLessThanOrEqualTo: maxPrice);
-      }
 
-      // Apply rating filter
-      if (minRating != null && minRating > 0) {
-        query = query.where('rating', isGreaterThanOrEqualTo: minRating);
-      }
+      // Apply sorting first (before range filters to avoid composite index issues)
+      // switch (sortBy) {
+      //   case 'price_asc':
+      //     query = query.orderBy('price', descending: false);
+      //     break;
+      //   case 'price_desc':
+      //     query = query.orderBy('price', descending: true);
+      //     break;
+      //   case 'rating':
+      //     query = query.orderBy('rating', descending: true);
+      //     break;
+      //   case 'popularity':
+      //     query = query.orderBy('purchaseCount', descending: true);
+      //     break;
+      //   default:
+      //     query = query.orderBy('createdAt', descending: true);
+      // }
 
-      // Apply sorting
-      switch (sortBy) {
-        case 'price_asc':
-          query = query.orderBy('price', descending: false);
-          break;
-        case 'price_desc':
-          query = query.orderBy('price', descending: true);
-          break;
-        case 'rating':
-          query = query.orderBy('rating', descending: true);
-          break;
-        case 'popularity':
-          query = query.orderBy('purchaseCount', descending: true);
-          break;
-        default:
-          query = query.orderBy('createdAt', descending: true);
-      }
-
-      // Apply pagination
-      if (lastProductId != null) {
-        final lastDoc = await _firestore
-            .collection(AppConstants.productsCollection)
-            .doc(lastProductId)
-            .get();
-        if (lastDoc.exists) {
-          query = query.startAfterDocument(lastDoc);
-        }
-      }
-
-      query = query.limit(limit);
-
-      final querySnapshot = await query.get();
-
-      return querySnapshot.docs
+      // Get the results without additional filters that would require complex indexes
+      QuerySnapshot querySnapshot = await query.get();
+      List<Product> products = querySnapshot.docs
           .map((doc) => Product.fromJson(
               {...(doc.data() as Map<String, dynamic>), 'id': doc.id}))
           .toList();
+
+      // Apply price and rating filters client-side to avoid composite index issues
+      if (minPrice != null) {
+        products = products.where((product) => product.price >= minPrice).toList();
+      }
+      if (maxPrice != null) {
+        products = products.where((product) => product.price <= maxPrice).toList();
+      }
+      if (minRating != null && minRating > 0) {
+        products = products.where((product) => product.rating >= minRating).toList();
+      }
+
+      // Apply pagination
+      if (lastProductId != null && products.isNotEmpty) {
+        final lastProductIndex = products.indexWhere((p) => p.id == lastProductId);
+        if (lastProductIndex >= 0 && lastProductIndex < products.length - 1) {
+          products = products.sublist(lastProductIndex + 1);
+        }
+      }
+
+      // Limit results
+      if (products.length > limit) {
+        products = products.sublist(0, limit);
+      }
+
+      return products;
     } catch (e) {
       throw Exception('Failed to fetch products: ${e.toString()}');
     }
