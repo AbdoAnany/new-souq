@@ -1,18 +1,18 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart' as carousel;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import 'package:carousel_slider/carousel_slider.dart' as carousel;
+import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/providers/product_provider.dart';
-import 'package:souq/screens/cart_screen.dart';
+import 'package:souq/widgets/custom_button.dart';
+import 'package:souq/widgets/rating_stars.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/core/widgets/custom_button.dart';
-import 'package:souq/core/widgets/rating_stars.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:souq/screens/cart_screen.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String productId;

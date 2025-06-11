@@ -6,6 +6,7 @@ import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/auth/login_screen.dart';
 import 'package:souq/screens/home_screen.dart';
+import '../utils/responsive_util.dart';
 
 import '../utils/responsive_util.dart';
 

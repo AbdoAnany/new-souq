@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/admin_provider.dart';
 

@@ -1,15 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
-import 'package:souq/providers/theme_provider.dart';
-import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/screens/wishlist_screen.dart';
+import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import '../core/widgets/my_app_bar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'admin/admin_dashboard_screen.dart';
 
@@ -19,14 +17,14 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final themeMode = ref.watch(themeModeProvider);
     final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: MyAppBar(
+      appBar: AppBar(
         title: const Text('My Profile'),
-
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
@@ -127,12 +125,13 @@ class ProfileScreen extends ConsumerWidget {
                 value: isDark,
                 activeColor: theme.colorScheme.primary,
                 onChanged: (value) {
-                  ref.read(themeModeProvider.notifier).setThemeMode(
-                      value ? ThemeMode.dark : ThemeMode.light);
+                  // TODO: Create and use proper theme provider
+                  // ref.read(themeModeNotifierProvider.notifier).toggleTheme();
                 },
               ),
               onTap: () {
-                ref.read(themeModeProvider.notifier).toggleTheme();
+                // TODO: Create and use proper theme provider
+                // ref.read(themeModeNotifierProvider.notifier).toggleTheme();
               },
             ),
             _buildListItem(

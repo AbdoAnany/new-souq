@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/product.dart';
-import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/providers/product_provider.dart';
+import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/core/widgets/product_card.dart';
-import '../core/widgets/my_app_bar.dart';
+import 'package:souq/widgets/product_card.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
@@ -97,8 +96,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             maxPrice: _filters['maxPrice']?.toDouble(),
             minRating: _filters['minRating']?.toDouble(),
             sortBy: _filters['sortBy']?.toString(),
-            // sortDescending: _filters['sortDescending'] as bool?,
-            // categoryId: _filters['categoryId']?.toString(),
+            sortDescending: _filters['sortDescending'] as bool?,
+            categoryId: _filters['categoryId']?.toString(),
           );
 
       setState(() {
@@ -455,8 +454,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: MyAppBar(
-
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
         title: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,

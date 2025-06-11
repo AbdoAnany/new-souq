@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:souq/core/constants/app_constants.dart';
-
+import 'package:souq/constants/app_constants.dart';
+import 'package:souq/models/category.dart';
+import 'package:souq/models/product.dart';
+import 'package:souq/models/offer.dart';
 import 'package:uuid/uuid.dart';
 
 class DummyDataService {

@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq/core/constants/app_constants.dart';
+import 'package:souq/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/order_provider.dart';
 import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
-import 'package:souq/core/widgets/custom_button.dart';
-
-// import 'package:lottie/lottie.dart';
-import '../core/widgets/my_app_bar.dart';
+import 'package:souq/widgets/custom_button.dart';
+import 'package:lottie/lottie.dart';
 import '../utils/responsive_util.dart';
 
 class OrderConfirmationScreen extends ConsumerWidget {
@@ -31,7 +29,7 @@ class OrderConfirmationScreen extends ConsumerWidget {
         return false;
       },
       child: Scaffold(
-        appBar: MyAppBar(
+        appBar: AppBar(
           title: Text(
             'Order Confirmation',
             style: TextStyle(
@@ -56,20 +54,20 @@ class OrderConfirmationScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Success animation
-                  // Lottie.asset(
-                  //   'assets/animations/order_success.json',
-                  //   width: ResponsiveUtil.spacing(
-                  //     mobile: 200,
-                  //     tablet: 240,
-                  //     desktop: 280,
-                  //   ),
-                  //   height: ResponsiveUtil.spacing(
-                  //     mobile: 200,
-                  //     tablet: 240,
-                  //     desktop: 280,
-                  //   ),
-                  //   repeat: false,
-                  // ),
+                  Lottie.asset(
+                    'assets/animations/order_success.json',
+                    width: ResponsiveUtil.spacing(
+                      mobile: 200,
+                      tablet: 240,
+                      desktop: 280,
+                    ),
+                    height: ResponsiveUtil.spacing(
+                      mobile: 200,
+                      tablet: 240,
+                      desktop: 280,
+                    ),
+                    repeat: false,
+                  ),
 
                   SizedBox(
                       height: ResponsiveUtil.spacing(

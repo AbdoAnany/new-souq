@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/utils/responsive_util.dart';
 
-import '../core/widgets/my_app_bar.dart';
-
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
 
@@ -12,9 +10,10 @@ class NotificationsScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: MyAppBar(
+      appBar: AppBar(
         title: const Text('Notifications'),
-
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: Center(
         child: Padding(

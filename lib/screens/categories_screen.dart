@@ -1,14 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/category_products_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-
-import '../core/widgets/my_app_bar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({Key? key}) : super(key: key);
@@ -33,7 +31,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final categoriesState = ref.watch(categoryProvider);
 
     return Scaffold(
-      appBar: MyAppBar(
+      appBar: AppBar(
         title: Text(
           "Categories",
           style: TextStyle(
@@ -42,7 +40,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
