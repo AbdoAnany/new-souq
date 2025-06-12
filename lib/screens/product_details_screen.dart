@@ -19,9 +19,9 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String productId;
 
   const ProductDetailsScreen({
-    Key? key,
+    super.key,
     required this.productId,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<ProductDetailsScreen> createState() =>
@@ -100,8 +100,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final productAsyncValue =
-        ref.watch(productDetailsProvider(widget.productId));
+    final productAsyncValue = ref.watch(productDetailsProvider(widget.productId));
 
     return Scaffold(
       body: SafeArea(
