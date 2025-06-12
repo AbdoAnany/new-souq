@@ -30,7 +30,7 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
         setThemeMode(ThemeMode.light);
         break;
       case ThemeMode.system:
-        setThemeMode(ThemeMode.light);
+        setThemeMode(ThemeMode.system);
         break;
     }
   }

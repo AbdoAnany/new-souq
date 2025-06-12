@@ -90,7 +90,6 @@ class SouqApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-  final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     final authState = ref.watch(authProvider);
 
@@ -98,19 +97,13 @@ class SouqApp extends ConsumerWidget {
         themeListenable: AppConfig.instance.themeController?.mapThemeData,
         builder: (context,theme) {
         return ScreenUtilInit(
-          // Design size based on iPhone 12 Pro (390x844)
           designSize: const Size(390, 844),
-          // Enable splitting for tablet/web layouts
           splitScreenMode: true,
-          // Minimum tablet width in dp
           minTextAdapt: true,
           builder: (context, child) {
             return MaterialApp(
               title: AppConstants.appName,
               theme: theme,
-
-
-              // themeMode: themeMode,
               locale: locale,
               supportedLocales: const [
                 Locale('en', 'US'), // English
@@ -124,7 +117,6 @@ class SouqApp extends ConsumerWidget {
               debugShowCheckedModeBanner: false,
               builder: (context, widget) {
                 return MediaQuery(
-                  // Prevent system text scale factor from affecting our app
                   data: MediaQuery.of(context).copyWith(
                     textScaler: const TextScaler.linear(1.0),
                   ),
@@ -132,8 +124,7 @@ class SouqApp extends ConsumerWidget {
                 );
               },
               home: authState.when(
-                data: (user) =>
-                    user != null ? const HomeScreen() : const LoginScreen(),
+                data: (user) => user != null ? const HomeScreen() : const LoginScreen(),
                 loading: () => const SplashScreen(),
                 error: (error, stack) => Scaffold(
                   body: Center(

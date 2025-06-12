@@ -112,17 +112,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       ),
       child: InkWell(
         onTap: () {
-          if (category.hasSubcategories) {
-            _showSubcategories(category);
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    CategoryProductsScreen(category: category),
-              ),
-            );
-          }
+          // Navigate directly to category products, even if it has subcategories
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  CategoryProductsScreen(category: category),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(12.r),
         child: Column(
@@ -177,27 +174,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: ResponsiveUtil.fontSize(
-                                mobile: 16, tablet: 18, desktop: 20),
-                          ),
-                        ),
-                      ),
-                      if (category.hasSubcategories)
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: ResponsiveUtil.fontSize(
-                              mobile: 16, tablet: 18, desktop: 20),
-                          color: theme.colorScheme.primary,
-                        ),
-                    ],
+                  Text(
+                    category.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 16, tablet: 18, desktop: 20),
+                    ),
                   ),
                   if (category.description.isNotEmpty) ...[
                     SizedBox(height: 4.h),
@@ -211,15 +194,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                  SizedBox(height: 8.h),
-                  Text(
-                    "${category.productCount} products",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                      fontSize: ResponsiveUtil.fontSize(
-                          mobile: 12, tablet: 13, desktop: 14),
-                    ),
-                  ),
                 ],
               ),
             ),
