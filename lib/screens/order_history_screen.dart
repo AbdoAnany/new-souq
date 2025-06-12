@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/widgets/custom_button.dart';
+import '../core/widgets/my_app_bar.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/auth_provider.dart';
@@ -47,7 +48,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
     final ordersAsyncValue = ref.watch(ordersProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           'My Orders',
           style: TextStyle(

@@ -10,6 +10,7 @@ import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 import '/core/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
+import '/core/widgets/my_app_bar.dart';
 
 class CategoryProductsScreen extends ConsumerStatefulWidget {
   final Category category;
@@ -433,7 +434,7 @@ class _CategoryProductsScreenState
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           widget.category.name,
           style: TextStyle(
@@ -441,8 +442,7 @@ class _CategoryProductsScreenState
                 ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
           ),
         ),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+
         actions: [
           IconButton(
             icon: Icon(

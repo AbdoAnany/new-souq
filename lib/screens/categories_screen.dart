@@ -8,6 +8,8 @@ import 'package:souq/utils/responsive_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '/core/widgets/my_app_bar.dart';
+
 class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({Key? key}) : super(key: key);
 
@@ -31,7 +33,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final categoriesState = ref.watch(categoryProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           "Categories",
           style: TextStyle(
@@ -40,8 +42,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+
       ),
       body: RefreshIndicator(
         onRefresh: () async {

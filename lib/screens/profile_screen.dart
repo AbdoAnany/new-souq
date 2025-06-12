@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../core/widgets/my_app_bar.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
@@ -21,10 +22,9 @@ class ProfileScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: const Text('My Profile'),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(

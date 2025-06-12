@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../core/widgets/custom_button.dart';
+import '../core/widgets/my_app_bar.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/user.dart';
@@ -861,7 +862,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: const Text(AppStrings.checkout),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../core/widgets/my_app_bar.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/product_provider.dart';
@@ -16,14 +17,14 @@ class OffersScreen extends ConsumerWidget {
     final offersAsyncValue = ref.watch(offerProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: MyAppBar(
         title: Text(
           AppStrings.offers,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
+
       ),
       body: offersAsyncValue.when(
         data: (offers) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../core/widgets/my_app_bar.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/product.dart';
 import 'package:souq/providers/product_provider.dart';
@@ -9,6 +10,7 @@ import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 import '/core/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
+import '/core/widgets/my_app_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
@@ -454,9 +456,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+      appBar: MyAppBar(
+
         title: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
