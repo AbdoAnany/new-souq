@@ -11,10 +11,10 @@ ChipThemeData get chipTheme {
       horizontal: AppDimensions.mediumPadding,
       vertical: AppDimensions.smallPadding,
     ),
-    labelStyle: AppTextStyles.textTheme.bodyMedium?.copyWith(
+    labelStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
       color: AppColorScheme.getColorScheme.onSurfaceVariant,
     ),
-    secondaryLabelStyle: AppTextStyles.textTheme.bodyMedium?.copyWith(
+    secondaryLabelStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
       color: AppColorScheme.getColorScheme.onSurfaceVariant,
     ),
     brightness: Brightness.light,

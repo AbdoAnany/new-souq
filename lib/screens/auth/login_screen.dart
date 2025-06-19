@@ -4,7 +4,7 @@ import '/core/constants/app_constants.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/auth/forgot_password_screen.dart';
 import 'package:souq/screens/auth/signup_screen.dart';
-import 'package:souq/screens/home_screen.dart';
+import 'package:souq/features/home/presentation/screens/home_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/utils/validator.dart';
 import '/core/widgets/custom_button.dart';

@@ -17,7 +17,7 @@ ElevatedButtonThemeData get elevatedButtonTheme => ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColorScheme.primary,
         foregroundColor: AppColorScheme.onPrimary,
-        textStyle: AppTextStyles.textTheme.bodyMedium?.copyWith(
+        textStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
           color: AppColorScheme.onPrimary,
         ),
         padding: EdgeInsets.symmetric(

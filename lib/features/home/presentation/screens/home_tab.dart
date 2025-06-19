@@ -22,7 +22,7 @@ import 'package:souq/core/widgets/offer_card.dart';import 'package:souq/core/wid
 import 'package:souq/core/widgets/section_header.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
-  const HomeTab({Key? key}) : super(key: key);
+  const HomeTab({super.key});
 
   @override
   ConsumerState<HomeTab> createState() => _HomeTabState();

@@ -5,11 +5,10 @@ import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/screens/categories_screen.dart';
 import 'package:souq/screens/profile_screen.dart';
 import 'package:souq/screens/search_screen.dart';
-import 'package:souq/screens/home/home_tab.dart';
 import 'package:souq/providers/cart_provider.dart';
 import '/core/widgets/badge.dart' as custom_badge;
 import 'package:souq/utils/responsive_util.dart';
-
+import 'home_tab.dart';
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 

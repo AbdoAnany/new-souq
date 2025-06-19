@@ -6,7 +6,7 @@ TooltipThemeData get tooltipTheme {
       color: AppColorScheme.getColorScheme.inverseSurface,
       borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
     ),
-    textStyle: AppTextStyles.textTheme.bodySmall?.copyWith(
+    textStyle: AppTextTheme.textTheme.bodySmall?.copyWith(
       color: AppColorScheme.getColorScheme.onInverseSurface,
     ),
     padding: EdgeInsets.symmetric(

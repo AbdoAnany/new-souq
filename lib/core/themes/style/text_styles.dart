@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AppTextStyles {
-  const AppTextStyles._();
+class AppTextTheme {
+  const AppTextTheme._();
   // static const String fontFamily='';
   static final fontFamily = GoogleFonts.notoSans().fontFamily;
 
@@ -93,4 +93,8 @@ class AppTextStyles {
       letterSpacing: 0.5,
     ),
   );
+  static TextTheme get textThemeLight => textTheme.apply(
+        bodyColor: Colors.black87,
+        displayColor: Colors.black87,
+      );
 }

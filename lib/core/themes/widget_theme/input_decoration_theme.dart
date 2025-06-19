@@ -22,8 +22,8 @@ InputDecorationTheme get inputDecorationTheme {
       borderRadius: BorderRadius.circular(AppDimensions.cardBorderRadius),
       borderSide: BorderSide(color: AppColorScheme.getColorScheme.error),
     ),
-    labelStyle: AppTextStyles.textTheme.bodyMedium,
-    hintStyle: AppTextStyles.textTheme.bodyMedium?.copyWith(
+    labelStyle: AppTextTheme.textTheme.bodyMedium,
+    hintStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
       color: AppColorScheme.getColorScheme.onSurfaceVariant,
     ),
   );

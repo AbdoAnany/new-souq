@@ -7,10 +7,10 @@ DialogTheme get dialogTheme {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
     ),
-    titleTextStyle: AppTextStyles.textTheme.titleLarge?.copyWith(
+    titleTextStyle: AppTextTheme.textTheme.titleLarge?.copyWith(
       color: AppColorScheme.getColorScheme.onSurface,
     ),
-    contentTextStyle: AppTextStyles.textTheme.bodyMedium?.copyWith(
+    contentTextStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
       color: AppColorScheme.getColorScheme.onSurface,
     ),
     actionsPadding: EdgeInsets.all(AppDimensions.mediumPadding),

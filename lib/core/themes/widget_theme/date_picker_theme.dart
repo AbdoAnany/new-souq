@@ -35,13 +35,13 @@ DatePickerThemeData get datePickerTheme {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
     ),
-    headerHeadlineStyle: AppTextStyles.textTheme.headlineSmall?.copyWith(
+    headerHeadlineStyle: AppTextTheme.textTheme.headlineSmall?.copyWith(
       color: AppColorScheme.onPrimary,
     ),
-    headerHelpStyle: AppTextStyles.textTheme.labelLarge?.copyWith(
+    headerHelpStyle: AppTextTheme.textTheme.labelLarge?.copyWith(
       color: AppColorScheme.onPrimary,
     ),
-    dayStyle: AppTextStyles.textTheme.bodyMedium,
-    yearStyle: AppTextStyles.textTheme.bodyMedium,
+    dayStyle: AppTextTheme.textTheme.bodyMedium,
+    yearStyle: AppTextTheme.textTheme.bodyMedium,
   );
 }
