@@ -5,8 +5,8 @@ TabBarTheme get tabBarTheme {
     labelColor: AppColorScheme.primary,
     unselectedLabelColor: AppColorScheme.getColorScheme.onSurfaceVariant,
     indicatorColor: AppColorScheme.primary,
-    labelStyle: AppTextStyles.textTheme.labelLarge,
-    unselectedLabelStyle: AppTextStyles.textTheme.labelLarge?.copyWith(
+    labelStyle: AppTextTheme.textTheme.labelLarge,
+    unselectedLabelStyle: AppTextTheme.textTheme.labelLarge?.copyWith(
       fontWeight: FontWeight.w400,
     ),
     indicatorSize: TabBarIndicatorSize.tab,

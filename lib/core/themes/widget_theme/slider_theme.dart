@@ -7,7 +7,7 @@ SliderThemeData get sliderTheme {
     thumbColor: AppColorScheme.primary,
     overlayColor: AppColorScheme.primary.withOpacity(0.2),
     valueIndicatorColor: AppColorScheme.primary,
-    valueIndicatorTextStyle: AppTextStyles.textTheme.labelMedium?.copyWith(
+    valueIndicatorTextStyle: AppTextTheme.textTheme.labelMedium?.copyWith(
       color: AppColorScheme.onPrimary,
     ),
     trackHeight: 4.0,

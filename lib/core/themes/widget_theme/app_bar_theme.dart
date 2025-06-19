@@ -6,7 +6,7 @@ AppBarTheme get appBarTheme {
     centerTitle: true,
     elevation: 0,
     backgroundColor: AppColorScheme.primary,
-    titleTextStyle: AppTextStyles.textTheme.headlineSmall!.copyWith(
+    titleTextStyle: AppTextTheme.textTheme.headlineSmall!.copyWith(
       color: AppColorScheme.onPrimary,
     ),
     iconTheme: IconThemeData(

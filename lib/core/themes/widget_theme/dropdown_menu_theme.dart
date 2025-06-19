@@ -18,6 +18,6 @@ DropdownMenuThemeData get dropdownMenuTheme {
       ),
     ),
     inputDecorationTheme: inputDecorationTheme,
-    textStyle: AppTextStyles.textTheme.bodyMedium,
+    textStyle: AppTextTheme.textTheme.bodyMedium,
   );
 }

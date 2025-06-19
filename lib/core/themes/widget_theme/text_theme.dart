@@ -1,7 +1,7 @@
 import '/core/import_core.dart';
 
 TextTheme get textTheme {
-  TextTheme baseTextTheme = AppTextStyles.textTheme;
+  TextTheme baseTextTheme = AppTextTheme.textTheme;
 
   return TextTheme(
     displayLarge: baseTextTheme.displayLarge?.copyWith(

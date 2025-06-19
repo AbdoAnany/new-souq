@@ -22,9 +22,9 @@ SearchBarThemeData get searchBarTheme {
     padding: WidgetStateProperty.all(
       EdgeInsets.symmetric(horizontal: AppDimensions.mediumPadding),
     ),
-    textStyle: MaterialStateProperty.all(AppTextStyles.textTheme.bodyMedium),
+    textStyle: MaterialStateProperty.all(AppTextTheme.textTheme.bodyMedium),
     hintStyle: MaterialStateProperty.all(
-      AppTextStyles.textTheme.bodyMedium?.copyWith(
+      AppTextTheme.textTheme.bodyMedium?.copyWith(
         color: AppColorScheme.getColorScheme.onSurfaceVariant,
       ),
     ),

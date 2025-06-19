@@ -8,34 +8,29 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/app_config.dart';
 import 'core/constants/app_constants.dart';
-import 'core/constants/responsive_app_theme.dart';
 import 'core/themes/app_theme.dart';
 import 'firebase_options.dart';
 import 'models/user.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
-import 'providers/theme_provider.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'features/auth/presentation/screens/auth_screen_wrapper.dart';
+import 'features/home/presentation/screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 
 Future<void> main() async {
   try {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    // Initialize Firebase
+    WidgetsFlutterBinding.ensureInitialized();    // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    
     // Load ThemeController
-    final themeController = await ThemeController.load();
-
-  AppConfig(
+    final themeController = await ThemeController.load();    AppConfig(
       environment: Environment.dev,
       themeController: themeController,
-      apiBaseUrl: 'https://dragonball-api.com/api',
+      apiBaseUrl: 'https://api.souq.com/v1',
       enableLogging: true,
-      appName: 'Your App',
+      appName: 'Souq E-commerce',
       appVersion: '1.0.0',
     );
     // Set system UI overlay style
@@ -122,9 +117,8 @@ class SouqApp extends ConsumerWidget {
                   ),
                   child: widget!,
                 );
-              },
-              home: authState.when(
-                data: (user) => user != null ? const HomeScreen() : const LoginScreen(),
+              },              home: authState.when(
+                data: (user) => user != null ? const HomeScreen() : const AuthScreenWrapper(),
                 loading: () => const SplashScreen(),
                 error: (error, stack) => Scaffold(
                   body: Center(

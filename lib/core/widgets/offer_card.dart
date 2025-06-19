@@ -1,10 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/utils/responsive_util.dart';
-
+import '/core/import_core.dart';
 class OfferCard extends StatelessWidget {
   final Offer offer;
   final bool isSmall;
@@ -19,7 +18,6 @@ class OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     if (isSmall) {
       // Small offer card for horizontal list
@@ -50,7 +48,7 @@ class OfferCard extends StatelessWidget {
                 color: Colors.grey[300],
               ),
               errorWidget: (context, url, error) => Container(
-                color: theme.primaryColor.withOpacity(0.2),
+                color: AppColorScheme.primary.withOpacity(0.2),
                 child: const Icon(Icons.error),
               ),
             ),
@@ -94,7 +92,7 @@ class OfferCard extends StatelessWidget {
                     color: Colors.grey[300],
                   ),
                   errorWidget: (context, url, error) => Container(
-                    color: theme.primaryColor.withOpacity(0.2),
+                    color: AppColorScheme.primary.withOpacity(0.2),
                     child: const Icon(Icons.error),
                   ),
                 ),
@@ -110,7 +108,7 @@ class OfferCard extends StatelessWidget {
                 children: [
                   Text(
                     offer.title,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: AppTextTheme.textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
@@ -129,7 +127,7 @@ class OfferCard extends StatelessWidget {
                   if (offer.description != null && offer.description!.isNotEmpty)
                     Text(
                       offer.description!,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style:  AppTextTheme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white,
                         fontSize: ResponsiveUtil.fontSize(mobile: 14, tablet: 16, desktop: 18),
                         shadows: [
@@ -160,7 +158,7 @@ class OfferCard extends StatelessWidget {
                   ),
                   child: Text(
                     "${offer.discountPercentage}% OFF",
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style:  AppTextTheme.textTheme.bodySmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
