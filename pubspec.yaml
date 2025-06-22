@@ -36,9 +36,9 @@ dependencies:
   shared_preferences: ^2.2.2
 
   # Internationalization
-  flutter_localizations:
-    sdk: flutter
-  intl: ^0.19.0
+#  flutter_localizations:
+#    sdk: flutter
+  intl: ^0.20.0
 
   # Firebase
   firebase_core: ^3.13.1
@@ -61,6 +61,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   timeline_tile: ^2.0.0
   flutter_bloc: ^9.1.1
+  dartz: ^0.10.1
 
 dev_dependencies:
   flutter_test:
