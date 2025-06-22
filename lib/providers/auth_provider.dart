@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/services/auth_service.dart';
@@ -24,7 +25,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> _initialize() async {
     if (!_mounted) return;
-    
+
     try {
       final user = await _authService.getUserData();
       _setState(AsyncValue.data(user));
@@ -35,15 +36,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     if (!_mounted) return;
-    
+
     _setState(const AsyncValue.loading());
     try {
       final result = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print(result.user);
-      
+      debugPrint('Sign in result: ${result.user}');
+
       if (result.isSuccess) {
         final user = await _authService.getUserData();
         _setState(AsyncValue.data(user));
@@ -58,13 +59,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   }
 
   Future<void> signUpWithEmailAndPassword(
-    String email, 
-    String password, 
-    String firstName, 
-    String lastName
-  ) async {
+      String email, String password, String firstName, String lastName) async {
     if (!_mounted) return;
-    
+
     _setState(const AsyncValue.loading());
     try {
       final result = await _authService.signUpWithEmailAndPassword(
@@ -73,7 +70,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         firstName: firstName,
         lastName: lastName,
       );
-      
+
       if (result.isSuccess) {
         final user = await _authService.getUserData();
         _setState(AsyncValue.data(user));
@@ -89,7 +86,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> signInWithGoogle() async {
     if (!_mounted) return;
-    
+
     _setState(const AsyncValue.loading());
     try {
       final result = await _authService.signInWithGoogle();
@@ -108,7 +105,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> signOut() async {
     if (!_mounted) return;
-    
+
     try {
       await _authService.signOut();
       _setState(const AsyncValue.data(null));
@@ -125,7 +122,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     String? profileImageUrl,
   }) async {
     if (!_mounted || state.value == null) return;
-    
+
     try {
       final result = await _authService.updateUserProfile(
         firstName: firstName,
@@ -133,7 +130,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         phoneNumber: phoneNumber,
         profileImageUrl: profileImageUrl,
       );
-      
+
       if (result.isSuccess) {
         final user = await _authService.getUserData();
         _setState(AsyncValue.data(user));
@@ -148,11 +145,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> resetPassword(String email) async {
     if (!_mounted) return;
-    
+
     if (email.trim().isEmpty) {
       throw ArgumentError('Email cannot be empty');
     }
-    
+
     try {
       final result = await _authService.sendPasswordResetEmail(email);
       if (!result.isSuccess) {
@@ -171,7 +168,8 @@ final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
 });
 
-final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
+final authProvider =
+    StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
   final authService = ref.watch(authServiceProvider);
   return AuthNotifier(authService);
 });

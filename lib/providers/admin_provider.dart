@@ -83,7 +83,7 @@ class AdminProductsNotifier extends StateNotifier<AsyncValue<List<Product>>> {
 
 // Categories Notifier for Admin
 class AdminCategoriesNotifier
-    extends StateNotifier<AsyncValue<List<Category>>> {
+    extends StateNotifier<AsyncValue<List<ProductCategory>>> {
   final AdminService _adminService;
 
   AdminCategoriesNotifier(this._adminService)
@@ -221,9 +221,8 @@ final adminProductsProvider =
   return AdminProductsNotifier(adminService);
 });
 
-final adminCategoriesProvider =
-    StateNotifierProvider<AdminCategoriesNotifier, AsyncValue<List<Category>>>(
-        (ref) {
+final adminCategoriesProvider = StateNotifierProvider<AdminCategoriesNotifier,
+    AsyncValue<List<ProductCategory>>>((ref) {
   final adminService = ref.watch(adminServiceProvider);
   return AdminCategoriesNotifier(adminService);
 });

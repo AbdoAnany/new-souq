@@ -1,7 +1,7 @@
 import '/core/import_core.dart';
 
-TabBarTheme get tabBarTheme {
-  return TabBarTheme(
+TabBarThemeData get tabBarTheme {
+  return TabBarThemeData(
     labelColor: AppColorScheme.primary,
     unselectedLabelColor: AppColorScheme.getColorScheme.onSurfaceVariant,
     indicatorColor: AppColorScheme.primary,

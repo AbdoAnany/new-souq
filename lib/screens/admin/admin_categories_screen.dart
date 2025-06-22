@@ -46,7 +46,6 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
             ),
           ),
         ),
-
         actions: [
           IconButton(
             icon: Icon(
@@ -278,7 +277,7 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
     );
   }
 
-  Widget _buildCategoryCard(Category category) {
+  Widget _buildCategoryCard(ProductCategory category) {
     return Card(
       margin: EdgeInsets.symmetric(
         horizontal: ResponsiveUtil.spacing(
@@ -542,21 +541,21 @@ class _AdminCategoriesScreenState extends ConsumerState<AdminCategoriesScreen> {
     }
   }
 
-  void _showCategoryDialog(BuildContext context, [Category? category]) {
+  void _showCategoryDialog(BuildContext context, [ProductCategory? category]) {
     showDialog(
       context: context,
       builder: (context) => CategoryFormDialog(category: category),
     );
   }
 
-  void _toggleActive(Category category) {
+  void _toggleActive(ProductCategory category) {
     ref.read(adminCategoriesProvider.notifier).toggleStatus(
           category.id,
           !category.isActive,
         );
   }
 
-  void _confirmDelete(Category category) {
+  void _confirmDelete(ProductCategory category) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

@@ -333,16 +333,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
             MaterialPageRoute(builder: (context) => const AdminOffersScreen()),
           ),
         ),
-        _buildManagementCard(
-          'Orders',
-          'View and manage orders',
-          Icons.shopping_bag,
-          Colors.purple,
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AdminOrdersScreen()),
-          ),
-        ),
+        // _buildManagementCard(
+        //   'Orders',
+        //   'View and manage orders',
+        //   Icons.shopping_bag,
+        //   Colors.purple,
+        //   () => Navigator.push(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const AdminOrdersScreen()),
+        //   ),
+        // ),
       ],
     );
   }

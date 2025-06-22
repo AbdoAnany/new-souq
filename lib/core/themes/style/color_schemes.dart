@@ -2,21 +2,19 @@ import '/core/import_core.dart';
 
 import '../../app_config.dart';
 
-
-
 class AppColorScheme {
   // Light theme colors - refined palette
   static const ColorScheme _lightColorScheme = ColorScheme(
     brightness: Brightness.light,
-    primary: Color(0xFF3A7BF7), // Vibrant blue
-    onPrimary: Colors.white,
-    primaryContainer: Color(0xFFDBE6FF), // Light blue tint
+    primary: Color.fromARGB(255, 26, 55, 110), // Vibrant blue
+    onPrimary: Color.fromARGB(255, 1, 27, 158),
+    primaryContainer: Color.fromARGB(255, 255, 255, 255), // Light blue tint
     onPrimaryContainer: Color(0xFF0A2E63),
     secondary: Color(0xFF4D5D6A), // Slate blue-gray
     onSecondary: Colors.white,
     secondaryContainer: Color(0xFFDAE4F3), // Light slate tint
     onSecondaryContainer: Color(0xFF1A2836),
-    tertiary: Color(0xFF795AA3), // Rich purple
+    tertiary: Color.fromARGB(255, 255, 255, 255), // Rich purple
     onTertiary: Colors.white,
     tertiaryContainer: Color(0xFFEEE1FF), // Light purple tint
     onTertiaryContainer: Color(0xFF2E1D45),
@@ -24,16 +22,16 @@ class AppColorScheme {
     onError: Colors.white,
     errorContainer: Color(0xFFFFDBD7), // Light red tint
     onErrorContainer: Color(0xFF410002),
-    surface: Colors.white,
-    onSurface: Color(0xFF21272D), // Dark gray for text
-    surfaceContainerHighest: Color(0xFFF8F8F8), // Very light gray
+    surface: Color.fromARGB(255, 242, 247, 253), // Very light gray
+    onSurface: Color.fromARGB(255, 28, 30, 33), // Dark gray for text
     onSurfaceVariant: Color(0xFF43484F), // Medium gray
+    surfaceContainerHighest: Color(0xFFF8F8F8), // Very light gray
     outline: Color(0xFFE7EBEF), // Light gray outline
     shadow: Color(0x40000000), // Semi-transparent shadow
     inverseSurface: Color(0xFF102A37), // Dark navy background
     onInverseSurface: Color(0xFFEBF8FF), // Light blue-white text
     inversePrimary: Color(0xFF9FC9FF), // Lighter blue
-    surfaceTint: Color(0xFF3A7BF7),
+    surfaceTint: Color.fromARGB(255, 33, 68, 133),
 
     // Same as primary
   );
@@ -58,11 +56,10 @@ class AppColorScheme {
     onError: Color(0xFF601410), // Dark red
     errorContainer: Color(0xFFB3261E), // Medium red
     onErrorContainer: Color(0xFFFFDAD5), // Very light red
-    background: Color(0xFF1A1D21), // Very dark gray
-    onBackground: Color(0xFFE2E4E9), // Very light gray text
     surface: Color(0xFF252A31), // Dark gray
     onSurface: Color(0xFFE2E4E9), // Very light gray text
     onSurfaceVariant: Color(0xFFBDC1C9), // Light gray text
+    surfaceContainerHighest: Color(0xFF3C434B), // Medium dark gray
     outline: Color(0xFF8C9199), // Medium gray outline
     shadow: Color(0x77000000), // Semi-transparent shadow
     inverseSurface: Color(0xFFE2E4E9), // Very light gray
@@ -94,8 +91,8 @@ class AppColorScheme {
     onError: Colors.black,
     errorContainer: Color(0xFF632B3A), // Dark rose
     onErrorContainer: Color(0xFFFFD8DF), // Light rose
-    surfaceVariant: Color(0xFF1C1C1C), // Slightly lighter than surface
     onSurfaceVariant: Color(0xFFBBBBBB), // Medium gray text
+    surfaceContainerHighest: Color(0xFF1C1C1C), // Slightly lighter than surface
     outline: Color(0xFF444444), // Dark gray outline
     shadow: Color(0x99000000), // Semi-transparent shadow
     inverseSurface: Color(0xFFE0E0E0), // Light gray
@@ -207,29 +204,29 @@ class AppColorScheme {
 
 // Common UI element colors
   /// Card background (defaulted to surface).
-  static Color get cardColor => surface;
+  static Color get cardColor => getColorScheme.surface;
 
   /// Line dividers between list items, sections.
-  static Color get dividerColor => outline.withOpacity(0.5);
+  static Color get dividerColor => outline.withValues(alpha: 0.5);
 
   /// Disabled state color for buttons, fields, etc.
-  static Color get disabledColor => onSurface.withOpacity(0.38);
+  static Color get disabledColor => onSurface.withValues(alpha: 0.38);
 
   /// Placeholder text, hint text in inputs.
-  static Color get hintColor => onSurface.withOpacity(0.6);
+  static Color get hintColor => onSurface.withValues(alpha: 0.6);
 
 // Text colors
   /// Primary text color on normal surfaces.
-  static Color get textPrimary => onSurface;
+  static Color get textPrimary => getColorScheme.onSurface;
 
   /// Less important text (e.g., subtitles, secondary info).
-  static Color get textSecondary => onSurface.withOpacity(0.7);
+  static Color get textSecondary => onSurface.withValues(alpha: 0.7);
 
   /// Hint text in form fields, search bars.
-  static Color get textHint => onSurface.withOpacity(0.5);
+  static Color get textHint => onSurface.withValues(alpha: 0.5);
 
   /// Disabled text (inactive fields, buttons).
-  static Color get textDisabled => onSurface.withOpacity(0.38);
+  static Color get textDisabled => onSurface.withValues(alpha: 0.38);
 
 // Button colors
   /// Button background color (main action buttons).
@@ -242,17 +239,17 @@ class AppColorScheme {
   static Color get buttonDisabledColor => disabledColor;
 
   /// Text color for disabled buttons.
-  static Color get buttonDisabledTextColor => onSurface.withOpacity(0.38);
+  static Color get buttonDisabledTextColor => onSurface.withValues(alpha: 0.38);
 
 // Icon colors
   /// Default active icon color.
   static Color get iconPrimary => onSurface;
 
   /// Less important icons (e.g., inactive states).
-  static Color get iconSecondary => onSurface.withOpacity(0.7);
+  static Color get iconSecondary => onSurface.withValues(alpha: 0.7);
 
   /// Disabled icons.
-  static Color get iconDisabled => onSurface.withOpacity(0.38);
+  static Color get iconDisabled => onSurface.withValues(alpha: 0.38);
 
   /// Highlighted/selected icons.
   static Color get iconActive => primary;
@@ -335,14 +332,14 @@ class AppColorScheme {
     return getColorScheme.brightness == Brightness.dark;
   }
 
-  // Material state color
+  // Widget state color
   static WidgetStateProperty<Color> getMaterialStateColor(Color defaultColor,
       {Color? hoverColor, Color? pressedColor}) {
     return WidgetStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor ?? darken(defaultColor, 0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor ?? lighten(defaultColor, 0.1);
       }
       return defaultColor;

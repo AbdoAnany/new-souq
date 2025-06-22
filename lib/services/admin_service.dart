@@ -134,7 +134,7 @@ class AdminService {
     }
   }
 
-  Future<List<Category>> getAllCategories() async {
+  Future<List<ProductCategory>> getAllCategories() async {
     try {
       final querySnapshot = await _firestore
           .collection(AppConstants.categoriesCollection)
@@ -142,7 +142,7 @@ class AdminService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => Category.fromJson({...doc.data(), 'id': doc.id}))
+          .map((doc) => ProductCategory.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch categories: $e');
