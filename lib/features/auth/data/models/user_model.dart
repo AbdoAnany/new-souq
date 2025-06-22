@@ -12,7 +12,7 @@ class UserModel extends UserEntity {
     required String lastName,
     String? phoneNumber,
     String? profileImageUrl,
-    @JsonKey(unknownEnumValue: UserRole.customer) UserRole role = UserRole.customer,
+    UserRole role = UserRole.customer,
     required DateTime createdAt,
     DateTime? updatedAt,
     bool isActive = true,
@@ -31,7 +31,8 @@ class UserModel extends UserEntity {
           isEmailVerified: isEmailVerified,
         );
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
@@ -66,6 +67,7 @@ class UserModel extends UserEntity {
       isEmailVerified: isEmailVerified,
     );
   }
+
   UserModel copyWith({
     String? id,
     String? email,

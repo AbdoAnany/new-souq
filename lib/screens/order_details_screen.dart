@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../core/widgets/custom_button.dart';
 import '../core/widgets/my_app_bar.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/models/cart.dart'; // Import for PaymentMethod
 import 'package:souq/providers/order_provider.dart';

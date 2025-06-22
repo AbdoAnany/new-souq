@@ -1,7 +1,7 @@
 import '/core/import_core.dart';
 
-CardTheme get cardTheme {
-  return CardTheme(
+CardThemeData get cardTheme {
+  return CardThemeData(
     elevation: AppDimensions.cardElevation,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppDimensions.cardBorderRadius),

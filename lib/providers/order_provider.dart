@@ -12,15 +12,20 @@ import 'package:souq/services/tracking_service.dart' as tracking_service;
 class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
   final OrderService _orderService;
   StreamSubscription<List<OrderModel>>? _ordersSubscription;
-  
-  OrderNotifier(this._orderService) : super(const AsyncValue.loading()) {
-    _setupOrdersSubscription();
-  }
-  
-  void _setupOrdersSubscription() {
+  String? _currentUserId;
+
+  OrderNotifier(this._orderService) : super(const AsyncValue.loading());
+
+  void _setupOrdersSubscription(String userId) {
     try {
+      // Only set up stream if we're not already listening to this user
+      if (_currentUserId == userId && _ordersSubscription != null) {
+        return;
+      }
+      
       _ordersSubscription?.cancel();
-      _ordersSubscription = _orderService.getOrderStreamAll().listen(
+      _currentUserId = userId;
+      _ordersSubscription = _orderService.getUserOrdersStream(userId).listen(
         (orders) {
           if (!mounted) return;
           state = AsyncValue.data(orders);
@@ -40,29 +45,32 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
   void dispose() {
     _ordersSubscription?.cancel();
     super.dispose();
-  }
-  
-  Future<void> loadUserOrders(String userId) async {
+  }  Future<void> loadUserOrders(String userId) async {
     if (!mounted) return;
     
     state = const AsyncValue.loading();
     try {
+      // First try to load orders directly
       final orders = await _orderService.getUserOrders(userId: userId);
       if (!mounted) return;
       state = AsyncValue.data(orders);
+      
+      // Then set up real-time subscription for future updates
+      _setupOrdersSubscription(userId);
     } catch (e) {
       if (!mounted) return;
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
-  
-  Future<void> loadMoreOrders(String userId, DocumentSnapshot lastDocument) async {
+
+  Future<void> loadMoreOrders(
+      String userId, DocumentSnapshot lastDocument) async {
     try {
       final moreOrders = await _orderService.getUserOrders(
         userId: userId,
         lastDocument: lastDocument,
       );
-      
+
       final currentOrders = state.value ?? [];
       state = AsyncValue.data([...currentOrders, ...moreOrders]);
     } catch (e) {
@@ -71,7 +79,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
       rethrow;
     }
   }
-  
+
   Future<OrderModel> placeOrder({
     required String userId,
     required Cart cart,
@@ -85,7 +93,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
     if (cart.items.isEmpty) {
       return Future.error('Cart is empty');
     }
-    
+
     try {
       final order = await _orderService.placeOrder(
         userId: userId,
@@ -96,33 +104,33 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
         paymentId: paymentId,
         notes: notes,
       );
-      
+
       // Update local state
       if (!mounted) return order;
       state.whenData((orders) {
         state = AsyncValue.data([order, ...orders]);
       });
-      
+
       return order;
     } catch (e) {
       if (!mounted) return Future.error(e);
       state = AsyncValue.error(e, StackTrace.current);
-      throw e;  // Re-throw to let UI handle specific error cases
+      throw e; // Re-throw to let UI handle specific error cases
     }
   }
-  
+
   Future<OrderModel> cancelOrder(String orderId) async {
     try {
       final cancelledOrder = await _orderService.cancelOrder(orderId);
-      
+
       state.whenData((orders) {
         final updatedOrders = orders.map((order) {
           return order.id == orderId ? cancelledOrder : order;
         }).toList();
-        
+
         state = AsyncValue.data(updatedOrders);
       });
-      
+
       return cancelledOrder;
     } catch (e) {
       rethrow;
@@ -131,34 +139,44 @@ class OrderNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
 
   // Enhanced helper methods
   bool hasOrders() => (state.value ?? []).isNotEmpty;
-  
+
   int get orderCount => state.value?.length ?? 0;
-    OrderModel? getOrderById(String orderId) {
+  OrderModel? getOrderById(String orderId) {
     try {
       return state.value?.firstWhere((order) => order.id == orderId);
     } catch (e) {
       return null;
     }
   }
-    
+
   List<OrderModel> getOrdersByStatus(OrderStatus status) =>
-    state.value?.where((order) => order.status == status).toList() ?? [];
-    
+      state.value?.where((order) => order.status == status).toList() ?? [];
+
   bool isOrderCancellable(String orderId) {
     final order = getOrderById(orderId);
-    return order != null && 
-           (order.status == OrderStatus.pending || 
+    return order != null &&
+        (order.status == OrderStatus.pending ||
             order.status == OrderStatus.confirmed);
   }
 
   Future<List<OrderModel>> searchOrders(String query) async {
     if (!mounted) return [];
     final orders = state.value ?? [];
-    
-    return orders.where((order) =>
-      order.id.toLowerCase().contains(query.toLowerCase()) ||
-      order.orderNumber.toLowerCase().contains(query.toLowerCase())
-    ).toList();
+
+    return orders
+        .where((order) =>
+            order.id.toLowerCase().contains(query.toLowerCase()) ||
+            order.orderNumber.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
+
+  // Temporary method for testing
+  Future<void> createTestOrders(String userId) async {
+    try {
+      await _orderService.createTestOrdersForUser(userId);
+    } catch (e) {
+      print('Error creating test orders: $e');
+    }
   }
 }
 
@@ -167,21 +185,22 @@ class OrderDetailNotifier extends StateNotifier<AsyncValue<OrderModel?>> {
   final String _orderId;
   StreamSubscription<OrderModel>? _orderSubscription;
 
-  OrderDetailNotifier(this._orderService, this._orderId) : super(const AsyncValue.loading()) {
+  OrderDetailNotifier(this._orderService, this._orderId)
+      : super(const AsyncValue.loading()) {
     _setupOrderSubscription();
   }
 
   void _setupOrderSubscription() {
     _orderSubscription?.cancel();
     _orderSubscription = _orderService.getOrderStream(_orderId).listen(
-      (order) => state = AsyncValue.data(order),
-      onError: (error, stack) => state = AsyncValue.error(error, stack),
-    );
+          (order) => state = AsyncValue.data(order),
+          onError: (error, stack) => state = AsyncValue.error(error, stack),
+        );
   }
 
   Future<void> refreshOrder() async {
     if (!mounted) return;
-    
+
     state = const AsyncValue.loading();
     try {
       final order = await _orderService.getOrderById(_orderId);
@@ -195,7 +214,7 @@ class OrderDetailNotifier extends StateNotifier<AsyncValue<OrderModel?>> {
 
   Future<void> cancelOrder() async {
     if (!mounted) return;
-    
+
     try {
       await _orderService.cancelOrder(_orderId);
       if (!mounted) return;
@@ -219,14 +238,14 @@ class OrderTrackingState {
   final bool isLoading;
   final String? error;
   final String? orderNumber;
-  
+
   const OrderTrackingState({
     this.events = const [],
     this.isLoading = false,
     this.error,
     this.orderNumber,
   });
-  
+
   OrderTrackingState copyWith({
     List<tracking_service.TrackingEvent>? events,
     bool? isLoading,
@@ -236,35 +255,36 @@ class OrderTrackingState {
     return OrderTrackingState(
       events: events ?? this.events,
       isLoading: isLoading ?? this.isLoading,
-      error: error,  // If null is passed, we want to clear the error
+      error: error, // If null is passed, we want to clear the error
       orderNumber: orderNumber ?? this.orderNumber,
     );
   }
 }
 
-class OrderTrackingNotifier extends StateNotifier<OrderTrackingState> {  final tracking_service.TrackingService _trackingService;
+class OrderTrackingNotifier extends StateNotifier<OrderTrackingState> {
+  final tracking_service.TrackingService _trackingService;
   final OrderService _orderService;
   StreamSubscription<OrderModel>? _orderSubscription;
 
   OrderTrackingNotifier(this._trackingService, this._orderService)
       : super(const OrderTrackingState());
-      
+
   Future<void> trackOrder(String orderNumber) async {
     if (!mounted) return;
-    
+
     // Reset state for new order tracking
     state = OrderTrackingState(
       isLoading: true,
       orderNumber: orderNumber,
     );
-    
+
     try {
       final order = await _orderService.getOrderById(orderNumber);
       if (!mounted) return;
-      
+
       // Set up subscription to order updates
       _setupOrderSubscription(order);
-      
+
       // Generate initial tracking events
       final events = _trackingService.generateTrackingEvents(order);
       state = state.copyWith(
@@ -279,9 +299,9 @@ class OrderTrackingNotifier extends StateNotifier<OrderTrackingState> {  final t
       );
     }
   }
-  
+
   void _setupOrderSubscription(OrderModel? order) {
-    if(order==null) return;
+    if (order == null) return;
     _orderSubscription?.cancel();
     _orderSubscription = _orderService.getOrderStream(order.id).listen(
       (updatedOrder) {
@@ -297,63 +317,65 @@ class OrderTrackingNotifier extends StateNotifier<OrderTrackingState> {  final t
       },
     );
   }
-  
+
   void clearError() {
     if (!mounted) return;
     state = state.copyWith(error: null);
   }
-  
+
   @override
   void dispose() {
     _orderSubscription?.cancel();
     super.dispose();
   }
-  
+
   // Helper methods
   bool get isTrackingOrder => state.orderNumber != null;
-  
+
   bool get hasError => state.error != null;
-  
-  bool get isDelivered => state.events.any(
-    (event) => event.status == 'Delivered' && event.isCompleted
-  );
+
+  bool get isDelivered => state.events
+      .any((event) => event.status == 'Delivered' && event.isCompleted);
 }
 
 final orderServiceProvider = Provider<OrderService>((ref) {
   return OrderService();
 });
 
-final ordersProvider = StateNotifierProvider<OrderNotifier, AsyncValue<List<OrderModel>>>((ref) {
+final ordersProvider =
+    StateNotifierProvider<OrderNotifier, AsyncValue<List<OrderModel>>>((ref) {
   final orderService = ref.watch(orderServiceProvider);
   return OrderNotifier(orderService);
 });
 
-final orderDetailProvider = StateNotifierProvider.family<OrderDetailNotifier, AsyncValue<OrderModel?>, String>((ref, orderId) {
+final orderDetailProvider = StateNotifierProvider.family<OrderDetailNotifier,
+    AsyncValue<OrderModel?>, String>((ref, orderId) {
   final orderService = ref.watch(orderServiceProvider);
   return OrderDetailNotifier(orderService, orderId);
 });
 
-final orderStreamProvider = StreamProvider.family<OrderModel, String>((ref, orderId) {
+final orderStreamProvider =
+    StreamProvider.family<OrderModel, String>((ref, orderId) {
   final orderService = ref.watch(orderServiceProvider);
   return orderService.getOrderStream(orderId);
 });
 
-final orderTrackingProvider = StateNotifierProvider<OrderTrackingNotifier, OrderTrackingState>((ref) {
+final orderTrackingProvider =
+    StateNotifierProvider<OrderTrackingNotifier, OrderTrackingState>((ref) {
   final orderService = ref.watch(orderServiceProvider);
   final trackingService = tracking_service.TrackingService();
   return OrderTrackingNotifier(trackingService, orderService);
 });
 
-final ordersByStatusProvider = FutureProvider.family<List<OrderModel>, OrderStatus>((ref, status) async {
+final ordersByStatusProvider =
+    FutureProvider.family<List<OrderModel>, OrderStatus>((ref, status) async {
   final orderService = ref.watch(orderServiceProvider);
   final authState = ref.watch(authProvider);
-  
+
   if (authState.value == null) {
     throw Exception('User not authenticated');
   }
-  
+
   return await orderService.getOrdersByStatus(
-    userId: authState.value!.id,
-    status: status
-  );
+      userId: authState.value!.id, status: status);
 });

@@ -9,6 +9,7 @@ import 'package:souq/providers/cart_provider.dart';
 import '/core/widgets/badge.dart' as custom_badge;
 import 'package:souq/utils/responsive_util.dart';
 import 'home_tab.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -35,7 +36,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartProvider);
-    final cartItemCount = cartState.value?.items.length ?? 0;
+    final cartItemCount = cartState.when(
+      data: (cart) => cart?.items.length ?? 0,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
 
     return Scaffold(
       body: ResponsiveUtil.isWeb(context)
@@ -58,7 +63,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Container(
           width: ResponsiveUtil.spacing(mobile: 180, tablet: 200, desktop: 220),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: AppConstants.cardColor,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -216,6 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppConstants.primaryColor,
       unselectedItemColor: Colors.grey,
+      backgroundColor: AppConstants.cardColor,
       showUnselectedLabels: true,
       selectedFontSize:
           ResponsiveUtil.fontSize(mobile: 11, tablet: 12, desktop: 13),

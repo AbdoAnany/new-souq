@@ -24,6 +24,16 @@ import '../../features/products/domain/repositories/product_repository.dart';
 import '../../features/products/domain/usecases/product_usecases.dart';
 import '../../features/products/presentation/blocs/product_bloc.dart';
 
+// Features - Orders
+import '../../features/orders/data/datasources/order_remote_data_source.dart';
+import '../../features/orders/data/datasources/order_local_data_source.dart';
+import '../../features/orders/data/repositories/order_repository_impl.dart';
+import '../../features/orders/domain/repositories/order_repository.dart';
+import '../../features/orders/domain/usecases/order_usecases.dart';
+import '../../features/orders/domain/usecases/tracking_usecases.dart';
+import '../../features/orders/presentation/bloc/order_bloc.dart';
+import '../../features/orders/presentation/bloc/tracking_bloc.dart';
+
 final sl = GetIt.instance; // Service Locator
 
 Future<void> init() async {
@@ -94,6 +104,48 @@ Future<void> init() async {
 
   sl.registerLazySingleton<ProductLocalDataSource>(
     () => ProductLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+
+  //! Features - Orders
+  // Bloc
+  sl.registerFactory(() => OrderBloc(
+        getUserOrdersUseCase: sl(),
+        getOrderByIdUseCase: sl(),
+        placeOrderUseCase: sl(),
+        updateOrderStatusUseCase: sl(),
+        cancelOrderUseCase: sl(),
+        searchOrdersUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => TrackingBloc(
+        trackOrderUseCase: sl(),
+      ));
+
+  // Use cases
+  sl.registerLazySingleton(() => GetUserOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderByIdUseCase(sl()));
+  sl.registerLazySingleton(() => PlaceOrderUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateOrderStatusUseCase(sl()));
+  sl.registerLazySingleton(() => CancelOrderUseCase(sl()));
+  sl.registerLazySingleton(() => SearchOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => TrackOrderUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+    () => OrderRemoteDataSourceImpl(firestore: sl()),
+  );
+
+  sl.registerLazySingleton<OrderLocalDataSource>(
+    () => OrderLocalDataSourceImpl(sharedPreferences: sl()),
   );
 
   //! Core

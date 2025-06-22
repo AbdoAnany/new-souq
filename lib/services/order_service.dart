@@ -535,6 +535,95 @@ class OrderService {
     }
   }
 
+  // Get user orders stream for real-time updates
+  Stream<List<OrderModel>> getUserOrdersStream(String userId) {
+    print('Setting up orders stream for user: $userId'); // Debug log
+    return _firestore
+        .collection(AppConstants.ordersCollection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      print(
+          'Received ${snapshot.docs.length} orders from Firestore'); // Debug log
+      return snapshot.docs.map((doc) {
+        try {
+          final data = doc.data();
+          print('Processing order doc: ${doc.id}'); // Debug log
+          return OrderModel.fromJson({...data, 'id': doc.id});
+        } catch (e) {
+          print('Error parsing order ${doc.id}: $e'); // Debug log
+          rethrow;
+        }
+      }).toList();
+    }).handleError((error) {
+      print('Firestore stream error: $error'); // Debug log
+    });
+  }
+
+  // Add this method temporarily for testing
+  Future<void> createTestOrdersForUser(String userId) async {
+    try {
+      print('Creating test orders for user: $userId');
+
+      // Create a test order
+      final testOrder = OrderModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: userId,
+        orderNumber: 'ORD${DateTime.now().millisecondsSinceEpoch}',
+        items: [
+          OrderItem(
+            productId: 'test-product-1',
+            title: 'Test Product 1',
+            price: 29.99,
+            quantity: 2,
+            total: 59.98,
+            image: 'https://via.placeholder.com/150',
+          ),
+          OrderItem(
+            productId: 'test-product-2',
+            title: 'Test Product 2',
+            price: 19.99,
+            quantity: 1,
+            total: 19.99,
+            image: 'https://via.placeholder.com/150',
+          ),
+        ],
+        subtotal: 79.97,
+        tax: 7.20,
+        shipping: 0.0,
+        discount: 0.0,
+        total: 87.17,
+        status: OrderStatus.pending,
+        shippingAddress: Address(
+          id: 'test-address',
+          firstName: 'Test',
+          lastName: 'User',
+          title: 'Test Address',
+          street: '123 Test St',
+          addressLine1: '123 Test St',
+          city: 'Test City',
+          state: 'Test State',
+          postalCode: '12345',
+          country: 'Test Country',
+        ),
+        paymentMethod: PaymentMethod.cashOnDelivery,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        notes: 'Test order',
+      );
+
+      await _firestore
+          .collection(AppConstants.ordersCollection)
+          .doc(testOrder.id)
+          .set(testOrder.toJson());
+
+      print('Test order created successfully');
+    } catch (e) {
+      print('Error creating test order: $e');
+    }
+  }
+
   // Private helper methods
   String _generateOrderNumber() {
     final now = DateTime.now();

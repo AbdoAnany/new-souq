@@ -6,9 +6,7 @@ import '/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/order_provider.dart';
-import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
-import '/core/constants/app_constants.dart';
 // import 'package:lottie/lottie.dart';
 import '../utils/responsive_util.dart';
 
@@ -637,10 +635,6 @@ class OrderConfirmationScreen extends ConsumerWidget {
   }
 
   void _navigateToOrderHistory(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const OrderHistoryScreen(),
-      ),
-    );
+    Navigator.of(context).pushReplacementNamed('/legacy/orders');
   }
 }

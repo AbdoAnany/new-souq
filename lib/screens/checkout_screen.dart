@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../core/widgets/custom_button.dart';
@@ -13,7 +14,6 @@ import 'package:souq/screens/order_confirmation_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
 import 'package:souq/utils/validator.dart';
-import '/core/constants/app_constants.dart';
 import '/core/widgets/custom_text_field.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -30,6 +30,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _selectedPaymentMethod = AppConstants.cashOnDelivery;
   bool _sameAsBillingAddress = true;
   bool _isPlacingOrder = false;
+  int? selectedAddressIndex;
 
   // Address form controllers
   final _firstNameController = TextEditingController();
@@ -107,29 +108,39 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       _lastNameController.text = user.lastName;
       _emailController.text = user.email;
       _phoneController.text = user.phoneNumber ?? '';
-      // Pre-fill address if available
+
+      // Pre-fill address if available and auto-select first address
       if (user.addresses.isNotEmpty) {
+        selectedAddressIndex = 0; // Auto-select first address
         final defaultAddress = user.addresses.first;
-        _addressLine1Controller.text = defaultAddress.street;
-        _addressLine2Controller.text = '';
-        _cityController.text = defaultAddress.city;
-        _stateController.text = defaultAddress.state ?? '';
-        _postalCodeController.text = defaultAddress.postalCode ?? '';
-        _countryController.text = defaultAddress.country;
+        _fillFormWithAddress(defaultAddress);
       }
     }
   }
 
   bool _validateCurrentStep() {
+    final user = ref.read(authProvider).value;
+
     switch (_currentStep) {
       case 0: // Billing Address
+        // Check if user has addresses saved and one is selected
+        if (user?.addresses.isNotEmpty == true &&
+            selectedAddressIndex != null) {
+          // If user has selected a saved address, validation passes
+          return true;
+        }
+        // If no saved addresses or none selected, validate form
         return _formKey.currentState?.validate() ?? false;
+
       case 1: // Shipping Address
         if (_sameAsBillingAddress) return true;
         return _formKey.currentState?.validate() ?? false;
+
       case 2: // Payment Method
         if (_selectedPaymentMethod == AppConstants.cashOnDelivery) return true;
+        // Validate credit card form if card payment selected
         return _formKey.currentState?.validate() ?? false;
+
       default:
         return false;
     }
@@ -137,6 +148,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   void _nextStep() {
     if (_validateCurrentStep()) {
+      // Add haptic feedback for successful step completion
+      HapticFeedback.lightImpact();
+
       if (_currentStep < 2) {
         setState(() {
           _currentStep++;
@@ -146,6 +160,51 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         // Place order
         _placeOrder();
       }
+    } else {
+      // Add error haptic feedback for validation failure
+      HapticFeedback.mediumImpact();
+
+      // Provide specific validation messages based on current step
+      String errorMessage;
+      switch (_currentStep) {
+        case 0:
+          errorMessage = "Please add a valid billing address";
+          break;
+        case 1:
+          errorMessage = "Please complete shipping address details";
+          break;
+        case 2:
+          errorMessage = "Please complete payment details";
+          break;
+        default:
+          errorMessage = "Please complete required fields";
+      }
+
+      // Show enhanced validation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 8.w),
+              Expanded(child: Text(errorMessage)),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(AppConstants.borderRadiusMedium),
+          ),
+          action: SnackBarAction(
+            label: "Fix",
+            textColor: Colors.white,
+            onPressed: () {
+              // Auto-scroll to problematic section or show help
+            },
+          ),
+        ),
+      );
     }
   }
 
@@ -308,121 +367,493 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return 'PAY${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  Widget _buildBillingAddressForm() {
-    return Form(
-      key: _formKey,
+  // Method to build selected address card display
+  Widget _buildSelectedAddressCard(Address address) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        border: Border.all(color: AppConstants.primaryColor, width: 1.5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Billing Address",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Selected Address',
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: ResponsiveUtil.fontSize(
-                      mobile: 20, tablet: 22, desktop: 24),
-                ),
-          ),
-          SizedBox(height: 16.h),
-
-          // Name fields
-          Row(
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  controller: _firstNameController,
-                  label: AppStrings.firstName,
-                  validator: AppValidator.validateName,
+                  color: AppConstants.primaryColor,
                 ),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: CustomTextField(
-                  controller: _lastNameController,
-                  label: AppStrings.lastName,
-                  validator: AppValidator.validateName,
-                ),
+              TextButton(
+                onPressed: _showAddressSelectionSheet,
+                child: const Text('Change'),
               ),
             ],
           ),
-          SizedBox(height: 16.h),
-
-          // Contact fields
-          CustomTextField(
-            controller: _phoneController,
-            label: AppStrings.phoneNumber,
-            keyboardType: TextInputType.phone,
-            validator: AppValidator.validatePhoneNumber,
+          SizedBox(height: 8.h),
+          Text(
+            '${address.firstName} ${address.lastName}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          SizedBox(height: 16.h),
-
-          CustomTextField(
-            controller: _emailController,
-            label: AppStrings.email,
-            keyboardType: TextInputType.emailAddress,
-            validator: AppValidator.validateEmail,
+          SizedBox(height: 4.h),
+          Text(
+            address.addressLine1,
+            style: theme.textTheme.bodyMedium,
           ),
-          SizedBox(height: 16.h),
-
-          // Address fields
-          CustomTextField(
-            controller: _addressLine1Controller,
-            label: "Address Line 1",
-            validator: (value) =>
-                AppValidator.validateRequired(value, "Address"),
+          if (address.addressLine2?.isNotEmpty == true) ...[
+            SizedBox(height: 2.h),
+            Text(
+              address.addressLine2!,
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
+          SizedBox(height: 2.h),
+          Text(
+            '${address.city}, ${address.state ?? ''} ${address.postalCode ?? ''}',
+            style: theme.textTheme.bodyMedium,
           ),
-          SizedBox(height: 16.h),
-
-          CustomTextField(
-            controller: _addressLine2Controller,
-            label: "Address Line 2 (Optional)",
-          ),
-          SizedBox(height: 16.h),
-
-          Row(
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  controller: _cityController,
-                  label: AppStrings.city,
-                  validator: AppValidator.validateCity,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: CustomTextField(
-                  controller: _stateController,
-                  label: "State/Province",
-                  validator: (value) =>
-                      AppValidator.validateRequired(value, "State"),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-
-          Row(
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  controller: _postalCodeController,
-                  label: AppStrings.postalCode,
-                  keyboardType: TextInputType.number,
-                  validator: AppValidator.validatePostalCode,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: CustomTextField(
-                  controller: _countryController,
-                  label: AppStrings.country,
-                  validator: (value) =>
-                      AppValidator.validateRequired(value, "Country"),
-                ),
-              ),
-            ],
+          SizedBox(height: 2.h),
+          Text(
+            address.country,
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),
+    );
+  }
+
+  // Method to show address selection bottom sheet
+  void _showAddressSelectionSheet() {
+    final user = ref.read(authProvider).value;
+    if (user?.addresses.isEmpty == true) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) {
+          return Container(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+
+                // Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Select Address',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+
+                // Address list
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: user!.addresses.length,
+                    itemBuilder: (context, index) {
+                      final address = user.addresses[index];
+                      final isSelected = selectedAddressIndex == index;
+
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              selectedAddressIndex = index;
+                              // Pre-fill form with selected address
+                              _fillFormWithAddress(address);
+                            });
+                            Navigator.pop(context);
+                            HapticFeedback.selectionClick();
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppConstants.primaryColor.withOpacity(0.1)
+                                  : Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadiusMedium),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppConstants.primaryColor
+                                    : Theme.of(context).dividerColor,
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                // Radio button
+                                Radio<int>(
+                                  value: index,
+                                  groupValue: selectedAddressIndex,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedAddressIndex = value;
+                                      _fillFormWithAddress(address);
+                                    });
+                                    Navigator.pop(context);
+                                    HapticFeedback.selectionClick();
+                                  },
+                                ),
+                                SizedBox(width: 12.w),
+
+                                // Address details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${address.firstName} ${address.lastName}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        address.addressLine1,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        '${address.city}, ${address.state ?? ''} ${address.postalCode ?? ''}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Edit button
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _showEditAddressSheet(address, index);
+                                  },
+                                  icon: const Icon(Icons.edit_outlined),
+                                  iconSize: 20.w,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Add new address button
+                SizedBox(height: 16.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showEditAddressSheet(null, null); // null for new address
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add New Address'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // Method to show edit address sheet
+  void _showEditAddressSheet(Address? address, int? index) {
+    // This would open a form to edit/add address
+    // For now, showing a simple dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(address == null ? 'Add New Address' : 'Edit Address'),
+        content: const Text(
+          'Address editing functionality would be implemented here.\n\n'
+          'This would include:\n'
+          '• Form fields for all address components\n'
+          '• Validation\n'
+          '• Save/Update functionality\n'
+          '• Integration with user profile',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // TODO: Implement actual address editing
+            },
+            child: Text(address == null ? 'Add' : 'Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to fill form with selected address
+  void _fillFormWithAddress(Address address) {
+    _firstNameController.text = address.firstName;
+    _lastNameController.text = address.lastName;
+    _addressLine1Controller.text = address.addressLine1;
+    _addressLine2Controller.text = address.addressLine2 ?? '';
+    _cityController.text = address.city;
+    _stateController.text = address.state ?? '';
+    _postalCodeController.text = address.postalCode ?? '';
+    _countryController.text = address.country;
+  }
+
+  Widget _buildBillingAddressForm() {
+    final user = ref.read(authProvider).value;
+    final hasAddresses = user?.addresses.isNotEmpty == true;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Billing Address",
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtil.fontSize(
+                    mobile: 20, tablet: 22, desktop: 24),
+              ),
+        ),
+        SizedBox(height: 16.h),
+
+        // Show selected address card if user has addresses and one is selected
+        if (hasAddresses && selectedAddressIndex != null) ...[
+          _buildSelectedAddressCard(user!.addresses[selectedAddressIndex!]),
+          SizedBox(height: 16.h),
+        ] else if (hasAddresses) ...[
+          // Show button to select address if user has addresses but none selected
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius:
+                  BorderRadius.circular(AppConstants.borderRadiusMedium),
+              border: Border.all(color: Theme.of(context).dividerColor),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 48.w,
+                  color: AppConstants.primaryColor,
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'Select a saved address',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Choose from your saved addresses or add a new one',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 12.h),
+                ElevatedButton.icon(
+                  onPressed: _showAddressSelectionSheet,
+                  icon: const Icon(Icons.location_on),
+                  label: const Text('Select Address'),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Divider with "OR" text
+          Row(
+            children: [
+              const Expanded(child: Divider()),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Text(
+                  'OR',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              const Expanded(child: Divider()),
+            ],
+          ),
+          SizedBox(height: 16.h),
+
+          Text(
+            'Enter new address',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          SizedBox(height: 16.h),
+        ],
+
+        // Address form (always show for users without addresses, or when manually entering)
+        Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              // Name fields
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _firstNameController,
+                      label: AppStrings.firstName,
+                      validator: AppValidator.validateName,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _lastNameController,
+                      label: AppStrings.lastName,
+                      validator: AppValidator.validateName,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+
+              // Contact fields
+              CustomTextField(
+                controller: _phoneController,
+                label: AppStrings.phoneNumber,
+                keyboardType: TextInputType.phone,
+                validator: AppValidator.validatePhoneNumber,
+              ),
+              SizedBox(height: 16.h),
+
+              CustomTextField(
+                controller: _emailController,
+                label: AppStrings.email,
+                keyboardType: TextInputType.emailAddress,
+                validator: AppValidator.validateEmail,
+              ),
+              SizedBox(height: 16.h),
+
+              // Address fields
+              CustomTextField(
+                controller: _addressLine1Controller,
+                label: "Address Line 1",
+                validator: (value) =>
+                    AppValidator.validateRequired(value, "Address"),
+              ),
+              SizedBox(height: 16.h),
+
+              CustomTextField(
+                controller: _addressLine2Controller,
+                label: "Address Line 2 (Optional)",
+              ),
+              SizedBox(height: 16.h),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _cityController,
+                      label: AppStrings.city,
+                      validator: AppValidator.validateCity,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _stateController,
+                      label: "State/Province",
+                      validator: (value) =>
+                          AppValidator.validateRequired(value, "State"),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _postalCodeController,
+                      label: AppStrings.postalCode,
+                      keyboardType: TextInputType.number,
+                      validator: AppValidator.validatePostalCode,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _countryController,
+                      label: AppStrings.country,
+                      validator: (value) =>
+                          AppValidator.validateRequired(value, "Country"),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -757,15 +1188,80 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
               Divider(height: 24.h),
 
-              // Item count
-              Text(
-                "${cart.items.length} ${cart.items.length == 1 ? 'item' : 'items'} in cart",
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: ResponsiveUtil.fontSize(
-                      mobile: 14, tablet: 15, desktop: 16),
+              // Item count and horizontal product display
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${cart.items.length} ${cart.items.length == 1 ? 'item' : 'items'}",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14, tablet: 15, desktop: 16),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+
+              // Horizontal product images
+              Container(
+                height: 66.h,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: cart.items.length,
+                  itemBuilder: (context, index) {
+                    final item = cart.items[index];
+                    return Container(
+                      margin: EdgeInsets.only(right: 8.w),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 40.w,
+                            height: 40.h,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(6.r),
+                              image: item.product.mainImage.isNotEmpty
+                                  ? DecorationImage(
+                                      image:
+                                          NetworkImage(item.product.mainImage),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                            child: item.product.mainImage.isEmpty
+                                ? Icon(
+                                    Icons.shopping_bag_outlined,
+                                    color: Colors.grey[500],
+                                    size: 20.w,
+                                  )
+                                : null,
+                          ),
+                          SizedBox(height: 3.h),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6.w, vertical: 1.5.h),
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor,
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Text(
+                              "${item.quantity}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 16.h),
               // Price breakdown
               _buildPriceLine(
                   "Subtotal", FormatterUtil.formatCurrency(cart.subtotal)),

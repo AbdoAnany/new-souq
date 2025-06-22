@@ -1,4 +1,5 @@
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:souq/core/app_config.dart';
 import 'package:souq/core/utils/responsive.dart';
 
@@ -93,9 +94,9 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is AuthAuthenticated) {
             _handleAuthSuccess();
-          } else if (state is AuthFailure) {
+          } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -184,7 +185,6 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
 
   Widget _buildAppBar(
     BuildContext context,
-    ThemeData theme,
 
   ) {
     return Padding(
@@ -207,14 +207,14 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
           const Spacer(),
 
           // Theme toggle
-          IconButton(
-            icon: Icon(
-              themeManager.isDarkMode(context)
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            onPressed: () => .toggleTheme(),
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     themeManager.isDarkMode(context)
+          //         ? Icons.light_mode
+          //         : Icons.dark_mode,
+          //   ),
+          //   onPressed: () => .toggleTheme(),
+          // ),
         ],
       ),
     );
@@ -284,7 +284,7 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
         // App Name
         Text(
           AppConfig.instance.appName,
-          style: theme.textTheme.headlineLarge?.copyWith(
+          style: AppTextTheme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: Responsive.fontSize(
               context,
@@ -295,8 +295,8 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
             foreground: Paint()
               ..shader = LinearGradient(
                 colors: [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.secondary,
+                  AppColorScheme.primary,
+                  AppColorScheme.secondary,
                 ],
               ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
           ),
@@ -305,9 +305,9 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
         SizedBox(height: AppDimensions. smallMargin),
 
         Text(
-          l10n.tagline,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+          "l10n.tagline",
+          style: AppTextTheme.textTheme.bodyLarge?.copyWith(
+            color: AppColorScheme.onSurfaceVariant,
             fontSize: Responsive.fontSize(
               context,
               mobile: 16,
@@ -361,30 +361,30 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
           thickness: 1,
         ),
 
-        SizedBox(height: AppDimensions.lg),
+        SizedBox(height: AppDimensions.largeMargin),
 
         Text(
-          l10n.orContinueAs,
-          style: AppTextTheme.bodyMedium?.copyWith(
+          "l10n.orContinueAs",
+          style: AppTextTheme.textTheme.bodyMedium?.copyWith(
             color: AppColorScheme.onSurfaceVariant,
           ),
         ),
 
-        SizedBox(height: AppDimensions.md),
+        SizedBox(height: AppDimensions.mediumMargin),
 
-        AppButton(
-          text: l10n.continueAsGuest,
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const HomeScreen(),
-              ),
-            );
-          },
-          variant: AppButtonVariant.text,
-          icon: Icons.person_outline,
-        ),
+        // AppButton(
+        //   text: "l10n.continueAsGuest",
+        //   onPressed: () {
+        //     Navigator.pushReplacement(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (_) => const HomeScreen(),
+        //       ),
+        //     );
+        //   },
+        //   variant: AppButtonVariant.text,
+        //   icon: Icons.person_outline,
+        // ),
       ],
     );
   }

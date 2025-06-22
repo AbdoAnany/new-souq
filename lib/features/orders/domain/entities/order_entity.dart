@@ -12,20 +12,10 @@ enum OrderStatus {
 }
 
 // Payment status enum
-enum PaymentStatus {
-  pending,
-  completed,
-  failed,
-  refunded
-}
+enum PaymentStatus { pending, completed, failed, refunded }
 
 // Payment method enum
-enum PaymentMethod {
-  cashOnDelivery,
-  creditCard,
-  paypal,
-  stripe
-}
+enum PaymentMethod { cashOnDelivery, creditCard, paypal, stripe, unknown }
 
 // Order item entity
 class OrderItemEntity extends Equatable {
@@ -131,8 +121,8 @@ class OrderEntity extends Equatable {
   int get totalItems => items.fold(0, (sum, item) => sum + item.quantity);
 
   // Check if order can be cancelled
-  bool get canBeCancelled => 
-    status == OrderStatus.pending || status == OrderStatus.confirmed;
+  bool get canBeCancelled =>
+      status == OrderStatus.pending || status == OrderStatus.confirmed;
 
   // Check if order is completed
   bool get isCompleted => status == OrderStatus.delivered;

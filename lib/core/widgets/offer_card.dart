@@ -1,9 +1,9 @@
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/utils/responsive_util.dart';
 import '/core/import_core.dart';
+
 class OfferCard extends StatelessWidget {
   final Offer offer;
   final bool isSmall;
@@ -18,18 +18,19 @@ class OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (isSmall) {
       // Small offer card for horizontal list
       return InkWell(
-        onTap: onTap ?? () {
-          // Navigate to offer details or apply discount
-        },
+        onTap: onTap ??
+            () {
+              // Navigate to offer details or apply discount
+            },
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         child: Container(
           width: ResponsiveUtil.spacing(mobile: 200, tablet: 220, desktop: 250),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius:
+                BorderRadius.circular(AppConstants.borderRadiusMedium),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -39,11 +40,13 @@ class OfferCard extends StatelessWidget {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius:
+                BorderRadius.circular(AppConstants.borderRadiusMedium),
             child: CachedNetworkImage(
               imageUrl: offer.imageUrl,
               fit: BoxFit.cover,
-              height: ResponsiveUtil.spacing(mobile: 100, tablet: 110, desktop: 130),
+              height: ResponsiveUtil.spacing(
+                  mobile: 100, tablet: 110, desktop: 130),
               placeholder: (context, url) => Container(
                 color: Colors.grey[300],
               ),
@@ -59,14 +62,16 @@ class OfferCard extends StatelessWidget {
 
     // Regular size offer card for carousel
     return InkWell(
-      onTap: onTap ?? () {
-        // Navigate to offer details or apply discount
-      },
+      onTap: onTap ??
+          () {
+            // Navigate to offer details or apply discount
+          },
       child: Container(
         // Specify explicit width instead of infinity
         width: MediaQuery.of(context).size.width * 0.85,
         constraints: BoxConstraints(
-          maxWidth: ResponsiveUtil.spacing(mobile: 450, tablet: 500, desktop: 550),
+          maxWidth:
+              ResponsiveUtil.spacing(mobile: 450, tablet: 500, desktop: 550),
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
@@ -82,7 +87,8 @@ class OfferCard extends StatelessWidget {
           children: [
             // Background image
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+              borderRadius:
+                  BorderRadius.circular(AppConstants.borderRadiusMedium),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: CachedNetworkImage(
@@ -111,7 +117,8 @@ class OfferCard extends StatelessWidget {
                     style: AppTextTheme.textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 18, tablet: 20, desktop: 22),
                       shadows: [
                         Shadow(
                           color: Colors.black.withOpacity(0.5),
@@ -124,12 +131,13 @@ class OfferCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 8.h),
-                  if (offer.description != null && offer.description!.isNotEmpty)
+                  if (offer.description.isNotEmpty)
                     Text(
-                      offer.description!,
-                      style:  AppTextTheme.textTheme.bodyMedium?.copyWith(
+                      offer.description,
+                      style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white,
-                        fontSize: ResponsiveUtil.fontSize(mobile: 14, tablet: 16, desktop: 18),
+                        fontSize: ResponsiveUtil.fontSize(
+                            mobile: 14, tablet: 16, desktop: 18),
                         shadows: [
                           Shadow(
                             color: Colors.black.withOpacity(0.5),
@@ -146,7 +154,8 @@ class OfferCard extends StatelessWidget {
             ),
 
             // Discount badge
-            if (offer.discountPercentage != null && offer.discountPercentage! > 0)
+            if (offer.discountPercentage != null &&
+                offer.discountPercentage! > 0)
               Positioned(
                 top: 12,
                 right: 12,
@@ -158,10 +167,11 @@ class OfferCard extends StatelessWidget {
                   ),
                   child: Text(
                     "${offer.discountPercentage}% OFF",
-                    style:  AppTextTheme.textTheme.bodySmall?.copyWith(
+                    style: AppTextTheme.textTheme.bodySmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: ResponsiveUtil.fontSize(mobile: 12, tablet: 13, desktop: 14),
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 12, tablet: 13, desktop: 14),
                     ),
                   ),
                 ),

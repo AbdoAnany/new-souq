@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:math' as math;
 import '../core/widgets/custom_button.dart';
 import '../core/widgets/my_app_bar.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/models/order.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/providers/order_provider.dart';
@@ -28,10 +29,15 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
     _tabController = TabController(length: 5, vsync: this);
 
     // Load user orders when the screen is created
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = ref.read(authProvider).value;
+      print('Order History: User auth state: ${user?.id}'); // Debug log
       if (user != null) {
+        print(
+            'Order History: Loading orders for user: ${user.id}'); // Debug log
         ref.read(ordersProvider.notifier).loadUserOrders(user.id);
+      } else {
+        print('Order History: No authenticated user found'); // Debug log
       }
     });
   }
@@ -73,6 +79,7 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
       ),
       body: ordersAsyncValue.when(
         data: (orders) {
+          print('Orders loaded: ${orders.length} orders'); // Debug log
           if (orders.isEmpty) {
             return _buildEmptyState(context);
           }
@@ -118,47 +125,66 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: ResponsiveUtil.iconSize(
-                    mobile: 48, tablet: 56, desktop: 64),
-                color: Colors.red,
-              ),
-              SizedBox(
-                  height: ResponsiveUtil.spacing(
-                      mobile: 16, tablet: 18, desktop: 20)),
-              Text(
-                'Error loading orders',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontSize: ResponsiveUtil.fontSize(
-                      mobile: 16, tablet: 18, desktop: 20),
+        error: (error, stack) {
+          print('Order loading error: $error'); // Debug log
+          print('Stack trace: $stack'); // Debug log
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: ResponsiveUtil.iconSize(
+                      mobile: 48, tablet: 56, desktop: 64),
+                  color: Colors.red,
                 ),
-              ),
-              SizedBox(
-                  height: ResponsiveUtil.spacing(
-                      mobile: 8, tablet: 10, desktop: 12)),
-              TextButton(
-                onPressed: () {
-                  final user = ref.read(authProvider).value;
-                  if (user != null) {
-                    ref.read(ordersProvider.notifier).loadUserOrders(user.id);
-                  }
-                },
-                child: Text(
-                  'Retry',
-                  style: TextStyle(
+                SizedBox(
+                    height: ResponsiveUtil.spacing(
+                        mobile: 16, tablet: 18, desktop: 20)),
+                Text(
+                  'Error loading orders',
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontSize: ResponsiveUtil.fontSize(
-                        mobile: 14, tablet: 15, desktop: 16),
+                        mobile: 16, tablet: 18, desktop: 20),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                SizedBox(
+                    height: ResponsiveUtil.spacing(
+                        mobile: 8, tablet: 10, desktop: 12)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 12, tablet: 13, desktop: 14),
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                    height: ResponsiveUtil.spacing(
+                        mobile: 8, tablet: 10, desktop: 12)),
+                TextButton(
+                  onPressed: () {
+                    final user = ref.read(authProvider).value;
+                    if (user != null) {
+                      ref.read(ordersProvider.notifier).loadUserOrders(user.id);
+                    }
+                  },
+                  child: Text(
+                    'Retry',
+                    style: TextStyle(
+                      fontSize: ResponsiveUtil.fontSize(
+                          mobile: 14, tablet: 15, desktop: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -207,6 +233,22 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
               text: "Start Shopping",
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+          ),
+          SizedBox(height: 16.h),
+          // Temporary test button for debugging
+          SizedBox(
+            width:
+                ResponsiveUtil.spacing(mobile: 200, tablet: 240, desktop: 280),
+            child: CustomButton(
+              text: "Create Test Order",
+              isOutlined: true,
+              onPressed: () {
+                final user = ref.read(authProvider).value;
+                if (user != null) {
+                  ref.read(ordersProvider.notifier).createTestOrders(user.id);
+                }
               },
             ),
           ),
@@ -316,51 +358,57 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
               // Items preview
               Row(
                 children: [
-                  // Show up to 3 product images
-                  Row(
-                    children: order.items.take(3).map((item) {
-                      final index = order.items.indexOf(item);
-                      final imageSize = ResponsiveUtil.spacing(
-                          mobile: 60, tablet: 66, desktop: 72);
+                  // Show up to 3 product images using Stack for overlapping effect
+                  if (order.items.isNotEmpty) ...[
+                    SizedBox(
+                      height: ResponsiveUtil.spacing(mobile: 60, tablet: 66, desktop: 72),
+                      width: order.items.length > 1 
+                          ? ResponsiveUtil.spacing(mobile: 60, tablet: 66, desktop: 72) + 
+                            (math.min(order.items.length, 3) - 1) * ResponsiveUtil.spacing(mobile: 40, tablet: 45, desktop: 50)
+                          : ResponsiveUtil.spacing(mobile: 60, tablet: 66, desktop: 72),
+                      child: Stack(
+                        children: order.items.take(3).toList().asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          final imageSize = ResponsiveUtil.spacing(
+                              mobile: 60, tablet: 66, desktop: 72);
+                          final leftOffset = math.max(0, index * ResponsiveUtil.spacing(mobile: 40, tablet: 45, desktop: 50));
 
-                      return Container(
-                        width: imageSize,
-                        height: imageSize,
-                        margin: EdgeInsets.only(
-                          left: index > 0
-                              ? ResponsiveUtil.spacing(
-                                  mobile: -15, tablet: -16, desktop: -18)
-                              : 0,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white, width: 2),
-                          borderRadius: BorderRadius.circular(
-                            ResponsiveUtil.spacing(
-                                mobile: 8, tablet: 9, desktop: 10),
-                          ),
-                          image: item.image != null
-                              ? DecorationImage(
-                                  image: NetworkImage(item.image!),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                          color: item.image == null ? Colors.grey[200] : null,
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                          return Positioned(
+                            left: leftOffset.toDouble(),
+                            top: 0,
+                            child: Container(
+                              width: imageSize,
+                              height: imageSize,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.white, width: 2),
+                                borderRadius: BorderRadius.circular(
+                                  ResponsiveUtil.spacing(
+                                      mobile: 8, tablet: 9, desktop: 10),
+                                ),
+                                image: item.image != null
+                                    ? DecorationImage(
+                                        image: NetworkImage(item.image!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                                color: item.image == null ? Colors.grey[200] : null,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
 
                   // Show count of any additional items
                   if (order.items.length > 3) ...[
+                    SizedBox(width: ResponsiveUtil.spacing(mobile: 4, tablet: 6, desktop: 8)),
                     Container(
                       width: ResponsiveUtil.spacing(
                           mobile: 60, tablet: 66, desktop: 72),
                       height: ResponsiveUtil.spacing(
                           mobile: 60, tablet: 66, desktop: 72),
-                      margin: EdgeInsets.only(
-                        left: ResponsiveUtil.spacing(
-                            mobile: -15, tablet: -16, desktop: -18),
-                      ),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white, width: 2),
                         borderRadius: BorderRadius.circular(
