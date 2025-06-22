@@ -12,7 +12,7 @@ import 'package:souq/services/tracking_service.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
 import '/core/constants/app_constants.dart';
-import 'package:timeline_tile/timeline_tile.dart';
+import 'package:timeline_tile/.dart';
 
 class OrderDetailsScreen extends ConsumerWidget {
   final String orderId;
