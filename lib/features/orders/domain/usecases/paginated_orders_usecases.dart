@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../data/services/order_cache_service.dart';
 import '../entities/order_entity.dart';
 import '../repositories/order_repository.dart';
-import '../../data/services/order_cache_service.dart';
 
 /// Parameters for paginated orders request
 class PaginatedOrdersParams extends Equatable {
@@ -148,7 +149,6 @@ class GetPaginatedOrdersUseCase
   /// Get cached result if available and valid
   PaginatedResult<OrderEntity>? _getCachedResult(PaginatedOrdersParams params) {
     try {
-      final cacheKey = _generateCacheKey(params);
       final cachedOrders = <OrderEntity>[];
 
       // This is a simplified cache check - in reality you might want

@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:souq/core/import_core.dart';
 import 'package:souq/core/widgets/product_card.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ProductSection extends ConsumerStatefulWidget {
   final String title;

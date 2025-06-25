@@ -1,9 +1,9 @@
+import 'package:carousel_slider/carousel_slider.dart' as carousel_slider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:carousel_slider/carousel_slider.dart' as carousel_slider;
-import 'package:souq/providers/product_provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:souq/providers/product_provider.dart';
 
 class OfferCarousel extends ConsumerStatefulWidget {
   const OfferCarousel({super.key});

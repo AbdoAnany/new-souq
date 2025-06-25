@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import '../../domain/entities/order_entity.dart';
 
 // Order Events
@@ -89,14 +90,16 @@ class CancelOrderEvent extends OrderEvent {
 class SearchOrdersEvent extends OrderEvent {
   final String userId;
   final String query;
+  final OrderStatus? status; // Added status filter for search
 
   const SearchOrdersEvent({
     required this.userId,
     required this.query,
+    this.status,
   });
 
   @override
-  List<Object> get props => [userId, query];
+  List<Object?> get props => [userId, query, status];
 }
 
 class RefreshOrdersEvent extends OrderEvent {

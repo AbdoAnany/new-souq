@@ -12,13 +12,25 @@ class OrderItemModel extends OrderItemEntity {
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      id: json['id'] as String? ?? '',
-      productId: json['productId'] as String,
-      productName: json['productName'] as String,
-      productImageUrl: json['productImageUrl'] as String?,
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      quantity: json['quantity'] as int,
+      id: (json['id'] as String?) ?? '',
+      productId: (json['productId'] as String?) ?? '',
+      // Handle both legacy and new field names
+      productName:
+          (json['productName'] as String?) ?? (json['title'] as String?) ?? '',
+      productImageUrl:
+          (json['productImageUrl'] as String?) ?? (json['image'] as String?),
+      // Handle both legacy and new field names for price
+      unitPrice: _parseDouble(json['unitPrice'] ?? json['price']),
+      quantity: (json['quantity'] as int?) ?? 1,
     );
+  }
+
+  // Helper method for safe double parsing
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   Map<String, dynamic> toJson() {

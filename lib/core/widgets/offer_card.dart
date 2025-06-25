@@ -1,7 +1,8 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/utils/responsive_util.dart';
+
+import '/core/constants/app_constants.dart';
 import '/core/import_core.dart';
 
 class OfferCard extends StatelessWidget {

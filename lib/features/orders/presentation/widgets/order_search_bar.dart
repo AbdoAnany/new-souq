@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../../../../utils/responsive_util.dart';
 
 class OrderSearchBar extends StatefulWidget {
   final Function(String) onSearch;
+  final TextEditingController? controller;
 
   const OrderSearchBar({
     Key? key,
     required this.onSearch,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -15,12 +18,27 @@ class OrderSearchBar extends StatefulWidget {
 }
 
 class _OrderSearchBarState extends State<OrderSearchBar> {
-  final TextEditingController _controller = TextEditingController();
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_onTextChanged);
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.removeListener(_onTextChanged);
+    // Only dispose if we created the controller internally
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
+  }
+
+  void _onTextChanged() {
+    setState(() {}); // Rebuild to update suffixIcon visibility
   }
 
   @override

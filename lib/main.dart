@@ -2,24 +2,24 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/app_config.dart';
 import 'core/constants/app_constants.dart';
-import 'core/themes/app_theme.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/routing/app_router.dart';
-import 'firebase_options.dart';
-import 'models/user.dart';
-import 'providers/auth_provider.dart';
-import 'providers/locale_provider.dart';
+import 'core/themes/app_theme.dart';
 import 'features/auth/presentation/screens/auth_screen_wrapper.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 import 'features/orders/presentation/bloc/order_bloc.dart';
 import 'features/orders/presentation/bloc/tracking_bloc.dart';
+import 'firebase_options.dart';
+import 'models/user.dart';
+import 'providers/auth_provider.dart';
+import 'providers/locale_provider.dart';
 import 'screens/splash_screen.dart';
 
 Future<void> main() async {

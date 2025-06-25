@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/di/injection_container.dart';
+
 import '../../../../utils/responsive_util.dart';
 import '../../domain/entities/order_entity.dart';
 import '../bloc/order_bloc.dart';
@@ -26,20 +26,36 @@ class _OrderListScreenState extends State<OrderListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late ScrollController _scrollController;
+  late TextEditingController _searchController;
   OrderStatus? _selectedStatus;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(
+        length: 9, vsync: this); // Updated to match all statuses + "All"
     _scrollController = ScrollController();
+    _searchController = TextEditingController();
     _scrollController.addListener(_onScroll);
+
+    // Add listener to tab controller
+    _tabController.addListener(_onTabChanged);
+
+    // Load initial orders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderBloc>().add(GetUserOrdersEvent(
+            userId: widget.userId,
+            status: null, // Load all orders initially
+          ));
+    });
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -56,6 +72,52 @@ class _OrderListScreenState extends State<OrderListScreen>
     }
   }
 
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      // Only process when the tab animation is complete
+      print('Tab changed to index: ${_tabController.index}');
+
+      final newStatus = _tabController.index == 0
+          ? null
+          : OrderStatus.values[_tabController.index - 1];
+
+      print('New status: $newStatus');
+
+      setState(() {
+        _selectedStatus = newStatus;
+      });
+
+      // Clear search when switching tabs
+      _searchController.clear();
+
+      // Load orders for the selected status
+      context.read<OrderBloc>().add(GetUserOrdersEvent(
+            userId: widget.userId,
+            status: _selectedStatus,
+          ));
+    }
+  }
+
+  void _handleTabTap(int index) {
+    print('Handling tab tap for index: $index');
+
+    final newStatus = index == 0 ? null : OrderStatus.values[index - 1];
+    print('Tab status: $newStatus');
+
+    setState(() {
+      _selectedStatus = newStatus;
+    });
+
+    // Clear search when switching tabs
+    _searchController.clear();
+
+    // Load orders for the selected status
+    context.read<OrderBloc>().add(GetUserOrdersEvent(
+          userId: widget.userId,
+          status: _selectedStatus,
+        ));
+  }
+
   bool get _isBottom {
     if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
@@ -65,72 +127,73 @@ class _OrderListScreenState extends State<OrderListScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          sl<OrderBloc>()..add(GetUserOrdersEvent(userId: widget.userId)),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('My Orders'),
-          bottom: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            onTap: (index) {
-              _selectedStatus =
-                  index == 0 ? null : OrderStatus.values[index - 1];
-              context.read<OrderBloc>().add(GetUserOrdersEvent(
-                    userId: widget.userId,
-                    status: _selectedStatus,
-                  ));
-            },
-            tabs: const [
-              Tab(text: 'All'),
-              Tab(text: 'Pending'),
-              Tab(text: 'Confirmed'),
-              Tab(text: 'Processing'),
-              Tab(text: 'Shipped'),
-              Tab(text: 'Delivered'),
-            ],
-          ),
-        ),
-        body: Column(
-          children: [
-            // Search bar
-            OrderSearchBar(
-              onSearch: (query) {
-                if (query.isNotEmpty) {
-                  context.read<OrderBloc>().add(SearchOrdersEvent(
-                        userId: widget.userId,
-                        query: query,
-                      ));
-                } else {
-                  context.read<OrderBloc>().add(GetUserOrdersEvent(
-                        userId: widget.userId,
-                        status: _selectedStatus,
-                      ));
-                }
-              },
-            ),
-
-            // Order list
-            Expanded(
-              child: BlocBuilder<OrderBloc, OrderState>(
-                builder: (context, state) {
-                  if (state is OrderLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is OrdersLoaded) {
-                    return _buildOrderList(state.orders, state.hasReachedMax);
-                  } else if (state is OrderSearchResults) {
-                    return _buildOrderList(state.orders, true);
-                  } else if (state is OrderError) {
-                    print('Error loading orders: ${state.message}');
-                    return _buildErrorWidget(state.message);
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Orders'),
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          onTap: (index) {
+            print('TabBar onTap called with index: $index');
+            _handleTabTap(index);
+          },
+          tabs: const [
+            Tab(text: 'All'),
+            Tab(text: 'Pending'),
+            Tab(text: 'Confirmed'),
+            Tab(text: 'Processing'),
+            Tab(text: 'Shipped'),
+            Tab(text: 'Delivered'),
+            Tab(text: 'Cancelled'),
+            Tab(text: 'Returned'),
+            Tab(text: 'Refunded'),
           ],
         ),
+      ),
+      body: Column(
+        children: [
+          // Search bar
+          OrderSearchBar(
+            controller: _searchController,
+            onSearch: (query) {
+              print(
+                  'Search called with query: "$query", Selected status: $_selectedStatus');
+              if (query.isNotEmpty) {
+                context.read<OrderBloc>().add(SearchOrdersEvent(
+                      userId: widget.userId,
+                      query: query,
+                      status:
+                          _selectedStatus, // Include current tab filter in search
+                    ));
+              } else {
+                // When search is cleared, reload with current tab filter
+                context.read<OrderBloc>().add(GetUserOrdersEvent(
+                      userId: widget.userId,
+                      status: _selectedStatus,
+                    ));
+              }
+            },
+          ),
+
+          // Order list
+          Expanded(
+            child: BlocBuilder<OrderBloc, OrderState>(
+              builder: (context, state) {
+                if (state is OrderLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is OrdersLoaded) {
+                  return _buildOrderList(state.orders, state.hasReachedMax);
+                } else if (state is OrderSearchResults) {
+                  return _buildOrderList(state.orders, true);
+                } else if (state is OrderError) {
+                  print('Error loading orders: ${state.message}');
+                  return _buildErrorWidget(state.message);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

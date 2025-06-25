@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../utils/responsive_util.dart';
+
 import '../../../../utils/formatter_util.dart';
+import '../../../../utils/responsive_util.dart';
 import '../../domain/entities/order_entity.dart';
 
 class OrderItemCard extends StatelessWidget {

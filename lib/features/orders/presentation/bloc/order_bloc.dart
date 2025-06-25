@@ -1,7 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/errors/failures.dart';
-import '../../domain/usecases/order_usecases.dart';
 import '../../domain/usecases/order_management_usecases.dart';
+import '../../domain/usecases/order_usecases.dart';
 import 'order_event.dart';
 import 'order_state.dart';
 
@@ -169,6 +170,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     final result = await searchOrdersUseCase(SearchOrdersParams(
       userId: event.userId,
       query: event.query,
+      status: event.status,
     ));
 
     result.fold(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/models/offer.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/widgets/offer_form_dialog.dart';
 
+import '/core/constants/app_constants.dart';
 import '../../core/widgets/my_app_bar.dart';
 import '../../utils/responsive_util.dart';
 

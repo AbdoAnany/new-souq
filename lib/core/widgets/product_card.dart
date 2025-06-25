@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/core/import_core.dart';
-import '/core/widgets/rating_stars.dart';
 import 'package:souq/models/product.dart';
+import 'package:souq/providers/wishlist_provider.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/providers/wishlist_provider.dart';
+
+import '/core/widgets/rating_stars.dart';
 
 class ProductCard extends ConsumerWidget {
   final Product product;

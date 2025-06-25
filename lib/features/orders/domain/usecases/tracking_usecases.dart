@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/base_classes.dart';
 import '../entities/tracking_entity.dart';

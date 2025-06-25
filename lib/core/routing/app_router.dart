@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../features/orders/domain/entities/order_entity.dart';
 // Core
 import 'app_routes.dart';
 import 'order_route_wrappers.dart';
-import '../../features/orders/domain/entities/order_entity.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {

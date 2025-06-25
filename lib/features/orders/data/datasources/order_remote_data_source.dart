@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/entities/order_entity.dart';
 import '../models/order_model.dart';
 import '../models/tracking_model.dart';
-import '../../domain/entities/order_entity.dart';
 
 abstract class OrderRemoteDataSource {
   Future<List<OrderModel>> getUserOrders({
@@ -32,6 +33,7 @@ abstract class OrderRemoteDataSource {
   Future<List<OrderModel>> searchOrders({
     required String userId,
     required String query,
+    OrderStatus? status,
   });
 }
 
@@ -48,17 +50,11 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
     String? status,
   }) async {
     try {
+      // Simplified query to avoid index requirement temporarily
       Query query = firestore
           .collection('orders')
-          .where('userId', isEqualTo: userId);
-
-      // Add status filter if provided
-      if (status != null) {
-        query = query.where('status', isEqualTo: status);
-      }
-
-      // Apply limit (removing orderBy temporarily to avoid index requirement)
-      query = query.limit(limit);
+          .where('userId', isEqualTo: userId)
+          .limit(limit);
 
       final snapshot = await query.get();
 
@@ -72,6 +68,11 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
 
       // Sort by orderDate in memory (newest first)
       orders.sort((a, b) => b.orderDate.compareTo(a.orderDate));
+
+      // Filter by status in memory if provided (to avoid compound index)
+      if (status != null) {
+        return orders.where((order) => order.status.name == status).toList();
+      }
 
       return orders;
     } catch (e) {
@@ -249,16 +250,24 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   Future<List<OrderModel>> searchOrders({
     required String userId,
     required String query,
+    OrderStatus? status,
   }) async {
     try {
       // First get user orders
-      final userOrders = await getUserOrders(userId: userId, limit: 100);
+      final userOrders = await getUserOrders(
+        userId: userId,
+        limit: 100,
+        status: status?.name, // Convert OrderStatus to string
+      );
 
       // Filter locally by order number or other searchable fields
       final filteredOrders = userOrders.where((order) {
         final searchQuery = query.toLowerCase();
-        return order.orderNumber.toLowerCase().contains(searchQuery) ||
-            order.id.toLowerCase().contains(searchQuery);
+        final matchesQuery =
+            order.orderNumber.toLowerCase().contains(searchQuery) ||
+                order.id.toLowerCase().contains(searchQuery);
+        final matchesStatus = status == null || order.status == status;
+        return matchesQuery && matchesStatus;
       }).toList();
 
       return filteredOrders;

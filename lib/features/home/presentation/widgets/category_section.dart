@@ -1,12 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/categories_screen.dart';
 import 'package:souq/screens/category_products_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CategorySection extends ConsumerStatefulWidget {
   const CategorySection({super.key});

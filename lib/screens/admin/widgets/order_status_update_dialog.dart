@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:souq/models/order.dart';
 
 import '../../../features/orders/data/models/order_model.dart';
 import '../../../features/orders/domain/entities/order_entity.dart';

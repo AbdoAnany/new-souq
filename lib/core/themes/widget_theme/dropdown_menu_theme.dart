@@ -1,5 +1,4 @@
 import '/core/import_core.dart';
-
 import 'input_decoration_theme.dart';
 
 DropdownMenuThemeData get dropdownMenuTheme {

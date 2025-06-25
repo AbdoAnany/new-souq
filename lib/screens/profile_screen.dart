@@ -1,14 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../core/widgets/my_app_bar.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/wishlist_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
+import '/core/constants/app_constants.dart';
+import '../core/widgets/my_app_bar.dart';
 import 'admin/admin_dashboard_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {

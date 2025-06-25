@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../providers/auth_provider.dart';
-import '../di/injection_container.dart' as di;
 import '../../features/orders/domain/entities/order_entity.dart';
-import '../../features/orders/presentation/screens/order_list_screen.dart';
-import '../../features/orders/presentation/screens/order_details_screen.dart';
-import '../../features/orders/presentation/screens/order_update_screen.dart';
-import '../../features/orders/presentation/screens/order_details_screen_clean.dart';
 import '../../features/orders/presentation/bloc/order_bloc.dart';
 import '../../features/orders/presentation/bloc/tracking_bloc.dart';
+import '../../features/orders/presentation/screens/order_details_screen.dart';
+import '../../features/orders/presentation/screens/order_details_screen_clean.dart';
+import '../../features/orders/presentation/screens/order_list_screen.dart';
+import '../../features/orders/presentation/screens/order_update_screen.dart';
+import '../../providers/auth_provider.dart';
+import '../di/injection_container.dart' as di;
 
 /// Wrapper widget that provides authentication context for order screens
 class AuthenticatedOrderWrapper extends ConsumerWidget {

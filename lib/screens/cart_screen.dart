@@ -1,15 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../core/widgets/custom_button.dart';
-import '../core/widgets/my_app_bar.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/checkout_screen.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
+import '/core/constants/app_constants.dart';
+import '../core/widgets/custom_button.dart';
+import '../core/widgets/my_app_bar.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({Key? key}) : super(key: key);

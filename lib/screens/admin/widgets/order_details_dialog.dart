@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:souq/utils/formatter_util.dart';
+
+import '/core/constants/app_constants.dart';
 import '../../../features/orders/data/models/order_model.dart';
 import '../../../features/orders/domain/entities/order_entity.dart';
-import '/core/constants/app_constants.dart';
-import 'package:souq/utils/formatter_util.dart';
 
 class OrderDetailsDialog extends StatelessWidget {
   final OrderModel order;
@@ -268,7 +269,8 @@ class OrderDetailsDialog extends StatelessWidget {
             const SizedBox(height: 12),
             _buildDetailRow(
                 'Payment Method', order.paymentMethod.name.toUpperCase()),
-            _buildDetailRow('Payment Status', order.paymentStatus.name.toUpperCase()),
+            _buildDetailRow(
+                'Payment Status', order.paymentStatus.name.toUpperCase()),
             const Divider(),
             _buildDetailRow(
                 'Subtotal', FormatterUtil.formatCurrency(order.subtotal)),

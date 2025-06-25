@@ -4,13 +4,14 @@ import 'package:souq/core/constants/app_constants.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/notifications_screen.dart';
 import 'package:souq/screens/wishlist_screen.dart';
+
 import '../../../../core/import_core.dart';
+import '../widgets/app_download_banner.dart';
+import '../widgets/category_section.dart';
 import '../widgets/enhanced_search_bar.dart' as enhanced_search;
 import '../widgets/improved_offer_carousel.dart';
-import '../widgets/special_offers_section.dart';
 import '../widgets/product_section.dart';
-import '../widgets/category_section.dart';
-import '../widgets/app_download_banner.dart';
+import '../widgets/special_offers_section.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});

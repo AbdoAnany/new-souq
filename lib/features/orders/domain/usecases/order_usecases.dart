@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/base_classes.dart';
 import '../entities/order_entity.dart';
@@ -157,6 +158,7 @@ class SearchOrdersUseCase
     return await repository.searchOrders(
       userId: params.userId,
       query: params.query,
+      status: params.status, // Pass status to repository
     );
   }
 }
@@ -164,12 +166,14 @@ class SearchOrdersUseCase
 class SearchOrdersParams extends Equatable {
   final String userId;
   final String query;
+  final OrderStatus? status; // Added status filter
 
   const SearchOrdersParams({
     required this.userId,
     required this.query,
+    this.status,
   });
 
   @override
-  List<Object> get props => [userId, query];
+  List<Object?> get props => [userId, query, status];
 }

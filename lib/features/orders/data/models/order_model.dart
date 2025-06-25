@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/order_entity.dart';
 import 'order_item_model.dart';
 import 'shipping_address_model.dart';
@@ -24,41 +26,182 @@ class OrderModel extends OrderEntity {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // Handle timestamp conversions with better error handling
+    DateTime orderDate;
+    try {
+      if (json['createdAt'] is Timestamp) {
+        orderDate = (json['createdAt'] as Timestamp).toDate();
+      } else if (json['orderDate'] is String) {
+        orderDate = DateTime.parse(json['orderDate'] as String);
+      } else if (json['orderDate'] is Timestamp) {
+        orderDate = (json['orderDate'] as Timestamp).toDate();
+      } else if (json['createdAt'] != null) {
+        // Handle various timestamp formats
+        final createdAt = json['createdAt'];
+        if (createdAt is Map) {
+          orderDate = DateTime.fromMillisecondsSinceEpoch(
+              (createdAt['seconds'] as int) * 1000);
+        } else if (createdAt is int) {
+          orderDate = DateTime.fromMillisecondsSinceEpoch(createdAt);
+        } else {
+          orderDate = DateTime.now();
+        }
+      } else {
+        orderDate = DateTime.now();
+      }
+    } catch (e) {
+      orderDate = DateTime.now();
+    }
+
+    DateTime? shippedDate;
+    try {
+      final shippedAt = json['shippedAt'] ?? json['shippedDate'];
+      if (shippedAt is Timestamp) {
+        shippedDate = shippedAt.toDate();
+      } else if (shippedAt is String) {
+        shippedDate = DateTime.parse(shippedAt);
+      } else if (shippedAt is Map && shippedAt['seconds'] != null) {
+        shippedDate = DateTime.fromMillisecondsSinceEpoch(
+            (shippedAt['seconds'] as int) * 1000);
+      }
+    } catch (e) {
+      // shippedDate remains null
+    }
+
+    DateTime? deliveredDate;
+    try {
+      final deliveredAt = json['deliveredAt'] ?? json['deliveredDate'];
+      if (deliveredAt is Timestamp) {
+        deliveredDate = deliveredAt.toDate();
+      } else if (deliveredAt is String) {
+        deliveredDate = DateTime.parse(deliveredAt);
+      } else if (deliveredAt is Map && deliveredAt['seconds'] != null) {
+        deliveredDate = DateTime.fromMillisecondsSinceEpoch(
+            (deliveredAt['seconds'] as int) * 1000);
+      }
+    } catch (e) {
+      // deliveredDate remains null
+    }
+
+    // Safely extract userId with null safety
+    String userId = '';
+    try {
+      if (json.containsKey('userId') && json['userId'] != null) {
+        userId = json['userId'].toString();
+      }
+    } catch (e) {
+      // userId remains empty
+    }
+
+    // Handle order items with backward compatibility
+    List<OrderItemModel> items = [];
+    try {
+      if (json['items'] != null) {
+        items = (json['items'] as List<dynamic>).map((item) {
+          try {
+            return OrderItemModel.fromJson(item as Map<String, dynamic>);
+          } catch (e) {
+            // Try legacy format conversion
+            return _convertLegacyOrderItem(item as Map<String, dynamic>);
+          }
+        }).toList();
+      }
+    } catch (e) {
+      items = [];
+    }
+
+    // Handle shipping address with error handling
+    ShippingAddressModel? shippingAddress;
+    try {
+      if (json['shippingAddress'] != null) {
+        shippingAddress = ShippingAddressModel.fromJson(
+            json['shippingAddress'] as Map<String, dynamic>);
+      }
+    } catch (e) {
+      // Create a default shipping address if parsing fails
+      shippingAddress = _createDefaultShippingAddress();
+    }
+
+    shippingAddress ??= _createDefaultShippingAddress();
+
     return OrderModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      orderNumber: json['orderNumber'] as String,
-      items: (json['items'] as List<dynamic>)
-          .map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      subtotal: (json['subtotal'] as num).toDouble(),
-      shipping: (json['shipping'] as num).toDouble(),
-      tax: (json['tax'] as num).toDouble(),
-      total: (json['total'] as num).toDouble(),
-      status: OrderStatus.values.firstWhere(
-        (status) => status.name == json['status'],
-        orElse: () => OrderStatus.pending,
-      ),
-      paymentStatus: PaymentStatus.values.firstWhere(
-        (status) => status.name == json['paymentStatus'],
-        orElse: () => PaymentStatus.pending,
-      ),
-      paymentMethod: PaymentMethod.values.firstWhere(
-        (method) => method.name == json['paymentMethod'],
-        orElse: () => PaymentMethod.cashOnDelivery,
-      ),
-      shippingAddress: ShippingAddressModel.fromJson(
-        json['shippingAddress'] as Map<String, dynamic>,
-      ),
-      orderDate: DateTime.parse(json['orderDate'] as String),
-      shippedDate: json['shippedDate'] != null
-          ? DateTime.parse(json['shippedDate'] as String)
-          : null,
-      deliveredDate: json['deliveredDate'] != null
-          ? DateTime.parse(json['deliveredDate'] as String)
-          : null,
+      id: (json['id'] as String?) ?? '',
+      userId: userId,
+      orderNumber: (json['orderNumber'] as String?) ?? '',
+      items: items,
+      subtotal: _parseDouble(json['subtotal']) ?? 0.0,
+      shipping: _parseDouble(json['shipping']) ?? 0.0,
+      tax: _parseDouble(json['tax']) ?? 0.0,
+      total: _parseDouble(json['total']) ?? 0.0,
+      status: _parseOrderStatus(json['status']),
+      paymentStatus: _parsePaymentStatus(json['paymentStatus']),
+      paymentMethod: _parsePaymentMethod(json['paymentMethod']),
+      shippingAddress: shippingAddress,
+      orderDate: orderDate,
+      shippedDate: shippedDate,
+      deliveredDate: deliveredDate,
       trackingNumber: json['trackingNumber'] as String?,
-      notes: json['notes'] as String?,
+      notes: json['notes'] as String? ?? json['cancellationReason'] as String?,
+    );
+  }
+
+  // Helper methods for safe parsing
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static OrderStatus _parseOrderStatus(dynamic value) {
+    if (value == null) return OrderStatus.pending;
+    final statusString = value.toString();
+    return OrderStatus.values.firstWhere(
+      (status) => status.name == statusString,
+      orElse: () => OrderStatus.pending,
+    );
+  }
+
+  static PaymentStatus _parsePaymentStatus(dynamic value) {
+    if (value == null) return PaymentStatus.pending;
+    final statusString = value.toString();
+    return PaymentStatus.values.firstWhere(
+      (status) => status.name == statusString,
+      orElse: () => PaymentStatus.pending,
+    );
+  }
+
+  static PaymentMethod _parsePaymentMethod(dynamic value) {
+    if (value == null) return PaymentMethod.cashOnDelivery;
+    final methodString = value.toString();
+    return PaymentMethod.values.firstWhere(
+      (method) => method.name == methodString,
+      orElse: () => PaymentMethod.cashOnDelivery,
+    );
+  }
+
+  static OrderItemModel _convertLegacyOrderItem(Map<String, dynamic> json) {
+    return OrderItemModel(
+      id: (json['id'] as String?) ?? '',
+      productId: (json['productId'] as String?) ?? '',
+      productName:
+          (json['title'] as String?) ?? (json['productName'] as String?) ?? '',
+      productImageUrl:
+          (json['image'] as String?) ?? (json['productImageUrl'] as String?),
+      unitPrice:
+          _parseDouble(json['price']) ?? _parseDouble(json['unitPrice']) ?? 0.0,
+      quantity: (json['quantity'] as int?) ?? 1,
+    );
+  }
+
+  static ShippingAddressModel _createDefaultShippingAddress() {
+    return const ShippingAddressModel(
+      fullName: 'Unknown Customer',
+      address: 'Address not provided',
+      city: 'Unknown',
+      state: 'Unknown',
+      country: 'Unknown',
+      postalCode: '00000',
     );
   }
 

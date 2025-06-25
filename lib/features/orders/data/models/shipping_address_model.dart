@@ -12,15 +12,48 @@ class ShippingAddressModel extends ShippingAddressEntity {
   });
 
   factory ShippingAddressModel.fromJson(Map<String, dynamic> json) {
-    return ShippingAddressModel(
-      fullName: json['fullName'] as String,
-      address: json['address'] as String,
-      city: json['city'] as String,
-      state: json['state'] as String,
-      country: json['country'] as String,
-      postalCode: json['postalCode'] as String,
-      phoneNumber: json['phoneNumber'] as String?,
-    );
+    try {
+      // Handle different field name formats between legacy and new data
+      final firstName = json['firstName']?.toString() ?? '';
+      final lastName = json['lastName']?.toString() ?? '';
+      final fullName = json['fullName']?.toString() ??
+          (firstName.isNotEmpty || lastName.isNotEmpty
+              ? '$firstName $lastName'.trim()
+              : 'Customer Name');
+
+      final address = json['address']?.toString() ??
+          json['street']?.toString() ??
+          json['addressLine1']?.toString() ??
+          'Address not provided';
+
+      final city = json['city']?.toString() ?? 'City not provided';
+      final state = json['state']?.toString() ?? 'State not provided';
+      final country = json['country']?.toString() ?? 'Country not provided';
+      final postalCode = json['postalCode']?.toString() ??
+          json['zipCode']?.toString() ??
+          'Postal code not provided';
+      final phoneNumber = json['phoneNumber']?.toString();
+
+      return ShippingAddressModel(
+        fullName: fullName,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        postalCode: postalCode,
+        phoneNumber: phoneNumber,
+      );
+    } catch (e) {
+      // Return a default shipping address if parsing fails
+      return const ShippingAddressModel(
+        fullName: 'Customer Name',
+        address: 'Address not available',
+        city: 'City not available',
+        state: 'State not available',
+        country: 'Country not available',
+        postalCode: 'Postal code not available',
+      );
+    }
   }
 
   Map<String, dynamic> toJson() {

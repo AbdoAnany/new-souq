@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
@@ -211,12 +212,14 @@ class OrderRepositoryImpl implements OrderRepository {
   Future<Either<Failure, List<OrderEntity>>> searchOrders({
     required String userId,
     required String query,
+    OrderStatus? status,
   }) async {
     if (await networkInfo.isConnected) {
       try {
         final orders = await remoteDataSource.searchOrders(
           userId: userId,
           query: query,
+          status: status,
         );
         return Right(orders);
       } on ServerException catch (e) {
@@ -227,8 +230,11 @@ class OrderRepositoryImpl implements OrderRepository {
         final cachedOrders = await localDataSource.getCachedOrders(userId);
         final filteredOrders = cachedOrders.where((order) {
           final searchQuery = query.toLowerCase();
-          return order.orderNumber.toLowerCase().contains(searchQuery) ||
-              order.id.toLowerCase().contains(searchQuery);
+          final matchesQuery =
+              order.orderNumber.toLowerCase().contains(searchQuery) ||
+                  order.id.toLowerCase().contains(searchQuery);
+          final matchesStatus = status == null || order.status == status;
+          return matchesQuery && matchesStatus;
         }).toList();
 
         return Right(filteredOrders);

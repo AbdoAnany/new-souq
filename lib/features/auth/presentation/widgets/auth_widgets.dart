@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../utils/responsive_util.dart';
+
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../utils/responsive_util.dart';
 
 class SocialAuthButtons extends StatelessWidget {
   final VoidCallback? onGooglePressed;

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../../../../core/di/injection_container.dart';
-import '../../../../utils/responsive_util.dart';
 import '../../../../utils/formatter_util.dart';
+import '../../../../utils/responsive_util.dart';
 import '../../domain/entities/order_entity.dart';
 import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
 import '../bloc/order_state.dart';
-import '../widgets/order_status_badge.dart';
 import '../widgets/order_item_card.dart';
+import '../widgets/order_status_badge.dart';
 import '../widgets/order_timeline.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
@@ -108,12 +109,16 @@ class OrderDetailsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Order #${order.orderNumber}',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    'Order #${order.orderNumber}',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                SizedBox(width: 8.w),
                 OrderStatusBadge(status: order.status),
               ],
             ),

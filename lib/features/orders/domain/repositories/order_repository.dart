@@ -1,8 +1,9 @@
 import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/failures.dart';
+import '../../data/services/order_cache_service.dart';
 import '../entities/order_entity.dart';
 import '../entities/tracking_entity.dart';
-import '../../data/services/order_cache_service.dart';
 import '../usecases/paginated_orders_usecases.dart';
 
 abstract class OrderRepository {
@@ -47,6 +48,7 @@ abstract class OrderRepository {
   Future<Either<Failure, List<OrderEntity>>> searchOrders({
     required String userId,
     required String query,
+    OrderStatus? status,
   });
 
   // Get paginated orders with advanced filtering

@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:souq/core/themes/style/color_schemes.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/utils/responsive_util.dart';
+
 import '/core/import_core.dart';
 
 class WelcomeHeader extends ConsumerWidget {

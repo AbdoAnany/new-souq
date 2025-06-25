@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
+import '../../domain/entities/order_entity.dart';
 import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
 import '../bloc/order_state.dart';
-import '../../domain/entities/order_entity.dart';
 
 /// This class helps transition from Riverpod providers to BLoC
 /// It provides utility methods to make the migration smoother

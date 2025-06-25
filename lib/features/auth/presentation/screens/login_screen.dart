@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/constants/app_constants.dart';
-import '../../../../utils/responsive_util.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
-import '../../../../core/widgets/app_card.dart';
+import '../../../../utils/responsive_util.dart';
 import '../../../../utils/validator.dart';
 import '../../../home/presentation/screens/home_screen.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
 import '../blocs/auth_bloc.dart';
+import 'forgot_password_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
