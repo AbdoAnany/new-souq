@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
+
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
 import 'package:souq/screens/categories_screen.dart';
@@ -7,9 +9,11 @@ import 'package:souq/screens/profile_screen.dart';
 import 'package:souq/screens/search_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 
+import '../../../../core/routing/order_route_wrappers.dart';
 import '/core/constants/app_constants.dart';
 import '/core/widgets/badge.dart' as custom_badge;
 import 'home_tab.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -28,7 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       const HomeTab(),
       const CategoriesScreen(),
       const SearchScreen(),
-      const CartScreen(),
+      const OrderListWrapper(),
       const ProfileScreen(),
     ];
   }
@@ -36,7 +40,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartProvider);
-    final cartItemCount = cartState.value?.items.length ?? 0;
+    final cartItemCount = cartState.when(
+      data: (cart) => cart?.items.length ?? 0,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
 
     return Scaffold(
       body: ResponsiveUtil.isWeb(context)
@@ -59,7 +67,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Container(
           width: ResponsiveUtil.spacing(mobile: 180, tablet: 200, desktop: 220),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: AppConstants.cardColor,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -130,15 +138,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 index: 2,
               ),
               _buildSideNavItem(
-                icon: Icons.shopping_cart_outlined,
-                activeIcon: Icons.shopping_cart,
+                icon: Iconsax.shopping_cart,
+                activeIcon: Iconsax.truck,
                 label: AppStrings.cart,
                 index: 3,
                 badgeCount: cartItemCount,
               ),
               _buildSideNavItem(
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
+                icon: Iconsax.user,
+                activeIcon: Iconsax.user,
                 label: AppStrings.profile,
                 index: 4,
               ),
@@ -217,6 +225,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppConstants.primaryColor,
       unselectedItemColor: Colors.grey,
+      backgroundColor: AppConstants.cardColor,
       showUnselectedLabels: true,
       selectedFontSize:
           ResponsiveUtil.fontSize(mobile: 11, tablet: 12, desktop: 13),
@@ -225,36 +234,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       iconSize: ResponsiveUtil.iconSize(mobile: 22, tablet: 24, desktop: 26),
       items: [
         const BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
+          icon: Icon(Iconsax.shop_copy,color: Colors.grey,),
+          activeIcon: Icon(Iconsax.shop),
           label: AppStrings.home,
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.category_outlined),
-          activeIcon: Icon(Icons.category),
+          icon: Icon(Iconsax.category_2_copy,color: Colors.grey,),
+          activeIcon: Icon(Iconsax.category),
           label: AppStrings.categories,
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.search_outlined),
-          activeIcon: Icon(Icons.search),
+          icon: Icon(Iconsax.search_normal_copy,color: Colors.grey,),
+          activeIcon: Icon(Iconsax.search_normal),
           label: AppStrings.search,
         ),
         BottomNavigationBarItem(
           icon: custom_badge.Badge(
             value: cartItemCount.toString(),
             isVisible: cartItemCount > 0,
-            child: const Icon(Icons.shopping_cart_outlined),
+            child: const Icon(Iconsax.truck_fast_copy,color: Colors.grey,),
           ),
           activeIcon: custom_badge.Badge(
             value: cartItemCount.toString(),
             isVisible: cartItemCount > 0,
-            child: const Icon(Icons.shopping_cart),
+            child: const Icon(Iconsax.truck_fast),
           ),
-          label: AppStrings.cart,
+          label: AppStrings.orders,
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
+          icon: Icon(Iconsax.profile_circle_copy,color: Colors.grey,),
+          activeIcon: Icon(Iconsax.profile_circle),
           label: AppStrings.profile,
         ),
       ],

@@ -1,4 +1,4 @@
-import 'package:carousel_slider/carousel_slider.dart' as carousel_slider;
+import 'package:carousel_slider/carousel_slider.dart' ;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,8 +15,8 @@ class OfferCarousel extends ConsumerStatefulWidget {
 class _OfferCarouselState extends ConsumerState<OfferCarousel>
     with TickerProviderStateMixin {
   int _currentCarouselSlide = 0;
-  final carousel_slider.CarouselSliderController _carouselController =
-      carousel_slider.CarouselSliderController();
+  final CarouselSliderController _carouselController =
+      CarouselSliderController();
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -64,9 +64,9 @@ class _OfferCarouselState extends ConsumerState<OfferCarousel>
 
               return Column(
                 children: [
-                  carousel_slider.CarouselSlider(
+                  CarouselSlider(
                     carouselController: _carouselController,
-                    options: carousel_slider.CarouselOptions(
+                    options: CarouselOptions(
                       height: 160.h,
                       viewportFraction: 0.92,
                       enlargeCenterPage: true,

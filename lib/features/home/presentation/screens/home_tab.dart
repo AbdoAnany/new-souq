@@ -86,10 +86,10 @@ class _HomeTabState extends ConsumerState<HomeTab>
               ),
             ),
 
-            // Offer Carousel
-            const SliverToBoxAdapter(
-              child: OfferCarousel(),
-            ),
+            // // Offer Carousel
+            // const SliverToBoxAdapter(
+            //   child: OfferCarousel(),
+            // ),
 
             // Spacer
             SliverToBoxAdapter(

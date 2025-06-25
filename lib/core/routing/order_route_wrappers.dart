@@ -119,7 +119,7 @@ class AuthenticatedOrderWrapper extends ConsumerWidget {
 
 /// Pre-configured wrapper for order list screen
 class OrderListWrapper extends StatelessWidget {
-  const OrderListWrapper({Key? key}) : super(key: key);
+  const OrderListWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {

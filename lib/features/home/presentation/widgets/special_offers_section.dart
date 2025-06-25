@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:souq/core/import_core.dart';
 import 'package:souq/core/widgets/offer_card.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/offers_screen.dart';
@@ -45,7 +46,6 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final offersState = ref.watch(offerProvider);
 
     return AnimatedBuilder(
@@ -70,7 +70,7 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
                               width: 4.w,
                               height: 24.h,
                               decoration: BoxDecoration(
-                                color: theme.primaryColor,
+                                color: AppColorScheme.primary,
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                             ),
@@ -83,7 +83,7 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
                                     children: [
                                       Text(
                                         "Special Offers",
-                                        style: theme.textTheme.titleLarge
+                                        style: AppTextTheme.textTheme.titleLarge
                                             ?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           fontSize: ResponsiveUtil.fontSize(
@@ -128,7 +128,7 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
                                   SizedBox(height: 4.h),
                                   Text(
                                     "Limited time deals",
-                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                    style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                                       color: Colors.grey[600],
                                       fontSize: ResponsiveUtil.fontSize(
                                           mobile: 14, tablet: 15, desktop: 16),
@@ -141,11 +141,12 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
                         ),
                       ),
                       Container(
+                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
                         decoration: BoxDecoration(
-                          color: theme.primaryColor.withOpacity(0.1),
+                          color: AppColorScheme.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20.r),
                         ),
-                        child: TextButton.icon(
+                        child: TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -154,23 +155,17 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
                               ),
                             );
                           },
-                          icon: Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14.sp,
-                            color: theme.primaryColor,
-                          ),
-                          label: Text(
+                          // style: TextButton.styleFrom(
+                          //   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                          // ),
+                          child: Text(
                             "See All",
                             style: TextStyle(
-                              color: theme.primaryColor,
+                              color: AppColorScheme.primary,
                               fontWeight: FontWeight.w600,
                               fontSize: ResponsiveUtil.fontSize(
                                   mobile: 12, tablet: 13, desktop: 14),
                             ),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 6.h),
                           ),
                         ),
                       ),
@@ -183,10 +178,10 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
                 // Offers List
                 offersState.when(
                   loading: () => _buildShimmerLoader(),
-                  error: (error, stackTrace) => _buildErrorWidget(theme),
+                  error: (error, stackTrace) => _buildErrorWidget(),
                   data: (offers) {
                     if (offers.isEmpty) {
-                      return _buildEmptyState(theme);
+                      return _buildEmptyState();
                     }
 
                     return SizedBox(
@@ -259,14 +254,14 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState() {
     return Container(
       height: ResponsiveUtil.spacing(mobile: 140, tablet: 160, desktop: 180),
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: AppColorScheme.cardColor,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+        border: Border.all(color: AppColorScheme.dividerColor.withOpacity(0.5)),
       ),
       child: Center(
         child: Column(
@@ -281,7 +276,7 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
             SizedBox(height: 12.h),
             Text(
               "No special offers available right now",
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[600],
                 fontSize: ResponsiveUtil.fontSize(
                     mobile: 14, tablet: 16, desktop: 18),
@@ -294,7 +289,7 @@ class _SpecialOffersSectionState extends ConsumerState<SpecialOffersSection>
     );
   }
 
-  Widget _buildErrorWidget(ThemeData theme) {
+  Widget _buildErrorWidget() {
     return Container(
       height: ResponsiveUtil.spacing(mobile: 140, tablet: 160, desktop: 180),
       margin: EdgeInsets.symmetric(horizontal: 16.w),

@@ -29,6 +29,7 @@ class ProductService {
       throw Exception('Failed to fetch featured products: ${e.toString()}');
     }
   }
+
   // Get products by category (including subcategories)
   Future<List<Product>> getProductsByCategory({
     required String categoryId,
@@ -42,7 +43,7 @@ class ProductService {
     try {
       // First, get all subcategory IDs for this category
       List<String> categoryIds = [categoryId];
-      
+
       try {
         final subcategories = await getSubcategories(categoryId);
         categoryIds.addAll(subcategories.map((cat) => cat.id).toList());
@@ -55,7 +56,7 @@ class ProductService {
 
       // Get products from all category IDs (parent + subcategories)
       List<Product> allProducts = [];
-      
+
       for (String catId in categoryIds) {
         try {
           Query query = _firestore
@@ -68,7 +69,7 @@ class ProductService {
               .map((doc) => Product.fromJson(
                   {...(doc.data() as Map<String, dynamic>), 'id': doc.id}))
               .toList();
-              
+
           allProducts.addAll(categoryProducts);
         } catch (e) {
           if (kDebugMode) {
@@ -87,18 +88,22 @@ class ProductService {
 
       // Apply price and rating filters client-side to avoid composite index issues
       if (minPrice != null) {
-        products = products.where((product) => product.price >= minPrice).toList();
+        products =
+            products.where((product) => product.price >= minPrice).toList();
       }
       if (maxPrice != null) {
-        products = products.where((product) => product.price <= maxPrice).toList();
+        products =
+            products.where((product) => product.price <= maxPrice).toList();
       }
       if (minRating != null && minRating > 0) {
-        products = products.where((product) => product.rating >= minRating).toList();
+        products =
+            products.where((product) => product.rating >= minRating).toList();
       }
 
       // Apply pagination
       if (lastProductId != null && products.isNotEmpty) {
-        final lastProductIndex = products.indexWhere((p) => p.id == lastProductId);
+        final lastProductIndex =
+            products.indexWhere((p) => p.id == lastProductId);
         if (lastProductIndex >= 0 && lastProductIndex < products.length - 1) {
           products = products.sublist(lastProductIndex + 1);
         }
@@ -149,13 +154,16 @@ class ProductService {
 
       // Apply filters client-side
       if (minPrice != null) {
-        products = products.where((product) => product.price >= minPrice).toList();
+        products =
+            products.where((product) => product.price >= minPrice).toList();
       }
       if (maxPrice != null) {
-        products = products.where((product) => product.price <= maxPrice).toList();
+        products =
+            products.where((product) => product.price <= maxPrice).toList();
       }
       if (minRating != null) {
-        products = products.where((product) => product.rating >= minRating).toList();
+        products =
+            products.where((product) => product.rating >= minRating).toList();
       }
 
       return products;
@@ -176,28 +184,29 @@ class ProductService {
         return null;
       }
 
-      final product = Product.fromJson({...productDoc.data()!, 'id': productDoc.id});
+      final product =
+          Product.fromJson({...productDoc.data()!, 'id': productDoc.id});
       return product;
     } catch (e) {
       throw Exception('Failed to fetch product: ${e.toString()}');
     }
-  }  // Get categories
-  Future<List<models.Category>> getCategories() async {
+  } // Get categories
+
+  Future<List<models.ProductCategory>> getCategories() async {
     try {
       // Fetch all categories without filters to avoid index issues
-      final querySnapshot = await _firestore
-          .collection(AppConstants.categoriesCollection)
-          .get();
+      final querySnapshot =
+          await _firestore.collection(AppConstants.categoriesCollection).get();
 
       // Filter and sort on the client side
       final categories = querySnapshot.docs
-          .map((doc) => models.Category.fromJson({...doc.data(), 'id': doc.id}))
+          .map((doc) =>
+              models.ProductCategory.fromJson({...doc.data(), 'id': doc.id}))
           .where((category) {
-            // Filter only active categories
-            return category.isActive == true; // Explicitly check for true value
-          })
-          .toList();
-        // Sort by name
+        // Filter only active categories
+        return category.isActive == true; // Explicitly check for true value
+      }).toList();
+      // Sort by name
       categories.sort((a, b) {
         return a.name.compareTo(b.name);
       });
@@ -210,22 +219,22 @@ class ProductService {
       throw Exception('Failed to fetch categories: ${e.toString()}');
     }
   }
+
   // Get parent categories
-  Future<List<models.Category>> getParentCategories() async {
+  Future<List<models.ProductCategory>> getParentCategories() async {
     try {
       // Fetch categories without complex filters/ordering to avoid index issues
-      final querySnapshot = await _firestore
-          .collection(AppConstants.categoriesCollection)
-          .get();
+      final querySnapshot =
+          await _firestore.collection(AppConstants.categoriesCollection).get();
 
       // Filter and sort on the client side
       final categories = querySnapshot.docs
-          .map((doc) => models.Category.fromJson({...doc.data(), 'id': doc.id}))
-          .where((category) => 
-            category.isActive == true && 
-            category.parentId == null)
+          .map((doc) =>
+              models.ProductCategory.fromJson({...doc.data(), 'id': doc.id}))
+          .where((category) =>
+              category.isActive == true && category.parentId == null)
           .toList();
-        // Sort by name
+      // Sort by name
       categories.sort((a, b) {
         return a.name.compareTo(b.name);
       });
@@ -238,8 +247,10 @@ class ProductService {
       throw Exception('Failed to fetch parent categories: ${e.toString()}');
     }
   }
+
   // Get subcategories
-  Future<List<models.Category>> getSubcategories(String parentCategoryId) async {
+  Future<List<models.ProductCategory>> getSubcategories(
+      String parentCategoryId) async {
     try {
       // Use a simplified query that doesn't require complex indexes
       final querySnapshot = await _firestore
@@ -249,10 +260,11 @@ class ProductService {
 
       // Filter active categories and sort client-side
       final categories = querySnapshot.docs
-          .map((doc) => models.Category.fromJson({...doc.data(), 'id': doc.id}))
+          .map((doc) =>
+              models.ProductCategory.fromJson({...doc.data(), 'id': doc.id}))
           .where((category) => category.isActive == true)
           .toList();
-        // Sort by name
+      // Sort by name
       categories.sort((a, b) {
         return a.name.compareTo(b.name);
       });
@@ -313,6 +325,7 @@ class ProductService {
       throw Exception('Failed to fetch recommended products: ${e.toString()}');
     }
   }
+
   // Get active offers
   Future<List<Offer>> getActiveOffers() async {
     try {
@@ -324,13 +337,14 @@ class ProductService {
           // .where('isActive', isEqualTo: true)
           // .where('endDate', isGreaterThan: Timestamp.fromDate(now))
           // .orderBy('endDate')
-          .get();      // Filter the valid offers client-side
+          .get(); // Filter the valid offers client-side
       final offers = querySnapshot.docs
           .map((doc) => Offer.fromJson({...doc.data(), 'id': doc.id}))
-          .where((offer) => 
-              offer.isValid && 
-              (offer.startDate.isBefore(now) || offer.startDate.isAtSameMomentAs(now)))
-          .toList();// Sort by discount percentage client-side (handling potential nulls)
+          .where((offer) =>
+              offer.isValid &&
+              (offer.startDate.isBefore(now) ||
+                  offer.startDate.isAtSameMomentAs(now)))
+          .toList(); // Sort by discount percentage client-side (handling potential nulls)
       offers.sort((a, b) {
         // Handle cases where discountPercentage might be null
         final aDiscount = a.discountPercentage ?? 0;
@@ -453,6 +467,7 @@ class ProductService {
       throw Exception('Failed to get price range: ${e.toString()}');
     }
   }
+
   // Get product count by category
   Future<int> getProductCountByCategory(String categoryId) async {
     try {

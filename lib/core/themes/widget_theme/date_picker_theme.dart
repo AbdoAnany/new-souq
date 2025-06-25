@@ -5,29 +5,29 @@ DatePickerThemeData get datePickerTheme {
     backgroundColor: AppColorScheme.getColorScheme.surface,
     headerBackgroundColor: AppColorScheme.primary,
     headerForegroundColor: AppColorScheme.onPrimary,
-    dayBackgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      if (states.contains(MaterialState.selected)) {
+    dayBackgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+      if (states.contains(WidgetState.selected)) {
         return AppColorScheme.primary;
       }
       return Colors.transparent;
     }),
-    dayForegroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      if (states.contains(MaterialState.selected)) {
+    dayForegroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+      if (states.contains(WidgetState.selected)) {
         return AppColorScheme.onPrimary;
       }
       return AppColorScheme.getColorScheme.onSurface;
     }),
     todayBackgroundColor:
-        MaterialStateProperty.all(AppColorScheme.primary.withOpacity(0.15)),
-    todayForegroundColor: MaterialStateProperty.all(AppColorScheme.primary),
-    yearBackgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      if (states.contains(MaterialState.selected)) {
+        WidgetStateProperty.all(AppColorScheme.primary.withOpacity( 0.15)),
+    todayForegroundColor: WidgetStateProperty.all(AppColorScheme.primary),
+    yearBackgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+      if (states.contains(WidgetState.selected)) {
         return AppColorScheme.primary;
       }
       return Colors.transparent;
     }),
-    yearForegroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-      if (states.contains(MaterialState.selected)) {
+    yearForegroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+      if (states.contains(WidgetState.selected)) {
         return AppColorScheme.onPrimary;
       }
       return AppColorScheme.getColorScheme.onSurface;

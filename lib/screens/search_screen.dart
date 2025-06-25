@@ -14,8 +14,13 @@ import '../core/widgets/my_app_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
+  final bool showFilters;
 
-  const SearchScreen({Key? key, this.initialQuery}) : super(key: key);
+  const SearchScreen({
+    Key? key,
+    this.initialQuery,
+    this.showFilters = false,
+  }) : super(key: key);
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -39,6 +44,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       });
     } else {
       _loadRecentSearches();
+    }
+
+    // Show filters if requested
+    if (widget.showFilters) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showFilterDialog();
+      });
     }
   }
 
@@ -91,15 +103,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     try {
       // Store the search query for history
       _saveSearchQuery(query);
-      // Perform the search
+      // Perform the search with filters
       final results = await ref.read(productServiceProvider).searchProducts(
             query: query,
             minPrice: _filters['minPrice']?.toDouble(),
             maxPrice: _filters['maxPrice']?.toDouble(),
             minRating: _filters['minRating']?.toDouble(),
             sortBy: _filters['sortBy']?.toString(),
-            // sortDescending: _filters['sortDescending'] as bool?,
-            // categoryId: _filters['categoryId']?.toString(),
           );
 
       setState(() {
@@ -453,11 +463,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: MyAppBar(
-
         title: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,

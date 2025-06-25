@@ -172,7 +172,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.8),
+                Theme.of(context).colorScheme.primaryContainer.withOpacity( 0.8),
                 Theme.of(context).colorScheme.surface,
               ],
             ),
@@ -204,7 +204,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
                             Text(
                               FormatterUtil.formatDate(order.orderDate),
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                               ),
                             ),
                           ],
@@ -230,7 +230,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       bottom: TabBar(
         controller: _tabController,
         labelColor: Theme.of(context).colorScheme.primary,
-        unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
         indicatorColor: Theme.of(context).colorScheme.primary,
         indicatorWeight: 3,
         labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -348,7 +348,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.12)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -360,7 +360,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity( 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -392,7 +392,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.12)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -404,7 +404,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity( 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -462,7 +462,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.12)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -474,7 +474,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity( 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -511,10 +511,10 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: _getPaymentStatusColor(order.paymentStatus).withValues(alpha: 0.1),
+                color: _getPaymentStatusColor(order.paymentStatus).withOpacity( 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _getPaymentStatusColor(order.paymentStatus).withValues(alpha: 0.3),
+                  color: _getPaymentStatusColor(order.paymentStatus).withOpacity( 0.3),
                 ),
               ),
               child: Row(
@@ -548,7 +548,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -591,7 +591,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -626,7 +626,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -690,7 +690,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -713,7 +713,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
             Text(
               'You can modify items in this order before it enters processing.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -736,7 +736,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -776,7 +776,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity( 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -828,7 +828,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
+        side: BorderSide(color: Colors.red.withOpacity( 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -852,7 +852,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
             Text(
               'Cancel this order if it has not been processed yet. This action cannot be undone.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -864,7 +864,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
                 label: const Text('Cancel Order'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.red,
-                  side: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                  side: BorderSide(color: Colors.red.withOpacity( 0.5)),
                 ),
               ),
             ),
@@ -933,7 +933,7 @@ class _OrderDetailsScreenCleanState extends State<OrderDetailsScreenClean>
             Text(
               'This action cannot be undone and any payments will be refunded.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.7),
               ),
             ),
           ],

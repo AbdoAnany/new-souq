@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/models/cart.dart';
 import 'package:souq/providers/cart_provider.dart';
 import 'package:souq/screens/checkout_screen.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
 
@@ -136,7 +135,7 @@ class CartScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final item = cart.items[index];
               return Dismissible(
-                key: Key(item.product.id),
+                key: Key(item.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
                   alignment: Alignment.centerRight,
@@ -149,10 +148,32 @@ class CartScreen extends ConsumerWidget {
                         mobile: 24, tablet: 28, desktop: 32),
                   ),
                 ),
-                onDismissed: (direction) {
-                  ref
-                      .read(cartProvider.notifier)
-                      .removeFromCart(item.product.id);
+                onDismissed: (direction) async {
+                  try {
+                    await ref
+                        .read(cartProvider.notifier)
+                        .removeFromCart(item.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('${item.product.name} removed from cart'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Failed to remove item: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  }
                 },
                 child: Card(
                   margin: EdgeInsets.only(bottom: 16.h),
@@ -215,10 +236,27 @@ class CartScreen extends ConsumerWidget {
                           children: [
                             IconButton(
                               onPressed: item.quantity > 1
-                                  ? () => ref
-                                      .read(cartProvider.notifier)
-                                      .updateQuantity(
-                                          item.product.id, item.quantity - 1)
+                                  ? () async {
+                                      try {
+                                        await ref
+                                            .read(cartProvider.notifier)
+                                            .updateQuantity(
+                                                item.id, item.quantity - 1);
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Failed to update quantity: ${e.toString()}'),
+                                              backgroundColor: Colors.red,
+                                              duration:
+                                                  const Duration(seconds: 3),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    }
                                   : null,
                               icon: Icon(
                                 Icons.remove,
@@ -235,10 +273,25 @@ class CartScreen extends ConsumerWidget {
                               ),
                             ),
                             IconButton(
-                              onPressed: () => ref
-                                  .read(cartProvider.notifier)
-                                  .updateQuantity(
-                                      item.product.id, item.quantity + 1),
+                              onPressed: () async {
+                                try {
+                                  await ref
+                                      .read(cartProvider.notifier)
+                                      .updateQuantity(
+                                          item.id, item.quantity + 1);
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Failed to update quantity: ${e.toString()}'),
+                                        backgroundColor: Colors.red,
+                                        duration: const Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
                               icon: Icon(
                                 Icons.add,
                                 size: ResponsiveUtil.iconSize(

@@ -5,9 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:souq/models/user.dart';
 import 'package:souq/providers/auth_provider.dart';
 import 'package:souq/screens/wishlist_screen.dart';
-import 'package:souq/screens/order_history_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
 
+import '../core/routing/order_route_wrappers.dart';
 import '/core/constants/app_constants.dart';
 import '../core/widgets/my_app_bar.dart';
 import 'admin/admin_dashboard_screen.dart';
@@ -24,7 +24,6 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: MyAppBar(
         title: const Text('My Profile'),
-
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
@@ -106,8 +105,9 @@ class ProfileScreen extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const OrderHistoryScreen()),
+                      builder: (context) => const OrderListWrapper()),
                 );
+
               },
             ),
 
@@ -243,7 +243,8 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 // Show terms and conditions
               },
-            ), _buildListItem(
+            ),
+            _buildListItem(
               context: context,
               leading: Icon(
                 Icons.description_outlined,
@@ -257,7 +258,6 @@ class ProfileScreen extends ConsumerWidget {
                   MaterialPageRoute(
                       builder: (context) => const AdminDashboardScreen()),
                 );
-
               },
             ),
 

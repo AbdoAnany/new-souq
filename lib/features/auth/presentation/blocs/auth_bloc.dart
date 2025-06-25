@@ -45,6 +45,7 @@ class RegisterEvent extends AuthEvent {
   List<Object?> get props => [email, password, firstName, lastName, phoneNumber];
 }
 
+
 class LogoutEvent extends AuthEvent {}
 
 class CheckAuthStatusEvent extends AuthEvent {}
