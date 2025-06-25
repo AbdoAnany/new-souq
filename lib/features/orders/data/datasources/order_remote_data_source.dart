@@ -50,29 +50,30 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
     try {
       Query query = firestore
           .collection('orders')
-          .where('userId', isEqualTo: userId)
-          .orderBy('orderDate', descending: true)
-          .limit(limit);
+          .where('userId', isEqualTo: userId);
 
+      // Add status filter if provided
       if (status != null) {
         query = query.where('status', isEqualTo: status);
       }
 
-      // For pagination, we would need to implement startAfter with document snapshot
-      // This is a simplified version - skip unused for now
-      if (page > 1) {
-        // Note: Firestore doesn't support skip directly,
-        // we would need to implement proper pagination with document snapshots
-      }
+      // Apply limit (removing orderBy temporarily to avoid index requirement)
+      query = query.limit(limit);
 
       final snapshot = await query.get();
 
-      return snapshot.docs
+      // Get the orders and sort them in memory by orderDate (descending)
+      final orders = snapshot.docs
           .map((doc) => OrderModel.fromJson({
                 ...doc.data() as Map<String, dynamic>,
                 'id': doc.id,
               }))
           .toList();
+
+      // Sort by orderDate in memory (newest first)
+      orders.sort((a, b) => b.orderDate.compareTo(a.orderDate));
+
+      return orders;
     } catch (e) {
       throw ServerException('Failed to fetch user orders: $e');
     }

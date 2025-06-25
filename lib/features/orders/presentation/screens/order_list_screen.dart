@@ -122,6 +122,7 @@ class _OrderListScreenState extends State<OrderListScreen>
                   } else if (state is OrderSearchResults) {
                     return _buildOrderList(state.orders, true);
                   } else if (state is OrderError) {
+                    print('Error loading orders: ${state.message}');
                     return _buildErrorWidget(state.message);
                   }
                   return const SizedBox.shrink();
