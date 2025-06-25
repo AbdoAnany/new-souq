@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/core/constants/app_constants.dart';
-import 'package:souq/providers/auth_provider.dart';
-import '../features/auth/presentation/screens/auth_screen_wrapper.dart';
 import 'package:souq/features/home/presentation/screens/home_screen.dart';
+import 'package:souq/providers/auth_provider.dart';
+
+import '/core/constants/app_constants.dart';
+import '../features/auth/presentation/screens/auth_screen_wrapper.dart';
 import '../utils/responsive_util.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {

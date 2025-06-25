@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:souq/core/import_core.dart' hide Category;
 import 'package:souq/models/category.dart';
 import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/category_products_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '/core/widgets/my_app_bar.dart';
 
@@ -29,7 +28,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final categoriesState = ref.watch(categoryProvider);
 
     return Scaffold(
@@ -37,12 +35,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         title: Text(
           "Categories",
           style: TextStyle(
+            // color: AppColorScheme.surface,
             fontSize:
                 ResponsiveUtil.fontSize(mobile: 20, tablet: 22, desktop: 24),
             fontWeight: FontWeight.bold,
           ),
         ),
-
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -101,7 +99,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
-  Widget _buildCategoryItem(Category category) {
+  Widget _buildCategoryItem(ProductCategory category) {
     final theme = Theme.of(context);
 
     return Card(
@@ -116,8 +114,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  CategoryProductsScreen(category: category),
+              builder: (context) => CategoryProductsScreen(category: category),
             ),
           );
         },
@@ -203,7 +200,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     );
   }
 
-  void _showSubcategories(Category category) {
+  void _showSubcategories(ProductCategory category) {
     final theme = Theme.of(context);
 
     showModalBottomSheet(

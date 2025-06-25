@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/core/constants/app_constants.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:souq/core/import_core.dart';
 import 'package:souq/models/category.dart';
 import 'package:souq/models/product.dart';
-import 'package:souq/providers/product_provider.dart';
 import 'package:souq/providers/cart_provider.dart';
-import 'package:souq/screens/product_details_screen.dart';
+import 'package:souq/providers/product_provider.dart';
 import 'package:souq/screens/cart_screen.dart';
+import 'package:souq/screens/product_details_screen.dart';
 import 'package:souq/utils/responsive_util.dart';
-import '/core/widgets/product_card.dart';
-import 'package:shimmer/shimmer.dart';
+
+import '/core/constants/app_constants.dart';
 import '/core/widgets/my_app_bar.dart';
+import '/core/widgets/product_card.dart';
 
 class CategoryProductsScreen extends ConsumerStatefulWidget {
-  final Category category;
+  final ProductCategory category;
 
   const CategoryProductsScreen({
     Key? key,
@@ -437,7 +439,10 @@ class _CategoryProductsScreenState
       appBar: MyAppBar(
         title: Text(
           widget.category.name,
+          
           style: TextStyle(
+                    //    color: AppColorScheme.surface,
+
             fontSize:
                 ResponsiveUtil.fontSize(mobile: 18, tablet: 20, desktop: 22),
           ),
@@ -447,6 +452,7 @@ class _CategoryProductsScreenState
           IconButton(
             icon: Icon(
               Icons.filter_list,
+            //  color: AppColorScheme.surface,
               size:
                   ResponsiveUtil.iconSize(mobile: 24, tablet: 26, desktop: 28),
             ),

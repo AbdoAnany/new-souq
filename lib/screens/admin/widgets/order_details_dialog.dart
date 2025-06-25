@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '/core/constants/app_constants.dart';
-import 'package:souq/models/order.dart';
-import 'package:souq/models/user.dart';
 import 'package:souq/utils/formatter_util.dart';
+
+import '/core/constants/app_constants.dart';
+import '../../../features/orders/data/models/order_model.dart';
+import '../../../features/orders/domain/entities/order_entity.dart';
 
 class OrderDetailsDialog extends StatelessWidget {
   final OrderModel order;
@@ -98,9 +99,9 @@ class OrderDetailsDialog extends StatelessWidget {
             _buildDetailRow('Order Number', order.orderNumber),
             _buildDetailRow('Status', order.status.name.toUpperCase()),
             _buildDetailRow(
-                'Order Date', FormatterUtil.formatDateShort(order.createdAt)),
+                'Order Date', FormatterUtil.formatDateShort(order.orderDate)),
             _buildDetailRow(
-                'Last Updated', FormatterUtil.formatDateShort(order.updatedAt)),
+                'Last Updated', FormatterUtil.formatDateShort(order.orderDate)),
             if (order.trackingNumber != null)
               _buildDetailRow('Tracking Number', order.trackingNumber!),
             if (order.notes != null) _buildDetailRow('Notes', order.notes!),
@@ -135,38 +136,27 @@ class OrderDetailsDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _buildAddressDetails(order.shippingAddress),
-
-            if (order.billingAddress != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Billing Address',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppConstants.primaryColor,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildAddressDetails(order.billingAddress!),
-            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAddressDetails(Address address) {
+  Widget _buildAddressDetails(ShippingAddressEntity address) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDetailRow('Name', '${address.firstName} ${address.lastName}'),
-        _buildDetailRow('Address', address.addressLine1),
-        if (address.addressLine2 != null && address.addressLine2!.isNotEmpty)
-          _buildDetailRow('Address 2', address.addressLine2!),
+        _buildDetailRow('Name', address.fullName),
+        _buildDetailRow('Address', address.address),
+        if (address.apartment != null && address.apartment!.isNotEmpty)
+          _buildDetailRow('Apartment', address.apartment!),
         _buildDetailRow(
           'Location',
-          '${address.city}, ${address.state ?? ''} ${address.postalCode ?? ''}',
+          '${address.city}, ${address.state} ${address.postalCode}',
         ),
         _buildDetailRow('Country', address.country),
+        if (address.phoneNumber != null)
+          _buildDetailRow('Phone', address.phoneNumber!),
       ],
     );
   }
@@ -192,7 +182,7 @@ class OrderDetailsDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildItemRow(OrderItem item, ThemeData theme) {
+  Widget _buildItemRow(OrderItemEntity item, ThemeData theme) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -226,7 +216,7 @@ class OrderDetailsDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.title,
+                  item.productName,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -241,7 +231,7 @@ class OrderDetailsDialog extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Unit Price: ${FormatterUtil.formatCurrency(item.price)}',
+                  'Unit Price: ${FormatterUtil.formatCurrency(item.unitPrice)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppConstants.textSecondaryColor,
                   ),
@@ -252,7 +242,7 @@ class OrderDetailsDialog extends StatelessWidget {
 
           // Total Price
           Text(
-            FormatterUtil.formatCurrency(item.price * item.quantity),
+            FormatterUtil.formatCurrency(item.totalPrice),
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppConstants.primaryColor,
@@ -279,17 +269,14 @@ class OrderDetailsDialog extends StatelessWidget {
             const SizedBox(height: 12),
             _buildDetailRow(
                 'Payment Method', order.paymentMethod.name.toUpperCase()),
-            if (order.paymentId != null)
-              _buildDetailRow('Payment ID', order.paymentId!),
+            _buildDetailRow(
+                'Payment Status', order.paymentStatus.name.toUpperCase()),
             const Divider(),
             _buildDetailRow(
                 'Subtotal', FormatterUtil.formatCurrency(order.subtotal)),
             _buildDetailRow('Tax', FormatterUtil.formatCurrency(order.tax)),
             _buildDetailRow(
                 'Shipping', FormatterUtil.formatCurrency(order.shipping)),
-            if (order.discount > 0)
-              _buildDetailRow('Discount',
-                  '-${FormatterUtil.formatCurrency(order.discount)}'),
             const Divider(),
             _buildDetailRow(
               'Total',
@@ -318,37 +305,37 @@ class OrderDetailsDialog extends StatelessWidget {
             const SizedBox(height: 12),
             _buildTimelineItem(
               'Order Placed',
-              FormatterUtil.formatDateShort(order.createdAt),
+              FormatterUtil.formatDateShort(order.orderDate),
               true,
             ),
-            if (order.confirmedAt != null)
+            if (order.status.index >= OrderStatus.confirmed.index)
               _buildTimelineItem(
                 'Order Confirmed',
-                FormatterUtil.formatDateShort(order.confirmedAt!),
+                FormatterUtil.formatDateShort(order.orderDate),
                 true,
               ),
-            if (order.processedAt != null)
+            if (order.status.index >= OrderStatus.processing.index)
               _buildTimelineItem(
                 'Order Processing',
-                FormatterUtil.formatDateShort(order.processedAt!),
+                FormatterUtil.formatDateShort(order.orderDate),
                 true,
               ),
-            if (order.shippedAt != null)
+            if (order.shippedDate != null)
               _buildTimelineItem(
                 'Order Shipped',
-                FormatterUtil.formatDateShort(order.shippedAt!),
+                FormatterUtil.formatDateShort(order.shippedDate!),
                 true,
               ),
-            if (order.deliveredAt != null)
+            if (order.deliveredDate != null)
               _buildTimelineItem(
                 'Order Delivered',
-                FormatterUtil.formatDateShort(order.deliveredAt!),
+                FormatterUtil.formatDateShort(order.deliveredDate!),
                 true,
               ),
-            if (order.cancelledAt != null)
+            if (order.status == OrderStatus.cancelled)
               _buildTimelineItem(
                 'Order Cancelled',
-                FormatterUtil.formatDateShort(order.cancelledAt!),
+                FormatterUtil.formatDateShort(order.orderDate),
                 true,
                 isNegative: true,
               ),

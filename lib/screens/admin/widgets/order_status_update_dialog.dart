@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:souq/models/order.dart';
+
+import '../../../features/orders/data/models/order_model.dart';
+import '../../../features/orders/domain/entities/order_entity.dart';
 
 class OrderStatusUpdateDialog extends StatefulWidget {
   final OrderModel order;
@@ -269,6 +271,9 @@ class _OrderStatusUpdateDialogState extends State<OrderStatusUpdateDialog> {
         return [OrderStatus.cancelled];
       case OrderStatus.returned:
         return [OrderStatus.returned];
+      case OrderStatus.refunded:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 
@@ -288,6 +293,9 @@ class _OrderStatusUpdateDialogState extends State<OrderStatusUpdateDialog> {
         return 'Cancelled';
       case OrderStatus.returned:
         return 'Returned';
+      case OrderStatus.refunded:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 
@@ -307,6 +315,9 @@ class _OrderStatusUpdateDialogState extends State<OrderStatusUpdateDialog> {
         return Colors.red;
       case OrderStatus.returned:
         return Colors.brown;
+      case OrderStatus.refunded:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 

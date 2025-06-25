@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import '../../domain/entities/product_entity.dart';
 
 part 'product_model.g.dart';

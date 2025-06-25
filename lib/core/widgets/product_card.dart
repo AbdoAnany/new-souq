@@ -1,12 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '/core/widgets/rating_stars.dart';
+import 'package:souq/core/import_core.dart';
 import 'package:souq/models/product.dart';
+import 'package:souq/providers/wishlist_provider.dart';
 import 'package:souq/utils/formatter_util.dart';
 import 'package:souq/utils/responsive_util.dart';
-import 'package:souq/providers/wishlist_provider.dart';
+
+import '/core/widgets/rating_stars.dart';
 
 class ProductCard extends ConsumerWidget {
   final Product product;
@@ -34,8 +34,6 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     // Responsive dimensions
     final cardWidth =
         width ?? ResponsiveUtil.spacing(mobile: 180, tablet: 200, desktop: 220);
@@ -64,7 +62,7 @@ class ProductCard extends ConsumerWidget {
         width: cardWidth,
         height: cardHeight,
         decoration: BoxDecoration(
-          color: theme.cardColor,
+          color: AppColorScheme.cardColor,
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
@@ -193,8 +191,9 @@ class ProductCard extends ConsumerWidget {
                       product.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: AppColorScheme.textPrimary,
                         fontSize: ResponsiveUtil.fontSize(
                             mobile: 14, tablet: 15, desktop: 16),
                       ),
@@ -207,7 +206,7 @@ class ProductCard extends ConsumerWidget {
                       product.category,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTextTheme.textTheme.bodySmall?.copyWith(
                         color: Colors.grey,
                         fontSize: ResponsiveUtil.fontSize(
                             mobile: 12, tablet: 13, desktop: 14),
@@ -235,11 +234,11 @@ class ProductCard extends ConsumerWidget {
                           children: [
                             Text(
                               FormatterUtil.formatCurrency(product.price),
-                              style: theme.textTheme.bodyLarge?.copyWith(
+                              style: AppTextTheme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: hasDiscount
-                                    ? theme.colorScheme.primary
-                                    : null,
+                                    ? AppColorScheme.primary
+                                    : AppColorScheme.onPrimaryContainer,
                                 fontSize: ResponsiveUtil.fontSize(
                                     mobile: 14, tablet: 16, desktop: 18),
                               ),
@@ -249,7 +248,8 @@ class ProductCard extends ConsumerWidget {
                               Text(
                                 FormatterUtil.formatCurrency(
                                     product.originalPrice!),
-                                style: theme.textTheme.bodySmall?.copyWith(
+                                style:
+                                    AppTextTheme.textTheme.bodySmall?.copyWith(
                                   decoration: TextDecoration.lineThrough,
                                   color: Colors.grey,
                                   fontSize: ResponsiveUtil.fontSize(
@@ -270,7 +270,7 @@ class ProductCard extends ConsumerWidget {
                             child: Container(
                               padding: EdgeInsets.all(6.w),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
+                                color: AppColorScheme.primary,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -296,7 +296,7 @@ class ProductCard extends ConsumerWidget {
                         ),
                         child: Text(
                           'Out of Stock',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTextTheme.textTheme.bodySmall?.copyWith(
                             color: Colors.red,
                             fontWeight: FontWeight.bold,
                             fontSize: ResponsiveUtil.fontSize(

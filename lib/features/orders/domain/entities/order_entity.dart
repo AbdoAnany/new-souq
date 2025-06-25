@@ -8,27 +8,27 @@ enum OrderStatus {
   shipped,
   delivered,
   cancelled,
+  returned,
   refunded
 }
 
 // Payment status enum
-enum PaymentStatus {
-  pending,
-  completed,
-  failed,
-  refunded
-}
+enum PaymentStatus { pending, completed, failed, refunded }
 
 // Payment method enum
 enum PaymentMethod {
   cashOnDelivery,
   creditCard,
+  debitCard,
+  bankTransfer,
   paypal,
-  stripe
+  stripe,
+  unknown
 }
 
 // Order item entity
 class OrderItemEntity extends Equatable {
+  final String id; // Added missing id field
   final String productId;
   final String productName;
   final String? productImageUrl;
@@ -36,6 +36,7 @@ class OrderItemEntity extends Equatable {
   final int quantity;
 
   const OrderItemEntity({
+    required this.id,
     required this.productId,
     required this.productName,
     this.productImageUrl,
@@ -47,6 +48,7 @@ class OrderItemEntity extends Equatable {
 
   @override
   List<Object?> get props => [
+        id,
         productId,
         productName,
         productImageUrl,
@@ -59,6 +61,7 @@ class OrderItemEntity extends Equatable {
 class ShippingAddressEntity extends Equatable {
   final String fullName;
   final String address;
+  final String? apartment;
   final String city;
   final String state;
   final String country;
@@ -73,7 +76,23 @@ class ShippingAddressEntity extends Equatable {
     required this.country,
     required this.postalCode,
     this.phoneNumber,
+    this.apartment,
   });
+
+  // Computed properties for backward compatibility
+  String get firstName {
+    final parts = fullName.split(' ');
+    return parts.isNotEmpty ? parts.first : '';
+  }
+
+  String get lastName {
+    final parts = fullName.split(' ');
+    return parts.length > 1 ? parts.sublist(1).join(' ') : '';
+  }
+
+  String get streetAddress => address;
+  String get zipCode => postalCode;
+  String? get phone => phoneNumber;
 
   @override
   List<Object?> get props => [
@@ -84,6 +103,7 @@ class ShippingAddressEntity extends Equatable {
         country,
         postalCode,
         phoneNumber,
+        apartment,
       ];
 }
 
@@ -127,12 +147,15 @@ class OrderEntity extends Equatable {
     this.notes,
   });
 
+  // Computed property for backward compatibility
+  double get shippingCost => shipping;
+
   // Get total items count
   int get totalItems => items.fold(0, (sum, item) => sum + item.quantity);
 
   // Check if order can be cancelled
-  bool get canBeCancelled => 
-    status == OrderStatus.pending || status == OrderStatus.confirmed;
+  bool get canBeCancelled =>
+      status == OrderStatus.pending || status == OrderStatus.confirmed;
 
   // Check if order is completed
   bool get isCompleted => status == OrderStatus.delivered;

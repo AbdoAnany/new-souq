@@ -1,15 +1,16 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import '../blocs/auth_bloc.dart';
-import '../../domain/usecases/auth_usecases.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../data/repositories/auth_repository_impl.dart';
-import '../../data/datasources/auth_remote_data_source.dart';
-import '../../data/datasources/auth_local_data_source.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../core/network/network_info.dart';
+import '../../data/datasources/auth_local_data_source.dart';
+import '../../data/datasources/auth_remote_data_source.dart';
+import '../../data/repositories/auth_repository_impl.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/auth_usecases.dart';
+import '../blocs/auth_bloc.dart';
 
 // External dependencies providers
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {

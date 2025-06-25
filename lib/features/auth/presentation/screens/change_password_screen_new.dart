@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/constants/app_constants.dart';
-import '../../../../utils/responsive_util.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../utils/responsive_util.dart';
 import '../../../../utils/validator.dart';
 import '../blocs/auth_bloc.dart';
 import '../widgets/password_strength_indicator.dart';

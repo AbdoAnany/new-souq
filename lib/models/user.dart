@@ -1,3 +1,6 @@
+// User roles enum
+enum UserRole { customer, admin, employee, staff }
+
 class User {
   final String id;
   final String email;
@@ -6,6 +9,7 @@ class User {
   final String? phoneNumber;
   final String? profileImageUrl;
   final List<Address> addresses;
+  final UserRole role;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isEmailVerified;
@@ -20,12 +24,19 @@ class User {
     this.phoneNumber,
     this.profileImageUrl,
     this.addresses = const [],
+    this.role = UserRole.customer,
     required this.createdAt,
     required this.updatedAt,
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
     this.fcmToken,
   });
+
+  // Helper methods for role checking
+  bool get isAdmin => role == UserRole.admin;
+  bool get isEmployee => role == UserRole.employee || role == UserRole.staff;
+  bool get isAdminOrEmployee => isAdmin || isEmployee;
+  bool get isCustomer => role == UserRole.customer;
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -39,12 +50,34 @@ class User {
               ?.map((address) => Address.fromJson(address))
               .toList() ??
           [],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      role: _parseUserRole(json['role']),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
       isEmailVerified: json['isEmailVerified'] ?? false,
       isPhoneVerified: json['isPhoneVerified'] ?? false,
       fcmToken: json['fcmToken'],
     );
+  }
+
+  static UserRole _parseUserRole(dynamic roleValue) {
+    if (roleValue == null) return UserRole.customer;
+
+    if (roleValue is String) {
+      switch (roleValue.toLowerCase()) {
+        case 'admin':
+          return UserRole.admin;
+        case 'employee':
+        case 'staff':
+          return UserRole.employee;
+        case 'customer':
+        default:
+          return UserRole.customer;
+      }
+    }
+
+    return UserRole.customer;
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +89,7 @@ class User {
       'phoneNumber': phoneNumber,
       'profileImageUrl': profileImageUrl,
       'addresses': addresses.map((address) => address.toJson()).toList(),
+      'role': role.name,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'isEmailVerified': isEmailVerified,
@@ -74,6 +108,7 @@ class User {
     String? phoneNumber,
     String? profileImageUrl,
     List<Address>? addresses,
+    UserRole? role,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isEmailVerified,
@@ -88,6 +123,7 @@ class User {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       addresses: addresses ?? this.addresses,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
@@ -106,8 +142,8 @@ class Address {
   final String country;
   final String? postalCode;
 
-    final String firstName;
-    final String lastName;
+  final String firstName;
+  final String lastName;
   final String addressLine1;
   final String? addressLine2;
 
@@ -121,12 +157,11 @@ class Address {
     required this.street,
     required this.city,
     this.state,
-   required this.firstName,
+    required this.firstName,
     required this.lastName,
-   required this.addressLine1,
-       this.addressLine2,
-    this.country="",
-
+    required this.addressLine1,
+    this.addressLine2,
+    this.country = "",
     this.postalCode,
     this.isDefault = false,
     this.latitude,
@@ -158,9 +193,8 @@ class Address {
       'title': title,
       'firstName': firstName,
       'lastName': lastName,
-        'addressLine1': addressLine1,
-        'addressLine2': addressLine2,
-
+      'addressLine1': addressLine1,
+      'addressLine2': addressLine2,
       'street': street,
       'city': city,
       'state': state,
@@ -182,7 +216,6 @@ class Address {
     String? addressLine2,
     String? firstName,
     String? lastName,
-
     String? city,
     String? state,
     String? country,

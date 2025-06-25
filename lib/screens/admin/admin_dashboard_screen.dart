@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '/core/constants/app_constants.dart';
 import 'package:souq/providers/admin_provider.dart';
 import 'package:souq/screens/admin/admin_categories_screen.dart';
 import 'package:souq/screens/admin/admin_offers_screen.dart';
-import 'package:souq/screens/admin/admin_orders_screen.dart';
 import 'package:souq/screens/admin/admin_products_screen.dart';
 import 'package:souq/services/dummy_data_service.dart';
 import 'package:souq/utils/responsive_util.dart';
 
+import '/core/constants/app_constants.dart';
 import '../../core/widgets/my_app_bar.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
@@ -333,16 +332,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
             MaterialPageRoute(builder: (context) => const AdminOffersScreen()),
           ),
         ),
-        _buildManagementCard(
-          'Orders',
-          'View and manage orders',
-          Icons.shopping_bag,
-          Colors.purple,
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AdminOrdersScreen()),
-          ),
-        ),
+        // _buildManagementCard(
+        //   'Orders',
+        //   'View and manage orders',
+        //   Icons.shopping_bag,
+        //   Colors.purple,
+        //   () => Navigator.push(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const AdminOrdersScreen()),
+        //   ),
+        // ),
       ],
     );
   }

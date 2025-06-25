@@ -2,11 +2,10 @@
 import 'package:souq/core/app_config.dart';
 import 'package:souq/core/utils/responsive.dart';
 
-
+import '/core/import_core.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../blocs/auth_bloc.dart';
 import '../widgets/auth_form.dart';
-import '/core/import_core.dart';
 class UnifiedAuthScreen extends StatefulWidget {
   final AuthFormType initialType;
 
