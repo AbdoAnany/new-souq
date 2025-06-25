@@ -102,7 +102,7 @@ class ProfileScreen extends ConsumerWidget {
               ),
               title: 'Order History',
               onTap: () {
-                Navigator.push(
+                Navigator.pushNamed(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const OrderListWrapper()),
