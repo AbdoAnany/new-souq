@@ -8,7 +8,8 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart?>> {
   final CartService _cartService;
   final String? _userId;
 
-  CartNotifier(this._cartService, this._userId) : super(const AsyncValue.loading()) {
+  CartNotifier(this._cartService, this._userId)
+      : super(const AsyncValue.loading()) {
     if (_userId != null) {
       fetchCart();
     } else {
@@ -31,7 +32,8 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart?>> {
     }
   }
 
-  Future<void> addToCart(Product product, int quantity, {Map<String, dynamic>? variants}) async {
+  Future<void> addToCart(Product product, int quantity,
+      {Map<String, dynamic>? variants}) async {
     if (_userId == null) {
       throw Exception('User must be logged in to add items to cart');
     }
@@ -58,8 +60,11 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart?>> {
         cartItemId: cartItemId,
       );
       state = AsyncValue.data(updatedCart);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+    } catch (e) {
+      // If removal fails, refresh the cart to get the current state
+      await fetchCart();
+      // Re-throw the error so UI can show appropriate message
+      rethrow;
     }
   }
 
@@ -73,8 +78,11 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart?>> {
         quantity: quantity,
       );
       state = AsyncValue.data(updatedCart);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+    } catch (e) {
+      // If update fails, refresh the cart to get the current state
+      await fetchCart();
+      // Re-throw the error so UI can show appropriate message
+      rethrow;
     }
   }
 
@@ -101,31 +109,59 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart?>> {
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
-  }  double get total {
-    if (state.value == null || state.value!.items.isEmpty) {
-      return 0.0;
-    }
-    return state.value!.items
-        .map((item) => item.totalPrice)
-        .reduce((sum, price) => sum + price);
   }
 
-  int get itemCount => state.value?.items.length ?? 0;
+  double get total {
+    return state.when(
+      data: (cart) {
+        if (cart == null || cart.items.isEmpty) {
+          return 0.0;
+        }
+        return cart.items
+            .map((item) => item.totalPrice)
+            .reduce((sum, price) => sum + price);
+      },
+      loading: () => 0.0,
+      error: (_, __) => 0.0,
+    );
+  }
+
+  int get itemCount => state.when(
+        data: (cart) => cart?.items.length ?? 0,
+        loading: () => 0,
+        error: (_, __) => 0,
+      );
 
   bool get isEmpty => itemCount == 0;
 
-  CartItem? getItem(String productId) => state.value?.items
-      .firstWhere((item) => item.productId == productId);
+  CartItem? getItem(String productId) => state.when(
+        data: (cart) {
+          if (cart?.items == null) return null;
+          try {
+            return cart!.items
+                .firstWhere((item) => item.productId == productId);
+          } catch (e) {
+            return null;
+          }
+        },
+        loading: () => null,
+        error: (_, __) => null,
+      );
 
-  bool hasProduct(String productId) => state.value?.items
-      .any((item) => item.productId == productId) ?? false;
+  bool hasProduct(String productId) => state.when(
+        data: (cart) =>
+            cart?.items.any((item) => item.productId == productId) ?? false,
+        loading: () => false,
+        error: (_, __) => false,
+      );
 }
 
 final cartServiceProvider = Provider<CartService>((ref) {
   return CartService();
 });
 
-final cartProvider = StateNotifierProvider<CartNotifier, AsyncValue<Cart?>>((ref) {
+final cartProvider =
+    StateNotifierProvider<CartNotifier, AsyncValue<Cart?>>((ref) {
   final cartService = ref.watch(cartServiceProvider);
   final authState = ref.watch(authProvider);
   final userId = authState.value?.id;

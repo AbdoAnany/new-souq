@@ -6,7 +6,7 @@ import '../../../models/category.dart';
 import '../../../providers/admin_provider.dart';
 
 class CategoryFormDialog extends ConsumerStatefulWidget {
-  final Category? category;
+  final ProductCategory? category;
 
   const CategoryFormDialog({super.key, this.category});
 
@@ -269,7 +269,7 @@ class _CategoryFormDialogState extends ConsumerState<CategoryFormDialog> {
           .where((tag) => tag.isNotEmpty)
           .toList();
 
-      final category = Category(
+      final category = ProductCategory(
         id: widget.category?.id ?? '',
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -287,7 +287,7 @@ class _CategoryFormDialogState extends ConsumerState<CategoryFormDialog> {
       } else {
         await ref
             .read(adminCategoriesProvider.notifier)
-            .updateCategory(category.id,category.toJson());
+            .updateCategory(category.id, category.toJson());
       }
 
       if (mounted) {

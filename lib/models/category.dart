@@ -1,17 +1,16 @@
-
-class Category {
+class ProductCategory {
   final String id;
   final String name;
   final String description;
   final String? imageUrl;
   final String? parentId;
-  final List<Category> subcategories;
+  final List<ProductCategory> subcategories;
   final int productCount;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Category({
+  ProductCategory({
     required this.id,
     required this.name,
     required this.description,
@@ -24,21 +23,23 @@ class Category {
     required this.updatedAt,
   });
 
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
+  factory ProductCategory.fromJson(Map<String, dynamic> json) {
+    return ProductCategory(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       imageUrl: json['imageUrl'],
       parentId: json['parentId'],
       subcategories: (json['subcategories'] as List<dynamic>?)
-              ?.map((cat) => Category.fromJson(cat))
+              ?.map((cat) => ProductCategory.fromJson(cat))
               .toList() ??
           [],
       productCount: json['productCount'] ?? 0,
       isActive: json['isActive'] ?? true,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -58,22 +59,22 @@ class Category {
   }
 
   bool get hasSubcategories => subcategories.isNotEmpty;
-  
+
   bool get isParentCategory => parentId == null;
 
-  Category copyWith({
+  ProductCategory copyWith({
     String? id,
     String? name,
     String? description,
     String? imageUrl,
     String? parentId,
-    List<Category>? subcategories,
+    List<ProductCategory>? subcategories,
     int? productCount,
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Category(
+    return ProductCategory(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
